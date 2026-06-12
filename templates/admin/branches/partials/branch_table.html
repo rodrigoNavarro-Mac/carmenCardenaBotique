@@ -19,13 +19,17 @@
           </dl>
         </div>
         <div class="row-actions">
-          <a class="btn btn-sm btn-outline-secondary" href="{% url 'branches:branch_update' branch.id %}">Editar</a>
-          <form method="post" action="{% url 'branches:branch_toggle' branch.id %}">
-            {% csrf_token %}
-            <button class="btn btn-sm btn-outline-secondary" type="submit">
-              {% if branch.is_active %}Desactivar{% else %}Activar{% endif %}
-            </button>
-          </form>
+          {% if admin_permissions.branches.can_edit %}
+            <a class="btn btn-sm btn-outline-secondary" href="{% url 'branches:branch_update' branch.id %}"><i class="bi bi-pencil" aria-hidden="true"></i>Editar</a>
+          {% endif %}
+          {% if admin_permissions.branches.can_delete %}
+            <form method="post" action="{% url 'branches:branch_toggle' branch.id %}">
+              {% csrf_token %}
+              <button class="btn btn-sm btn-outline-secondary" type="submit" data-confirm="Cambiar el estado de esta sucursal?">
+                {% if branch.is_active %}<i class="bi bi-toggle-off" aria-hidden="true"></i>Desactivar{% else %}<i class="bi bi-toggle-on" aria-hidden="true"></i>Activar{% endif %}
+              </button>
+            </form>
+          {% endif %}
         </div>
       </article>
     {% empty %}

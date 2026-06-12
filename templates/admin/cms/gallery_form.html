@@ -11,7 +11,7 @@
   <a class="btn btn-outline-secondary" href="{% url 'cms:dashboard' %}"><i class="bi bi-arrow-left" aria-hidden="true"></i>Volver</a>
 </div>
 
-<form class="editor-grid compact-editor" method="post" enctype="multipart/form-data">
+<form class="editor-grid compact-editor" method="post" enctype="multipart/form-data" data-prevent-double-submit>
   {% csrf_token %}
   <section class="work-panel form-panel">
     {{ form.non_field_errors }}

@@ -17,13 +17,17 @@
         <div class="taxonomy-card-foot">
           <span>{{ item.product_count }} productos</span>
           <div class="row-actions">
-            <a class="btn btn-sm btn-outline-secondary" href="{% url 'catalog:taxonomy_update' kind item.id %}">Editar</a>
-            <form method="post" action="{% url 'catalog:taxonomy_toggle' kind item.id %}">
-              {% csrf_token %}
-              <button class="btn btn-sm btn-outline-secondary" type="submit">
-                {% if item.is_active %}Desactivar{% else %}Activar{% endif %}
-              </button>
-            </form>
+            {% if admin_permissions.catalog.can_edit %}
+              <a class="btn btn-sm btn-outline-secondary" href="{% url 'catalog:taxonomy_update' kind item.id %}"><i class="bi bi-pencil" aria-hidden="true"></i>Editar</a>
+            {% endif %}
+            {% if admin_permissions.catalog.can_delete %}
+              <form method="post" action="{% url 'catalog:taxonomy_toggle' kind item.id %}">
+                {% csrf_token %}
+                <button class="btn btn-sm btn-outline-secondary" type="submit" data-confirm="Cambiar el estado de este registro?">
+                  {% if item.is_active %}<i class="bi bi-toggle-off" aria-hidden="true"></i>Desactivar{% else %}<i class="bi bi-toggle-on" aria-hidden="true"></i>Activar{% endif %}
+                </button>
+              </form>
+            {% endif %}
           </div>
         </div>
       </article>

@@ -1,0 +1,65 @@
+{% extends "admin/base_admin.html" %}
+
+{% block title %}Permisos por rol{% endblock %}
+
+{% block admin_content %}
+<div class="page-title-row">
+  <div>
+    <p class="eyebrow">Seguridad</p>
+    <h1>Permisos por rol</h1>
+  </div>
+  <a class="btn btn-outline-secondary" href="{% url 'admin_accounts:user_list' %}"><i class="bi bi-arrow-left" aria-hidden="true"></i>Usuarios</a>
+</div>
+
+{% if messages %}
+  <div class="message-stack">
+    {% for message in messages %}
+      <div class="alert alert-{{ message.tags|default:'info' }}">{{ message }}</div>
+    {% endfor %}
+  </div>
+{% endif %}
+
+<form method="post" data-prevent-double-submit>
+  {% csrf_token %}
+  <div class="permissions-layout">
+    {% for role in matrix %}
+      <section class="work-panel permission-card">
+        <div class="section-heading">
+          <div>
+            <p class="eyebrow">Rol</p>
+            <h2>{{ role.label }}</h2>
+          </div>
+        </div>
+        <div class="permission-table-wrap">
+          <table class="table align-middle permission-table">
+            <thead>
+              <tr>
+                <th>Modulo</th>
+                <th>Ver</th>
+                <th>Crear</th>
+                <th>Editar</th>
+                <th>Acciones sensibles</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for module in role.modules %}
+                <tr>
+                  <td><strong>{{ module.label }}</strong></td>
+                  <td><input class="form-check-input" type="checkbox" name="{{ role.role }}-{{ module.key }}-can_view" {% if module.permissions.can_view %}checked{% endif %}></td>
+                  <td><input class="form-check-input" type="checkbox" name="{{ role.role }}-{{ module.key }}-can_create" {% if module.permissions.can_create %}checked{% endif %}></td>
+                  <td><input class="form-check-input" type="checkbox" name="{{ role.role }}-{{ module.key }}-can_edit" {% if module.permissions.can_edit %}checked{% endif %}></td>
+                  <td><input class="form-check-input" type="checkbox" name="{{ role.role }}-{{ module.key }}-can_delete" {% if module.permissions.can_delete %}checked{% endif %}></td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </section>
+    {% endfor %}
+  </div>
+  <div class="sticky-save-bar">
+    <span>Los cambios aplican al siguiente request de cada usuario.</span>
+    <button class="btn btn-primary" type="submit"><i class="bi bi-check2" aria-hidden="true"></i>Guardar permisos</button>
+  </div>
+</form>
+{% endblock %}

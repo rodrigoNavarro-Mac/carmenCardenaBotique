@@ -23,6 +23,7 @@ urlpatterns = [
     path("admin-panel/cms/", include("cms.urls")),
     path("admin-panel/reportes/", include("reports.urls")),
     path("admin-panel/sucursales/", include("branches.urls")),
+    path("admin-panel/usuarios/", include("accounts.admin_urls")),
 ]
 
 if settings.DEBUG:

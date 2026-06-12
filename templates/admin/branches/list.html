@@ -8,7 +8,9 @@
     <p class="eyebrow">Sucursales</p>
     <h1>Tiendas</h1>
   </div>
-  <a class="btn btn-primary" href="{% url 'branches:branch_create' %}"><i class="bi bi-plus-lg" aria-hidden="true"></i>Nueva sucursal</a>
+  {% if admin_permissions.branches.can_create %}
+    <a class="btn btn-primary" href="{% url 'branches:branch_create' %}"><i class="bi bi-plus-lg" aria-hidden="true"></i>Nueva sucursal</a>
+  {% endif %}
 </div>
 
 {% if messages %}

@@ -3,14 +3,14 @@
 {% block title %}Iniciar sesion{% endblock %}
 
 {% block body %}
-<main class="auth-shell">
+<main id="main-content" class="auth-shell" tabindex="-1">
   <section class="auth-panel">
     <a class="brand-mark" href="/">
       <span class="brand-symbol">CC</span>
       <span>Carmen Cardena Boutique</span>
     </a>
     <h1>Iniciar sesion</h1>
-    <form method="post" class="stack-form">
+    <form method="post" class="stack-form" data-prevent-double-submit>
       {% csrf_token %}
       {{ form.non_field_errors }}
       <label>
@@ -21,7 +21,7 @@
         Contrasena
         {{ form.password }}
       </label>
-      <button class="btn btn-primary w-100" type="submit">Entrar</button>
+      <button class="btn btn-primary w-100" type="submit"><i class="bi bi-box-arrow-in-right" aria-hidden="true"></i>Entrar</button>
     </form>
   </section>
 </main>

@@ -10,7 +10,9 @@
   </div>
   <div class="page-actions">
     <a class="btn btn-outline-secondary" href="{% url 'inventory:movement_history' %}"><i class="bi bi-clock-history" aria-hidden="true"></i>Historial</a>
-    <a class="btn btn-primary" href="{% url 'inventory:movement_create' %}"><i class="bi bi-plus-lg" aria-hidden="true"></i>Registrar movimiento</a>
+    {% if admin_permissions.inventory.can_create %}
+      <a class="btn btn-primary" href="{% url 'inventory:movement_create' %}"><i class="bi bi-plus-lg" aria-hidden="true"></i>Registrar movimiento</a>
+    {% endif %}
   </div>
 </div>
 

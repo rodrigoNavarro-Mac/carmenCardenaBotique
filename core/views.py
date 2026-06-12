@@ -1,6 +1,6 @@
 from django.contrib.auth.decorators import login_required
 from django.db import models
-from django.db.models import Sum
+from django.db.models import Count, Sum
 from django.shortcuts import render
 from django.utils import timezone
 
@@ -90,7 +90,18 @@ def admin_dashboard(request):
     todays_income = IncomeEntry.objects.filter(date=today).aggregate(total=Sum("amount"))["total"] or 0
     todays_expenses = Expense.objects.filter(date=today).aggregate(total=Sum("amount"))["total"] or 0
     low_stock_count = InventoryItem.objects.filter(quantity__lte=models.F("low_stock_threshold")).count()
+    active_products_count = Product.objects.filter(is_active=True).count()
+    active_branches_count = Branch.objects.filter(is_active=True).count()
     recent_movements = InventoryMovement.objects.select_related("branch", "product", "user")[:6]
+    recent_sales = Sale.objects.select_related("branch", "customer", "user").exclude(status=Sale.Status.CANCELLED)[:5]
+    low_stock_items = InventoryItem.objects.select_related("branch", "product").filter(
+        quantity__lte=models.F("low_stock_threshold")
+    )[:5]
+    branch_sales = (
+        todays_sales.values("branch__name")
+        .annotate(total=Sum("total"), sales_count=Count("id"))
+        .order_by("-total")[:4]
+    )
 
     return render(
         request,
@@ -100,7 +111,13 @@ def admin_dashboard(request):
             "todays_sales_total": todays_sales.aggregate(total=Sum("total"))["total"] or 0,
             "todays_income": todays_income,
             "todays_expenses": todays_expenses,
+            "todays_net": todays_income - todays_expenses,
             "low_stock_count": low_stock_count,
+            "active_products_count": active_products_count,
+            "active_branches_count": active_branches_count,
             "recent_movements": recent_movements,
+            "recent_sales": recent_sales,
+            "low_stock_items": low_stock_items,
+            "branch_sales": branch_sales,
         },
     )

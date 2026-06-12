@@ -2,7 +2,7 @@
 
 {% block body %}
 <div class="admin-shell" x-data="{ sidebarOpen: false }">
-  <aside class="admin-sidebar" :class="{ 'is-open': sidebarOpen }">
+  <aside class="admin-sidebar" :class="{ 'is-open': sidebarOpen }" aria-label="Navegacion principal">
     <a class="brand-mark admin-brand" href="{% url 'admin_dashboard' %}">
       <span class="brand-symbol">CC</span>
       <span>
@@ -10,19 +10,22 @@
         <small>Back office</small>
       </span>
     </a>
-    <nav class="admin-menu">
+    <nav class="admin-menu" aria-label="Modulos administrativos">
       <span class="admin-menu-label">Gestion</span>
-      <a href="{% url 'admin_dashboard' %}" class="{% if request.resolver_match.url_name == 'admin_dashboard' %}active{% endif %}"><i class="bi bi-speedometer2" aria-hidden="true"></i>Dashboard</a>
-      <a href="{% url 'catalog:product_list' %}" class="{% if request.resolver_match.namespace == 'catalog' %}active{% endif %}"><i class="bi bi-bag" aria-hidden="true"></i>Catalogo</a>
-      <a href="{% url 'branches:branch_list' %}" class="{% if request.resolver_match.namespace == 'branches' %}active{% endif %}"><i class="bi bi-shop" aria-hidden="true"></i>Sucursales</a>
+      {% if admin_permissions.dashboard.can_view %}<a href="{% url 'admin_dashboard' %}" class="{% if request.resolver_match.url_name == 'admin_dashboard' %}active{% endif %}" {% if request.resolver_match.url_name == 'admin_dashboard' %}aria-current="page"{% endif %}><i class="bi bi-speedometer2" aria-hidden="true"></i>Dashboard</a>{% endif %}
+      {% if admin_permissions.catalog.can_view %}<a href="{% url 'catalog:product_list' %}" class="{% if request.resolver_match.namespace == 'catalog' %}active{% endif %}" {% if request.resolver_match.namespace == 'catalog' %}aria-current="page"{% endif %}><i class="bi bi-bag" aria-hidden="true"></i>Catalogo</a>{% endif %}
+      {% if admin_permissions.branches.can_view %}<a href="{% url 'branches:branch_list' %}" class="{% if request.resolver_match.namespace == 'branches' %}active{% endif %}" {% if request.resolver_match.namespace == 'branches' %}aria-current="page"{% endif %}><i class="bi bi-shop" aria-hidden="true"></i>Sucursales</a>{% endif %}
       <span class="admin-menu-label">Operacion</span>
-      <a href="{% url 'inventory:inventory_list' %}" class="{% if request.resolver_match.namespace == 'inventory' %}active{% endif %}"><i class="bi bi-box-seam" aria-hidden="true"></i>Inventario</a>
-      <a href="{% url 'sales:sale_list' %}" class="{% if request.resolver_match.namespace == 'sales' %}active{% endif %}"><i class="bi bi-receipt" aria-hidden="true"></i>Ventas</a>
-      <a href="{% url 'customers:customer_list' %}" class="{% if request.resolver_match.namespace == 'customers' %}active{% endif %}"><i class="bi bi-people" aria-hidden="true"></i>Clientes</a>
+      {% if admin_permissions.inventory.can_view %}<a href="{% url 'inventory:inventory_list' %}" class="{% if request.resolver_match.namespace == 'inventory' %}active{% endif %}" {% if request.resolver_match.namespace == 'inventory' %}aria-current="page"{% endif %}><i class="bi bi-box-seam" aria-hidden="true"></i>Inventario</a>{% endif %}
+      {% if admin_permissions.sales.can_view %}<a href="{% url 'sales:sale_list' %}" class="{% if request.resolver_match.namespace == 'sales' %}active{% endif %}" {% if request.resolver_match.namespace == 'sales' %}aria-current="page"{% endif %}><i class="bi bi-receipt" aria-hidden="true"></i>Ventas</a>{% endif %}
+      {% if admin_permissions.customers.can_view %}<a href="{% url 'customers:customer_list' %}" class="{% if request.resolver_match.namespace == 'customers' %}active{% endif %}" {% if request.resolver_match.namespace == 'customers' %}aria-current="page"{% endif %}><i class="bi bi-people" aria-hidden="true"></i>Clientes</a>{% endif %}
       <span class="admin-menu-label">Control</span>
-      <a href="{% url 'finance:dashboard' %}" class="{% if request.resolver_match.namespace == 'finance' %}active{% endif %}"><i class="bi bi-cash-coin" aria-hidden="true"></i>Finanzas</a>
-      <a href="{% url 'cms:dashboard' %}" class="{% if request.resolver_match.namespace == 'cms' %}active{% endif %}"><i class="bi bi-images" aria-hidden="true"></i>CMS</a>
-      <a href="{% url 'reports:dashboard' %}" class="{% if request.resolver_match.namespace == 'reports' %}active{% endif %}"><i class="bi bi-graph-up-arrow" aria-hidden="true"></i>Reportes</a>
+      {% if admin_permissions.finance.can_view %}<a href="{% url 'finance:dashboard' %}" class="{% if request.resolver_match.namespace == 'finance' %}active{% endif %}" {% if request.resolver_match.namespace == 'finance' %}aria-current="page"{% endif %}><i class="bi bi-cash-coin" aria-hidden="true"></i>Finanzas</a>{% endif %}
+      {% if admin_permissions.cms.can_view %}<a href="{% url 'cms:dashboard' %}" class="{% if request.resolver_match.namespace == 'cms' %}active{% endif %}" {% if request.resolver_match.namespace == 'cms' %}aria-current="page"{% endif %}><i class="bi bi-images" aria-hidden="true"></i>CMS</a>{% endif %}
+      {% if admin_permissions.reports.can_view %}<a href="{% url 'reports:dashboard' %}" class="{% if request.resolver_match.namespace == 'reports' %}active{% endif %}" {% if request.resolver_match.namespace == 'reports' %}aria-current="page"{% endif %}><i class="bi bi-graph-up-arrow" aria-hidden="true"></i>Reportes</a>{% endif %}
+      {% if admin_permissions.users.can_view %}
+        <a href="{% url 'admin_accounts:user_list' %}" class="{% if request.resolver_match.namespace == 'admin_accounts' %}active{% endif %}" {% if request.resolver_match.namespace == 'admin_accounts' %}aria-current="page"{% endif %}><i class="bi bi-person-gear" aria-hidden="true"></i>Usuarios</a>
+      {% endif %}
     </nav>
   </aside>
   <div class="admin-main">
@@ -36,11 +39,11 @@
         <a class="btn btn-outline-secondary btn-sm" href="/"><i class="bi bi-globe2" aria-hidden="true"></i>Ver sitio</a>
         <form method="post" action="{% url 'admin_logout' %}">
           {% csrf_token %}
-          <button class="btn btn-primary btn-sm" type="submit"><i class="bi bi-box-arrow-right" aria-hidden="true"></i>Salir</button>
+          <button class="btn btn-primary btn-sm" type="submit" data-confirm="Deseas cerrar sesion?"><i class="bi bi-box-arrow-right" aria-hidden="true"></i>Salir</button>
         </form>
       </div>
     </header>
-    <main class="admin-content">
+    <main id="main-content" class="admin-content" tabindex="-1">
       {% block admin_content %}{% endblock %}
     </main>
   </div>

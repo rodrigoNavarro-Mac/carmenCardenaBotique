@@ -9,8 +9,12 @@
     <h1>Contenido publico</h1>
   </div>
   <div class="page-actions">
-    <a class="btn btn-outline-secondary" href="{% url 'cms:landing_config_edit' %}"><i class="bi bi-pencil" aria-hidden="true"></i>Editar landing</a>
-    <a class="btn btn-primary" href="{% url 'cms:gallery_create' %}"><i class="bi bi-plus-lg" aria-hidden="true"></i>Nueva imagen</a>
+    {% if admin_permissions.cms.can_edit %}
+      <a class="btn btn-outline-secondary" href="{% url 'cms:landing_config_edit' %}"><i class="bi bi-pencil" aria-hidden="true"></i>Editar landing</a>
+    {% endif %}
+    {% if admin_permissions.cms.can_create %}
+      <a class="btn btn-primary" href="{% url 'cms:gallery_create' %}"><i class="bi bi-plus-lg" aria-hidden="true"></i>Nueva imagen</a>
+    {% endif %}
   </div>
 </div>
 
@@ -68,13 +72,17 @@
           {% else %}
             <span class="badge text-bg-secondary">Oculta</span>
           {% endif %}
-          <a class="btn btn-sm btn-outline-secondary" href="{% url 'cms:gallery_update' image.id %}"><i class="bi bi-pencil" aria-hidden="true"></i>Editar</a>
-          <form method="post" action="{% url 'cms:gallery_toggle' image.id %}">
-            {% csrf_token %}
-            <button class="btn btn-sm btn-outline-secondary" type="submit">
-              {% if image.is_published %}<i class="bi bi-eye-slash" aria-hidden="true"></i>Ocultar{% else %}<i class="bi bi-eye" aria-hidden="true"></i>Publicar{% endif %}
-            </button>
-          </form>
+          {% if admin_permissions.cms.can_edit %}
+            <a class="btn btn-sm btn-outline-secondary" href="{% url 'cms:gallery_update' image.id %}"><i class="bi bi-pencil" aria-hidden="true"></i>Editar</a>
+          {% endif %}
+          {% if admin_permissions.cms.can_delete %}
+            <form method="post" action="{% url 'cms:gallery_toggle' image.id %}">
+              {% csrf_token %}
+              <button class="btn btn-sm btn-outline-secondary" type="submit" data-confirm="Cambiar la publicacion de esta imagen?">
+                {% if image.is_published %}<i class="bi bi-eye-slash" aria-hidden="true"></i>Ocultar{% else %}<i class="bi bi-eye" aria-hidden="true"></i>Publicar{% endif %}
+              </button>
+            </form>
+          {% endif %}
         </div>
       </article>
     {% empty %}

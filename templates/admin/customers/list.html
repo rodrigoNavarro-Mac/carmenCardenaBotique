@@ -8,7 +8,9 @@
     <p class="eyebrow">Clientes</p>
     <h1>Directorio de clientes</h1>
   </div>
-  <a class="btn btn-primary" href="{% url 'customers:customer_create' %}"><i class="bi bi-plus-lg" aria-hidden="true"></i>Nuevo cliente</a>
+  {% if admin_permissions.customers.can_create %}
+    <a class="btn btn-primary" href="{% url 'customers:customer_create' %}"><i class="bi bi-plus-lg" aria-hidden="true"></i>Nuevo cliente</a>
+  {% endif %}
 </div>
 
 {% if messages %}

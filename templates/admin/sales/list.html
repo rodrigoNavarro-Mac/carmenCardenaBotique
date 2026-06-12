@@ -8,7 +8,9 @@
     <p class="eyebrow">Ventas</p>
     <h1>Historial de ventas</h1>
   </div>
-  <a class="btn btn-primary" href="{% url 'sales:sale_create' %}"><i class="bi bi-plus-lg" aria-hidden="true"></i>Nueva venta</a>
+  {% if admin_permissions.sales.can_create %}
+    <a class="btn btn-primary" href="{% url 'sales:sale_create' %}"><i class="bi bi-plus-lg" aria-hidden="true"></i>Nueva venta</a>
+  {% endif %}
 </div>
 
 {% if messages %}

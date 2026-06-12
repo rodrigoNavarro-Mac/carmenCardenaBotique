@@ -8,13 +8,36 @@
     <p class="eyebrow">Recibo</p>
     <h1>Venta #{{ sale.id }}</h1>
   </div>
-  <a class="btn btn-outline-secondary" href="{% url 'sales:sale_list' %}"><i class="bi bi-arrow-left" aria-hidden="true"></i>Volver</a>
+  <div class="page-actions">
+    <a class="btn btn-outline-secondary" href="{% url 'sales:sale_list' %}"><i class="bi bi-arrow-left" aria-hidden="true"></i>Volver</a>
+    {% if sale.status == "PAID" and admin_permissions.sales.can_delete %}
+      <form method="post" action="{% url 'sales:sale_cancel' sale.id %}">
+        {% csrf_token %}
+        <button class="btn btn-outline-secondary" type="submit" data-confirm="Cancelar esta venta restaurara el stock y quitara el ingreso financiero. Continuar?"><i class="bi bi-x-circle" aria-hidden="true"></i>Cancelar venta</button>
+      </form>
+    {% endif %}
+  </div>
 </div>
+
+{% if messages %}
+  <div class="message-stack">
+    {% for message in messages %}
+      <div class="alert alert-{{ message.tags|default:'info' }}">{{ message }}</div>
+    {% endfor %}
+  </div>
+{% endif %}
 
 <section class="receipt-panel">
   <header>
     <strong>Carmen Cardena Boutique</strong>
-    <span>{{ sale.created_at|date:"d/m/Y H:i" }}</span>
+    <span>
+      {{ sale.created_at|date:"d/m/Y H:i" }}
+      {% if sale.status == "CANCELLED" %}
+        <span class="badge text-bg-danger">Cancelada</span>
+      {% else %}
+        <span class="badge text-bg-success">{{ sale.get_status_display }}</span>
+      {% endif %}
+    </span>
   </header>
   <dl class="receipt-meta">
     <div><dt>Sucursal</dt><dd>{{ sale.branch.name }}</dd></div>

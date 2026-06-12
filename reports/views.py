@@ -32,7 +32,8 @@ def reports_dashboard(request):
         expenses = expenses.filter(branch_id=branch_id)
         inventory = inventory.filter(branch_id=branch_id)
 
-    sales_total = sales.aggregate(total=Sum("total"))["total"] or 0
+    paid_sales = sales.exclude(status=Sale.Status.CANCELLED)
+    sales_total = paid_sales.aggregate(total=Sum("total"))["total"] or 0
     income_total = income.aggregate(total=Sum("amount"))["total"] or 0
     expense_total = expenses.aggregate(total=Sum("amount"))["total"] or 0
     low_stock = inventory.filter(quantity__lte=models.F("low_stock_threshold"))
@@ -52,7 +53,7 @@ def reports_dashboard(request):
             "income_total": income_total,
             "expense_total": expense_total,
             "estimated_profit": income_total - expense_total,
-            "sales_count": sales.count(),
+            "sales_count": paid_sales.count(),
             "low_stock_count": low_stock.count(),
         },
     )

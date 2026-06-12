@@ -13,7 +13,7 @@
 
 {% include "admin/catalog/includes/catalog_tabs.html" with active_tab=kind %}
 
-<form class="editor-grid compact-editor" method="post">
+<form class="editor-grid compact-editor" method="post" data-prevent-double-submit>
   {% csrf_token %}
   <section class="work-panel form-panel">
     {{ form.non_field_errors }}

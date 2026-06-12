@@ -1,0 +1,78 @@
+<div id="user-results">
+  <div class="table-responsive">
+    <table class="table align-middle admin-table">
+      <thead>
+        <tr>
+          <th>Usuario</th>
+          <th>Rol</th>
+          <th>Sucursal</th>
+          <th>Contacto</th>
+          <th>Estado</th>
+          <th class="text-end">Acciones</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for managed_user in users %}
+          <tr>
+            <td>
+              <div class="user-cell">
+                <span class="user-avatar">{{ managed_user.first_name|first|default:managed_user.username|first|upper }}</span>
+                <div>
+                  <strong>{{ managed_user.get_full_name|default:managed_user.username }}</strong>
+                  <span class="table-subcopy">@{{ managed_user.username }}</span>
+                </div>
+              </div>
+            </td>
+            <td>{{ managed_user.get_role_display }}</td>
+            <td>{{ managed_user.assigned_branch.name|default:"Todas / sin asignar" }}</td>
+            <td>
+              {{ managed_user.phone|default:"Sin telefono" }}
+              <span class="table-subcopy">{{ managed_user.email|default:"Sin correo" }}</span>
+            </td>
+            <td>
+              {% if managed_user.is_active %}
+                <span class="badge text-bg-success">Activo</span>
+              {% else %}
+                <span class="badge text-bg-secondary">Inactivo</span>
+              {% endif %}
+              {% if managed_user.is_staff %}
+                <span class="badge text-bg-info">Staff</span>
+              {% endif %}
+            </td>
+            <td class="text-end">
+              <div class="row-actions">
+                {% if admin_permissions.users.can_edit %}
+                  <a class="btn btn-sm btn-outline-secondary" href="{% url 'admin_accounts:user_update' managed_user.id %}"><i class="bi bi-pencil" aria-hidden="true"></i>Editar</a>
+                {% endif %}
+                {% if admin_permissions.users.can_delete %}
+                  <form method="post" action="{% url 'admin_accounts:user_toggle' managed_user.id %}">
+                    {% csrf_token %}
+                    <button class="btn btn-sm btn-outline-secondary" type="submit" data-confirm="Cambiar el estado de este usuario?" {% if managed_user == request.user %}disabled{% endif %}>
+                      {% if managed_user.is_active %}<i class="bi bi-toggle-off" aria-hidden="true"></i>Desactivar{% else %}<i class="bi bi-toggle-on" aria-hidden="true"></i>Activar{% endif %}
+                    </button>
+                  </form>
+                {% endif %}
+              </div>
+            </td>
+          </tr>
+        {% empty %}
+          <tr>
+            <td colspan="6"><p class="empty-copy">No hay usuarios con esos filtros.</p></td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  {% if page_obj.has_other_pages %}
+    <nav class="pagination-row">
+      {% if page_obj.has_previous %}
+        <a hx-get="?page={{ page_obj.previous_page_number }}" hx-target="#user-results" hx-swap="outerHTML">Anterior</a>
+      {% endif %}
+      <span>Pagina {{ page_obj.number }} de {{ page_obj.paginator.num_pages }}</span>
+      {% if page_obj.has_next %}
+        <a hx-get="?page={{ page_obj.next_page_number }}" hx-target="#user-results" hx-swap="outerHTML">Siguiente</a>
+      {% endif %}
+    </nav>
+  {% endif %}
+</div>

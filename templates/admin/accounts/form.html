@@ -1,0 +1,40 @@
+{% extends "admin/base_admin.html" %}
+
+{% block title %}{{ title }}{% endblock %}
+
+{% block admin_content %}
+<div class="page-title-row">
+  <div>
+    <p class="eyebrow">Accesos</p>
+    <h1>{{ title }}</h1>
+  </div>
+  <a class="btn btn-outline-secondary" href="{% url 'admin_accounts:user_list' %}"><i class="bi bi-arrow-left" aria-hidden="true"></i>Volver</a>
+</div>
+
+<form class="editor-grid" method="post" data-prevent-double-submit>
+  {% csrf_token %}
+  <section class="work-panel form-panel">
+    {{ form.non_field_errors }}
+    <div class="form-grid">
+      <label>{{ form.first_name.label }}{{ form.first_name }}{{ form.first_name.errors }}</label>
+      <label>{{ form.last_name.label }}{{ form.last_name }}{{ form.last_name.errors }}</label>
+      <label>{{ form.username.label }}{{ form.username }}{{ form.username.errors }}</label>
+      <label>{{ form.email.label }}{{ form.email }}{{ form.email.errors }}</label>
+      <label>{{ form.phone.label }}{{ form.phone }}{{ form.phone.errors }}</label>
+      <label>{{ form.role.label }}{{ form.role }}{{ form.role.errors }}</label>
+      <label>{{ form.assigned_branch.label }}{{ form.assigned_branch }}{{ form.assigned_branch.errors }}</label>
+      <label>{{ form.password.label }}{{ form.password }}{{ form.password.errors }}<small>{{ form.password.help_text }}</small></label>
+      <label>{{ form.password_confirm.label }}{{ form.password_confirm }}{{ form.password_confirm.errors }}</label>
+    </div>
+    <div class="form-check-row">
+      <label class="form-check">{{ form.is_active }}<span>{{ form.is_active.label }}</span></label>
+      <label class="form-check">{{ form.is_staff }}<span>{{ form.is_staff.label }}</span></label>
+    </div>
+  </section>
+  <aside class="ops-card form-side">
+    <h2>Regla de acceso</h2>
+    <p class="empty-copy">El rol define el alcance operativo. La sucursal asignada sirve para reportes y flujos por tienda.</p>
+    <button class="btn btn-primary w-100" type="submit"><i class="bi bi-check2" aria-hidden="true"></i>Guardar usuario</button>
+  </aside>
+</form>
+{% endblock %}

@@ -3,86 +3,180 @@
 {% block title %}Panel administrativo{% endblock %}
 
 {% block admin_content %}
-<div class="page-title-row">
+<div class="control-dashboard">
+<section class="dashboard-hero">
   <div>
     <p class="eyebrow">Operacion diaria</p>
-    <h1>Control de tienda</h1>
+    <h1>Centro de control</h1>
+    <p>Lectura rapida de ventas, caja, inventario y actividad reciente para administrar la boutique sin cambiar de modulo.</p>
   </div>
-  <div class="page-actions">
-    <a class="btn btn-outline-secondary" href="{% url 'finance:expense_create' %}"><i class="bi bi-cash-stack" aria-hidden="true"></i>Registrar gasto</a>
-    <a class="btn btn-primary" href="{% url 'sales:sale_create' %}"><i class="bi bi-plus-lg" aria-hidden="true"></i>Nueva venta</a>
+  <div class="dashboard-actions">
+    <button class="icon-button" type="button" title="Actualizar" hx-get="{% url 'admin_dashboard' %}" hx-target=".admin-content" hx-select=".admin-content" hx-swap="outerHTML"><i class="bi bi-arrow-clockwise" aria-hidden="true"></i></button>
+    {% if admin_permissions.finance.can_create %}<a class="btn btn-outline-secondary" href="{% url 'finance:expense_create' %}"><i class="bi bi-cash-stack" aria-hidden="true"></i>Registrar gasto</a>{% endif %}
+    {% if admin_permissions.sales.can_create %}<a class="btn btn-primary" href="{% url 'sales:sale_create' %}"><i class="bi bi-plus-lg" aria-hidden="true"></i>Nueva venta</a>{% endif %}
   </div>
-</div>
+</section>
 
-<section class="metric-grid">
-  <article class="metric-card metric-primary">
-    <span>Ventas de hoy</span>
+<section class="dashboard-metrics" aria-label="Resumen del dia">
+  <article class="metric-card metric-primary metric-wide">
+    <div class="metric-card-head">
+      <div class="metric-icon"><i class="bi bi-bag-check" aria-hidden="true"></i></div>
+      <span class="metric-trend">Hoy</span>
+    </div>
+    <span>Ventas del dia</span>
     <strong>${{ todays_sales_total }}</strong>
-    <small>{{ todays_sales_count }} operaciones</small>
+    <small>{{ todays_sales_count }} operaciones registradas</small>
   </article>
   <article class="metric-card">
-    <span>Productos bajos</span>
+    <div class="metric-card-head">
+      <div class="metric-icon"><i class="bi bi-graph-up-arrow" aria-hidden="true"></i></div>
+      <span class="metric-trend positive">Caja</span>
+    </div>
+    <span>Flujo neto</span>
+    <strong>${{ todays_net }}</strong>
+    <small>Ingresos menos gastos del dia</small>
+  </article>
+  <article class="metric-card">
+    <div class="metric-card-head">
+      <div class="metric-icon warning"><i class="bi bi-exclamation-triangle" aria-hidden="true"></i></div>
+      <span class="metric-trend warning">Revision</span>
+    </div>
+    <span>Stock bajo</span>
     <strong>{{ low_stock_count }}</strong>
-    <small>Requieren revision</small>
+    <small>Productos por revisar</small>
   </article>
   <article class="metric-card">
-    <span>Ingresos</span>
-    <strong>${{ todays_income }}</strong>
-    <small>Registrados hoy</small>
-  </article>
-  <article class="metric-card">
-    <span>Egresos</span>
-    <strong>${{ todays_expenses }}</strong>
-    <small>Gastos del dia</small>
+    <div class="metric-card-head">
+      <div class="metric-icon"><i class="bi bi-shop" aria-hidden="true"></i></div>
+      <span class="metric-trend neutral">Activas</span>
+    </div>
+    <span>Operacion activa</span>
+    <strong>{{ active_branches_count }}</strong>
+    <small>{{ active_products_count }} productos activos</small>
   </article>
 </section>
 
-<div class="admin-grid">
-  <section class="work-panel">
+<section class="control-strip" aria-label="Acciones rapidas">
+  <div class="control-strip-copy">
+    <p class="eyebrow">Acciones rapidas</p>
+    <h2>Trabajo frecuente</h2>
+  </div>
+  <div class="quick-action-grid">
+    {% if admin_permissions.catalog.can_create %}<a class="quick-action" href="{% url 'catalog:product_create' %}">
+      <i class="bi bi-bag-plus" aria-hidden="true"></i>
+      <span>Producto</span>
+      <small>Alta en catalogo</small>
+    </a>{% endif %}
+    {% if admin_permissions.inventory.can_create %}<a class="quick-action" href="{% url 'inventory:movement_create' %}">
+      <i class="bi bi-box-arrow-in-down" aria-hidden="true"></i>
+      <span>Stock</span>
+      <small>Entrada o ajuste</small>
+    </a>{% endif %}
+    {% if admin_permissions.customers.can_create %}<a class="quick-action" href="{% url 'customers:customer_create' %}">
+      <i class="bi bi-person-plus" aria-hidden="true"></i>
+      <span>Cliente</span>
+      <small>Nuevo registro</small>
+    </a>{% endif %}
+    {% if admin_permissions.reports.can_view %}<a class="quick-action" href="{% url 'reports:dashboard' %}">
+      <i class="bi bi-bar-chart" aria-hidden="true"></i>
+      <span>Reportes</span>
+      <small>Analisis general</small>
+    </a>{% endif %}
+  </div>
+</section>
+
+<div class="dashboard-grid dashboard-grid-primary">
+  <section class="work-panel dashboard-panel">
     <div class="section-heading">
       <div>
-        <p class="eyebrow">Inventario</p>
-        <h2>Actividad reciente</h2>
+        <p class="eyebrow">Ventas</p>
+        <h2>Ultimas operaciones</h2>
       </div>
-      <button class="icon-button" type="button" title="Actualizar" hx-get="{% url 'admin_dashboard' %}" hx-target=".admin-content" hx-select=".admin-content" hx-swap="outerHTML">R</button>
+      <a class="btn btn-sm btn-outline-secondary" href="{% url 'sales:sale_list' %}"><i class="bi bi-receipt" aria-hidden="true"></i>Ventas</a>
     </div>
     <div class="activity-list">
-      {% for movement in recent_movements %}
+      {% for sale in recent_sales %}
         <article class="activity-row">
-          <span class="status-dot"></span>
+          <span class="activity-icon"><i class="bi bi-receipt" aria-hidden="true"></i></span>
           <div>
-            <strong>{{ movement.product.name }}</strong>
-            <p>{{ movement.get_movement_type_display }} &middot; {{ movement.branch.name }} &middot; {{ movement.quantity }} pzas</p>
+            <strong>Venta #{{ sale.id }} / ${{ sale.total }}</strong>
+            <p>{{ sale.branch.name }} / {{ sale.customer.name|default:"Cliente mostrador" }}</p>
           </div>
-          <time>{{ movement.created_at|date:"d/m H:i" }}</time>
+          <time>{{ sale.created_at|date:"d/m H:i" }}</time>
         </article>
       {% empty %}
-        <p class="empty-copy">Las ventas, movimientos de inventario y gastos apareceran aqui conforme se habiliten los modulos.</p>
+        <p class="empty-copy">Aun no hay ventas registradas.</p>
       {% endfor %}
     </div>
   </section>
 
-  <aside class="ops-panel" x-data="{ mode: 'ventas' }">
-    <div class="segmented-control">
-      <button type="button" :class="{ 'is-active': mode === 'ventas' }" @click="mode = 'ventas'">Ventas</button>
-      <button type="button" :class="{ 'is-active': mode === 'stock' }" @click="mode = 'stock'">Stock</button>
-      <button type="button" :class="{ 'is-active': mode === 'caja' }" @click="mode = 'caja'">Caja</button>
+  <aside class="work-panel dashboard-panel">
+    <div class="section-heading">
+      <div>
+        <p class="eyebrow">Alertas</p>
+        <h2>Stock bajo</h2>
+      </div>
+      <a class="btn btn-sm btn-outline-secondary" href="{% url 'inventory:inventory_list' %}"><i class="bi bi-box-seam" aria-hidden="true"></i>Inventario</a>
     </div>
-    <div class="ops-card" x-show="mode === 'ventas'">
-      <h2>Flujo de venta</h2>
-      <p>Busqueda por SKU, validacion de stock por sucursal y comprobante compacto.</p>
-      <span class="badge text-bg-success">Listo para construir</span>
-    </div>
-    <div class="ops-card" x-show="mode === 'stock'">
-      <h2>Control de stock</h2>
-      <p>Entradas, ajustes, transferencias, mermas y alertas de bajo inventario.</p>
-      <span class="badge text-bg-warning">Prioridad MVP</span>
-    </div>
-    <div class="ops-card" x-show="mode === 'caja'">
-      <h2>Corte operativo</h2>
-      <p>Ingresos desde ventas, gastos capturados y utilidad estimada por sucursal.</p>
-      <span class="badge text-bg-info">Base contable</span>
+    <div class="stock-watch-list">
+      {% for item in low_stock_items %}
+        <article>
+          <div>
+            <strong>{{ item.product.name }}</strong>
+            <span>{{ item.branch.name }}</span>
+          </div>
+          <b title="Piezas disponibles">{{ item.quantity }}</b>
+        </article>
+      {% empty %}
+        <p class="empty-copy">Sin alertas de stock bajo.</p>
+      {% endfor %}
     </div>
   </aside>
+</div>
+
+<div class="dashboard-grid secondary-grid">
+  <section class="work-panel dashboard-panel">
+    <div class="section-heading">
+      <div>
+        <p class="eyebrow">Inventario</p>
+        <h2>Movimientos recientes</h2>
+      </div>
+    </div>
+    <div class="activity-list compact-activity">
+      {% for movement in recent_movements %}
+        <article class="activity-row">
+          <span class="activity-icon muted"><i class="bi bi-arrow-left-right" aria-hidden="true"></i></span>
+          <div>
+            <strong>{{ movement.product.name }}</strong>
+            <p>{{ movement.get_movement_type_display }} / {{ movement.branch.name }} / {{ movement.quantity }} pzas</p>
+          </div>
+          <time>{{ movement.created_at|date:"d/m H:i" }}</time>
+        </article>
+      {% empty %}
+        <p class="empty-copy">Los movimientos apareceran aqui.</p>
+      {% endfor %}
+    </div>
+  </section>
+
+  <aside class="work-panel dashboard-panel">
+    <div class="section-heading">
+      <div>
+        <p class="eyebrow">Sucursales</p>
+        <h2>Ventas de hoy</h2>
+      </div>
+    </div>
+    <div class="branch-sales-list">
+      {% for branch in branch_sales %}
+        <article>
+          <span>{{ branch.branch__name }}</span>
+          <strong>${{ branch.total }}</strong>
+          <small>{{ branch.sales_count }} ventas</small>
+        </article>
+      {% empty %}
+        <p class="empty-copy">Sin ventas por sucursal hoy.</p>
+      {% endfor %}
+    </div>
+  </aside>
+</div>
 </div>
 {% endblock %}

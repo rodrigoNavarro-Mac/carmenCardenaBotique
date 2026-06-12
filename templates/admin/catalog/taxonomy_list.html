@@ -8,7 +8,9 @@
     <p class="eyebrow">Catalogo</p>
     <h1>{{ config.title }}</h1>
   </div>
-  <a class="btn btn-primary" href="{% url 'catalog:taxonomy_create' kind %}"><i class="bi bi-plus-lg" aria-hidden="true"></i>{{ config.create_title }}</a>
+  {% if admin_permissions.catalog.can_create %}
+    <a class="btn btn-primary" href="{% url 'catalog:taxonomy_create' kind %}"><i class="bi bi-plus-lg" aria-hidden="true"></i>{{ config.create_title }}</a>
+  {% endif %}
 </div>
 
 {% include "admin/catalog/includes/catalog_tabs.html" with active_tab=kind %}

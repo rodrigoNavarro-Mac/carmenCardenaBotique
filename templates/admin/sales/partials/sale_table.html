@@ -21,8 +21,26 @@
             <td>{{ sale.branch.name }}</td>
             <td>{{ sale.customer.name|default:"Venta mostrador" }}</td>
             <td><strong>${{ sale.total }}</strong></td>
-            <td><span class="badge text-bg-success">{{ sale.get_status_display }}</span></td>
-            <td class="text-end"><a class="btn btn-sm btn-outline-secondary" href="{% url 'sales:sale_detail' sale.id %}">Recibo</a></td>
+            <td>
+              {% if sale.status == "PAID" %}
+                <span class="badge text-bg-success">{{ sale.get_status_display }}</span>
+              {% elif sale.status == "CANCELLED" %}
+                <span class="badge text-bg-danger">{{ sale.get_status_display }}</span>
+              {% else %}
+                <span class="badge text-bg-warning">{{ sale.get_status_display }}</span>
+              {% endif %}
+            </td>
+            <td class="text-end">
+              <div class="row-actions">
+                <a class="btn btn-sm btn-outline-secondary" href="{% url 'sales:sale_detail' sale.id %}"><i class="bi bi-receipt" aria-hidden="true"></i>Recibo</a>
+                {% if sale.status == "PAID" and admin_permissions.sales.can_delete %}
+                  <form method="post" action="{% url 'sales:sale_cancel' sale.id %}">
+                    {% csrf_token %}
+                    <button class="btn btn-sm btn-outline-secondary" type="submit" data-confirm="Cancelar esta venta restaurara el stock y quitara el ingreso financiero. Continuar?"><i class="bi bi-x-circle" aria-hidden="true"></i>Cancelar</button>
+                  </form>
+                {% endif %}
+              </div>
+            </td>
           </tr>
         {% empty %}
           <tr>

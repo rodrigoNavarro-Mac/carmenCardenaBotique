@@ -1,0 +1,48 @@
+{% extends "admin/base_admin.html" %}
+
+{% block title %}Usuarios{% endblock %}
+
+{% block admin_content %}
+<div class="page-title-row">
+  <div>
+    <p class="eyebrow">Accesos</p>
+    <h1>Usuarios</h1>
+  </div>
+  <div class="page-actions">
+    {% if admin_permissions.users.can_edit %}
+      <a class="btn btn-outline-secondary" href="{% url 'admin_accounts:role_permissions' %}"><i class="bi bi-shield-lock" aria-hidden="true"></i>Permisos</a>
+    {% endif %}
+    {% if admin_permissions.users.can_create %}
+      <a class="btn btn-primary" href="{% url 'admin_accounts:user_create' %}"><i class="bi bi-person-plus" aria-hidden="true"></i>Nuevo usuario</a>
+    {% endif %}
+  </div>
+</div>
+
+{% if messages %}
+  <div class="message-stack">
+    {% for message in messages %}
+      <div class="alert alert-{{ message.tags|default:'info' }}">{{ message }}</div>
+    {% endfor %}
+  </div>
+{% endif %}
+
+<section class="work-panel">
+  <form class="filter-bar user-filter" method="get" hx-get="." hx-target="#user-results" hx-swap="outerHTML" hx-push-url="true">
+    <input class="form-control" type="search" name="q" value="{{ request.GET.q }}" placeholder="Buscar nombre, usuario, correo o telefono">
+    <select class="form-select" name="role">
+      <option value="all" {% if request.GET.role|default:"all" == "all" %}selected{% endif %}>Todos los roles</option>
+      {% for value, label in roles %}
+        <option value="{{ value }}" {% if request.GET.role == value %}selected{% endif %}>{{ label }}</option>
+      {% endfor %}
+    </select>
+    <select class="form-select" name="status">
+      <option value="active" {% if request.GET.status|default:"active" == "active" %}selected{% endif %}>Activos</option>
+      <option value="inactive" {% if request.GET.status == "inactive" %}selected{% endif %}>Inactivos</option>
+      <option value="all" {% if request.GET.status == "all" %}selected{% endif %}>Todos</option>
+    </select>
+    <button class="btn btn-outline-secondary" type="submit"><i class="bi bi-funnel" aria-hidden="true"></i>Filtrar</button>
+  </form>
+
+  {% include "admin/accounts/partials/user_table.html" %}
+</section>
+{% endblock %}

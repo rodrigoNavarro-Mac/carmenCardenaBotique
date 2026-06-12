@@ -61,3 +61,25 @@ def register_sale(*, branch, customer, user, lines):
 
     IncomeEntry.objects.create(branch=branch, sale=sale, amount=total, date=timezone.localdate())
     return sale
+
+
+@transaction.atomic
+def cancel_sale(*, sale, user=None):
+    sale = Sale.objects.select_for_update().prefetch_related("lines", "lines__product").get(pk=sale.pk)
+    if sale.status != Sale.Status.PAID:
+        raise ValueError("Solo se pueden cancelar ventas pagadas.")
+
+    for line in sale.lines.all():
+        register_stock_movement(
+            branch=sale.branch,
+            product=line.product,
+            movement_type=InventoryMovement.MovementType.RETURN,
+            quantity=line.quantity,
+            reference=f"Cancelacion venta #{sale.pk}",
+            user=user,
+        )
+
+    IncomeEntry.objects.filter(sale=sale).delete()
+    sale.status = Sale.Status.CANCELLED
+    sale.save(update_fields=["status", "updated_at"])
+    return sale

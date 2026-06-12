@@ -8,7 +8,9 @@
     <p class="eyebrow">Catalogo</p>
     <h1>Productos</h1>
   </div>
-  <a class="btn btn-primary" href="{% url 'catalog:product_create' %}"><i class="bi bi-plus-lg" aria-hidden="true"></i>Nuevo producto</a>
+  {% if admin_permissions.catalog.can_create %}
+    <a class="btn btn-primary" href="{% url 'catalog:product_create' %}"><i class="bi bi-plus-lg" aria-hidden="true"></i>Nuevo producto</a>
+  {% endif %}
 </div>
 
 {% include "admin/catalog/includes/catalog_tabs.html" with active_tab="products" %}

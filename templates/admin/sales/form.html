@@ -65,7 +65,7 @@
   <a class="btn btn-outline-secondary" href="{% url 'sales:sale_list' %}"><i class="bi bi-arrow-left" aria-hidden="true"></i>Volver</a>
 </div>
 
-<form class="editor-grid sale-editor" method="post">
+<form class="editor-grid sale-editor" method="post" data-prevent-double-submit>
   {% csrf_token %}
   <section class="work-panel form-panel">
     {{ header_form.non_field_errors }}

@@ -8,7 +8,9 @@
     <p class="eyebrow">Finanzas</p>
     <h1>Resumen operativo</h1>
   </div>
-  <a class="btn btn-primary" href="{% url 'finance:expense_create' %}"><i class="bi bi-plus-lg" aria-hidden="true"></i>Registrar gasto</a>
+  {% if admin_permissions.finance.can_create %}
+    <a class="btn btn-primary" href="{% url 'finance:expense_create' %}"><i class="bi bi-plus-lg" aria-hidden="true"></i>Registrar gasto</a>
+  {% endif %}
 </div>
 
 {% if messages %}

@@ -8,7 +8,7 @@ from branches.models import Branch
 
 from .forms import SaleHeaderForm, SaleLineForm
 from .models import Sale
-from .services import register_sale
+from .services import cancel_sale, register_sale
 
 
 SaleLineFormSet = formset_factory(SaleLineForm, extra=1, min_num=1, validate_min=False)
@@ -71,3 +71,16 @@ def sale_detail(request, pk):
         pk=pk,
     )
     return render(request, "admin/sales/detail.html", {"sale": sale})
+
+
+@login_required
+def sale_cancel(request, pk):
+    sale = get_object_or_404(Sale, pk=pk)
+    if request.method == "POST":
+        try:
+            cancel_sale(sale=sale, user=request.user)
+        except ValueError as exc:
+            messages.error(request, str(exc))
+        else:
+            messages.success(request, f"Venta #{sale.pk} cancelada y stock restaurado.")
+    return redirect("sales:sale_detail", pk=pk)
