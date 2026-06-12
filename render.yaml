@@ -1,0 +1,26 @@
+databases:
+  - name: carmen-cardena-db
+    plan: basic-256mb
+    databaseName: carmen_cardena
+    user: carmen_cardena
+
+services:
+  - type: web
+    name: carmen-cardena-boutique
+    runtime: python
+    plan: starter
+    buildCommand: bash build.sh
+    startCommand: gunicorn boutique.wsgi:application
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.12.8
+      - key: DJANGO_DEBUG
+        value: "0"
+      - key: DJANGO_SECRET_KEY
+        generateValue: true
+      - key: DATABASE_URL
+        fromDatabase:
+          name: carmen-cardena-db
+          property: connectionString
+      - key: DJANGO_SECURE_SSL_REDIRECT
+        value: "1"

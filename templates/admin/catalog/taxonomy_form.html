@@ -1,0 +1,31 @@
+{% extends "admin/base_admin.html" %}
+
+{% block title %}{{ title }}{% endblock %}
+
+{% block admin_content %}
+<div class="page-title-row">
+  <div>
+    <p class="eyebrow">Catalogo</p>
+    <h1>{{ title }}</h1>
+  </div>
+  <a class="btn btn-outline-secondary" href="{% url 'catalog:taxonomy_list' kind %}"><i class="bi bi-arrow-left" aria-hidden="true"></i>Volver</a>
+</div>
+
+{% include "admin/catalog/includes/catalog_tabs.html" with active_tab=kind %}
+
+<form class="editor-grid compact-editor" method="post">
+  {% csrf_token %}
+  <section class="work-panel form-panel">
+    {{ form.non_field_errors }}
+    <div class="form-grid">
+      <label>{{ form.name.label }}{{ form.name }}{{ form.name.errors }}</label>
+      <label class="wide-field">{{ form.description.label }}{{ form.description }}{{ form.description.errors }}</label>
+    </div>
+  </section>
+  <aside class="ops-card form-side">
+    <h2>Estado</h2>
+    <label class="form-check">{{ form.is_active }} <span>{{ form.is_active.label }}</span></label>
+    <button class="btn btn-primary w-100" type="submit"><i class="bi bi-check2" aria-hidden="true"></i>Guardar</button>
+  </aside>
+</form>
+{% endblock %}

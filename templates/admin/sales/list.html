@@ -1,0 +1,41 @@
+{% extends "admin/base_admin.html" %}
+
+{% block title %}Ventas{% endblock %}
+
+{% block admin_content %}
+<div class="page-title-row">
+  <div>
+    <p class="eyebrow">Ventas</p>
+    <h1>Historial de ventas</h1>
+  </div>
+  <a class="btn btn-primary" href="{% url 'sales:sale_create' %}"><i class="bi bi-plus-lg" aria-hidden="true"></i>Nueva venta</a>
+</div>
+
+{% if messages %}
+  <div class="message-stack">
+    {% for message in messages %}
+      <div class="alert alert-{{ message.tags|default:'info' }}">{{ message }}</div>
+    {% endfor %}
+  </div>
+{% endif %}
+
+<section class="work-panel">
+  <form class="filter-bar compact-filter" method="get" hx-get="." hx-target="#sale-results" hx-swap="outerHTML" hx-push-url="true">
+    <select class="form-select" name="branch">
+      <option value="">Todas las sucursales</option>
+      {% for branch in branches %}
+        <option value="{{ branch.id }}" {% if request.GET.branch == branch.id|stringformat:"s" %}selected{% endif %}>{{ branch.name }}</option>
+      {% endfor %}
+    </select>
+    <select class="form-select" name="status">
+      <option value="">Todos los estados</option>
+      {% for value, label in status_choices %}
+        <option value="{{ value }}" {% if request.GET.status == value %}selected{% endif %}>{{ label }}</option>
+      {% endfor %}
+    </select>
+    <button class="btn btn-outline-secondary" type="submit"><i class="bi bi-funnel" aria-hidden="true"></i>Filtrar</button>
+  </form>
+
+  {% include "admin/sales/partials/sale_table.html" %}
+</section>
+{% endblock %}

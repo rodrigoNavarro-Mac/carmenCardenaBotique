@@ -1,0 +1,54 @@
+{% extends "admin/base_admin.html" %}
+
+{% block title %}Clientes{% endblock %}
+
+{% block admin_content %}
+<div class="page-title-row">
+  <div>
+    <p class="eyebrow">Clientes</p>
+    <h1>Directorio de clientes</h1>
+  </div>
+  <a class="btn btn-primary" href="{% url 'customers:customer_create' %}"><i class="bi bi-plus-lg" aria-hidden="true"></i>Nuevo cliente</a>
+</div>
+
+{% if messages %}
+  <div class="message-stack">
+    {% for message in messages %}
+      <div class="alert alert-{{ message.tags|default:'info' }}">{{ message }}</div>
+    {% endfor %}
+  </div>
+{% endif %}
+
+<section class="module-summary-grid">
+  <article>
+    <span>Total clientes</span>
+    <strong>{{ customer_count }}</strong>
+  </article>
+  <article>
+    <span>Clientes activos</span>
+    <strong>{{ active_count }}</strong>
+  </article>
+  <article>
+    <span>Con historial</span>
+    <strong>{{ customers|length }}</strong>
+  </article>
+  <article>
+    <span>Modulo</span>
+    <strong>CRM</strong>
+  </article>
+</section>
+
+<section class="work-panel">
+  <form class="filter-bar compact-filter" method="get" hx-get="." hx-target="#customer-results" hx-swap="outerHTML" hx-push-url="true">
+    <input class="form-control" type="search" name="q" value="{{ request.GET.q }}" placeholder="Buscar nombre, telefono o correo">
+    <select class="form-select" name="status">
+      <option value="active" {% if request.GET.status|default:"active" == "active" %}selected{% endif %}>Activos</option>
+      <option value="inactive" {% if request.GET.status == "inactive" %}selected{% endif %}>Inactivos</option>
+      <option value="all" {% if request.GET.status == "all" %}selected{% endif %}>Todos</option>
+    </select>
+    <button class="btn btn-outline-secondary" type="submit"><i class="bi bi-funnel" aria-hidden="true"></i>Filtrar</button>
+  </form>
+
+  {% include "admin/customers/partials/customer_table.html" %}
+</section>
+{% endblock %}

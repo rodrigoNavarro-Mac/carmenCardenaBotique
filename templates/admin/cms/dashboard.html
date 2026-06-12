@@ -1,0 +1,85 @@
+{% extends "admin/base_admin.html" %}
+
+{% block title %}CMS{% endblock %}
+
+{% block admin_content %}
+<div class="page-title-row">
+  <div>
+    <p class="eyebrow">CMS</p>
+    <h1>Contenido publico</h1>
+  </div>
+  <div class="page-actions">
+    <a class="btn btn-outline-secondary" href="{% url 'cms:landing_config_edit' %}"><i class="bi bi-pencil" aria-hidden="true"></i>Editar landing</a>
+    <a class="btn btn-primary" href="{% url 'cms:gallery_create' %}"><i class="bi bi-plus-lg" aria-hidden="true"></i>Nueva imagen</a>
+  </div>
+</div>
+
+{% if messages %}
+  <div class="message-stack">
+    {% for message in messages %}
+      <div class="alert alert-{{ message.tags|default:'info' }}">{{ message }}</div>
+    {% endfor %}
+  </div>
+{% endif %}
+
+<section class="module-summary-grid">
+  <article>
+    <span>Nombre publico</span>
+    <strong class="compact-value">{{ config.boutique_name|default:"Sin configurar" }}</strong>
+  </article>
+  <article>
+    <span>Imagenes</span>
+    <strong>{{ gallery_count }}</strong>
+  </article>
+  <article>
+    <span>Publicadas</span>
+    <strong>{{ published_count }}</strong>
+  </article>
+  <article>
+    <span>Landing</span>
+    <strong>{% if config.is_active %}Activa{% else %}Inactiva{% endif %}</strong>
+  </article>
+</section>
+
+<section class="work-panel">
+  <div class="section-heading">
+    <div>
+      <p class="eyebrow">Galeria</p>
+      <h2>Imagenes publicas</h2>
+    </div>
+  </div>
+  <div class="cms-gallery-grid">
+    {% for image in gallery %}
+      <article class="cms-gallery-card">
+        <div class="cms-gallery-media">
+          {% if image.image %}
+            <img src="{{ image.image.url }}" alt="{{ image.title }}">
+          {% elif image.external_image_url %}
+            <img src="{{ image.external_image_url }}" alt="{{ image.title }}">
+          {% endif %}
+        </div>
+        <div>
+          <h3>{{ image.title }}</h3>
+          <p>Orden {{ image.sort_order }}{% if image.product %} · {{ image.product.name }}{% endif %}</p>
+        </div>
+        <div class="row-actions">
+          {% if image.is_published %}
+            <span class="badge text-bg-success">Publicada</span>
+          {% else %}
+            <span class="badge text-bg-secondary">Oculta</span>
+          {% endif %}
+          <a class="btn btn-sm btn-outline-secondary" href="{% url 'cms:gallery_update' image.id %}"><i class="bi bi-pencil" aria-hidden="true"></i>Editar</a>
+          <form method="post" action="{% url 'cms:gallery_toggle' image.id %}">
+            {% csrf_token %}
+            <button class="btn btn-sm btn-outline-secondary" type="submit">
+              {% if image.is_published %}<i class="bi bi-eye-slash" aria-hidden="true"></i>Ocultar{% else %}<i class="bi bi-eye" aria-hidden="true"></i>Publicar{% endif %}
+            </button>
+          </form>
+        </div>
+      </article>
+    {% empty %}
+      <p class="empty-copy">No hay imagenes de galeria.</p>
+    {% endfor %}
+  </div>
+</section>
+{% endblock %}

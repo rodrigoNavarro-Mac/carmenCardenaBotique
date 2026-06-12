@@ -1,0 +1,4 @@
+interface:
+  display_name: "Boutique HTMX UI"
+  short_description: "Django Templates con Bootstrap, HTMX y Alpine"
+  default_prompt: "Use $boutique-htmx-ui to build responsive Django template screens with Bootstrap 5, HTMX, and Alpine.js."

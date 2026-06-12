@@ -1,0 +1,4 @@
+interface:
+  display_name: "Boutique Domain Rules"
+  short_description: "Modelo, permisos y reglas de negocio boutique"
+  default_prompt: "Use $boutique-domain-rules to implement boutique domain models, RBAC, inventory, sales, and accounting rules."

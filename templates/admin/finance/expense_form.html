@@ -1,0 +1,31 @@
+{% extends "admin/base_admin.html" %}
+
+{% block title %}Registrar gasto{% endblock %}
+
+{% block admin_content %}
+<div class="page-title-row">
+  <div>
+    <p class="eyebrow">Finanzas</p>
+    <h1>Registrar gasto</h1>
+  </div>
+  <a class="btn btn-outline-secondary" href="{% url 'finance:dashboard' %}"><i class="bi bi-arrow-left" aria-hidden="true"></i>Volver</a>
+</div>
+
+<form class="editor-grid compact-editor" method="post">
+  {% csrf_token %}
+  <section class="work-panel form-panel">
+    {{ form.non_field_errors }}
+    <div class="form-grid">
+      <label>{{ form.branch.label }}{{ form.branch }}{{ form.branch.errors }}</label>
+      <label>{{ form.date.label }}{{ form.date }}{{ form.date.errors }}</label>
+      <label class="wide-field">{{ form.concept.label }}{{ form.concept }}{{ form.concept.errors }}</label>
+      <label>{{ form.amount.label }}{{ form.amount }}{{ form.amount.errors }}</label>
+    </div>
+  </section>
+  <aside class="ops-card form-side">
+    <h2>Registro contable</h2>
+    <p class="empty-copy">Los gastos aparecen en el resumen financiero del periodo y afectan la utilidad estimada.</p>
+    <button class="btn btn-primary w-100" type="submit"><i class="bi bi-check2" aria-hidden="true"></i>Guardar gasto</button>
+  </aside>
+</form>
+{% endblock %}

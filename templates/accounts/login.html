@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+
+{% block title %}Iniciar sesion{% endblock %}
+
+{% block body %}
+<main class="auth-shell">
+  <section class="auth-panel">
+    <a class="brand-mark" href="/">
+      <span class="brand-symbol">CC</span>
+      <span>Carmen Cardena Boutique</span>
+    </a>
+    <h1>Iniciar sesion</h1>
+    <form method="post" class="stack-form">
+      {% csrf_token %}
+      {{ form.non_field_errors }}
+      <label>
+        Usuario
+        {{ form.username }}
+      </label>
+      <label>
+        Contrasena
+        {{ form.password }}
+      </label>
+      <button class="btn btn-primary w-100" type="submit">Entrar</button>
+    </form>
+  </section>
+</main>
+{% endblock %}

@@ -1,0 +1,37 @@
+{% extends "admin/base_admin.html" %}
+
+{% block title %}{{ config.title }}{% endblock %}
+
+{% block admin_content %}
+<div class="page-title-row">
+  <div>
+    <p class="eyebrow">Catalogo</p>
+    <h1>{{ config.title }}</h1>
+  </div>
+  <a class="btn btn-primary" href="{% url 'catalog:taxonomy_create' kind %}"><i class="bi bi-plus-lg" aria-hidden="true"></i>{{ config.create_title }}</a>
+</div>
+
+{% include "admin/catalog/includes/catalog_tabs.html" with active_tab=kind %}
+
+{% if messages %}
+  <div class="message-stack">
+    {% for message in messages %}
+      <div class="alert alert-{{ message.tags|default:'info' }}">{{ message }}</div>
+    {% endfor %}
+  </div>
+{% endif %}
+
+<section class="work-panel">
+  <form class="filter-bar compact-filter" method="get" hx-get="." hx-target="#taxonomy-results" hx-swap="outerHTML" hx-push-url="true">
+    <input class="form-control" type="search" name="q" value="{{ request.GET.q }}" placeholder="Buscar por nombre o descripcion">
+    <select class="form-select" name="status">
+      <option value="active" {% if request.GET.status|default:"active" == "active" %}selected{% endif %}>Activas</option>
+      <option value="inactive" {% if request.GET.status == "inactive" %}selected{% endif %}>Inactivas</option>
+      <option value="all" {% if request.GET.status == "all" %}selected{% endif %}>Todas</option>
+    </select>
+    <button class="btn btn-outline-secondary" type="submit"><i class="bi bi-funnel" aria-hidden="true"></i>Filtrar</button>
+  </form>
+
+  {% include "admin/catalog/partials/taxonomy_table.html" %}
+</section>
+{% endblock %}

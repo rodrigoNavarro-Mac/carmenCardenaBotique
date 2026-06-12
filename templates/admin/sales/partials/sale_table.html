@@ -1,0 +1,35 @@
+<div id="sale-results">
+  <div class="table-responsive">
+    <table class="table align-middle admin-table">
+      <thead>
+        <tr>
+          <th>Venta</th>
+          <th>Sucursal</th>
+          <th>Cliente</th>
+          <th>Total</th>
+          <th>Estado</th>
+          <th class="text-end">Acciones</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for sale in sales %}
+          <tr>
+            <td>
+              <strong>#{{ sale.id }}</strong>
+              <span class="table-subcopy">{{ sale.created_at|date:"d/m/Y H:i" }}</span>
+            </td>
+            <td>{{ sale.branch.name }}</td>
+            <td>{{ sale.customer.name|default:"Venta mostrador" }}</td>
+            <td><strong>${{ sale.total }}</strong></td>
+            <td><span class="badge text-bg-success">{{ sale.get_status_display }}</span></td>
+            <td class="text-end"><a class="btn btn-sm btn-outline-secondary" href="{% url 'sales:sale_detail' sale.id %}">Recibo</a></td>
+          </tr>
+        {% empty %}
+          <tr>
+            <td colspan="6"><p class="empty-copy">Aun no hay ventas registradas.</p></td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>

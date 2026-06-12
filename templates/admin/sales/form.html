@@ -1,0 +1,114 @@
+{% extends "admin/base_admin.html" %}
+
+{% block title %}Nueva venta{% endblock %}
+
+{% block extra_scripts %}
+<script>
+  function saleLineManager() {
+    return {
+      lineCount: 0,
+      init() {
+        this.$nextTick(() => this.syncCount());
+      },
+      syncCount() {
+        if (!this.totalInput()) {
+          return;
+        }
+        this.lineCount = this.$refs.rows.querySelectorAll(".sale-line-row").length;
+        this.totalInput().value = this.lineCount;
+      },
+      totalInput() {
+        return this.$el.querySelector('input[name="lines-TOTAL_FORMS"]') || document.querySelector('input[name="lines-TOTAL_FORMS"]');
+      },
+      addLine() {
+        const totalInput = this.totalInput();
+        if (!totalInput) {
+          return;
+        }
+        const index = Number(totalInput.value);
+        const html = this.$refs.emptyLine.innerHTML.replaceAll("__prefix__", index);
+        this.$refs.rows.insertAdjacentHTML("beforeend", html);
+        totalInput.value = index + 1;
+        this.syncCount();
+      },
+      removeLine(button) {
+        if (this.lineCount <= 1) {
+          return;
+        }
+        button.closest(".sale-line-row").remove();
+        this.reindexLines();
+        this.syncCount();
+      },
+      reindexLines() {
+        this.$refs.rows.querySelectorAll(".sale-line-row").forEach((row, index) => {
+          row.querySelectorAll("[name], [id], label[for]").forEach((node) => {
+            ["name", "id", "for"].forEach((attr) => {
+              const value = node.getAttribute(attr);
+              if (value) {
+                node.setAttribute(attr, value.replace(/lines-(\d+|__prefix__)-/g, `lines-${index}-`));
+              }
+            });
+          });
+        });
+      }
+    };
+  }
+</script>
+{% endblock %}
+
+{% block admin_content %}
+<div class="page-title-row">
+  <div>
+    <p class="eyebrow">Ventas</p>
+    <h1>Nueva venta</h1>
+  </div>
+  <a class="btn btn-outline-secondary" href="{% url 'sales:sale_list' %}"><i class="bi bi-arrow-left" aria-hidden="true"></i>Volver</a>
+</div>
+
+<form class="editor-grid sale-editor" method="post">
+  {% csrf_token %}
+  <section class="work-panel form-panel">
+    {{ header_form.non_field_errors }}
+    <div class="form-grid">
+      <label>{{ header_form.branch.label }}{{ header_form.branch }}{{ header_form.branch.errors }}</label>
+      <label>{{ header_form.customer.label }}{{ header_form.customer }}{{ header_form.customer.errors }}</label>
+    </div>
+
+    <div class="sale-lines" x-data="saleLineManager()">
+      <div class="sale-lines-head">
+        <h2>Productos</h2>
+        <button class="btn btn-outline-secondary btn-sm" type="button" @click="addLine()">
+          <i class="bi bi-plus-lg" aria-hidden="true"></i>
+          Agregar fila
+        </button>
+      </div>
+      {{ formset.management_form }}
+      <div class="sale-line-list" x-ref="rows">
+        {% for form in formset %}
+          <div class="sale-line-row">
+            <label>{{ form.product.label }}{{ form.product }}{{ form.product.errors }}</label>
+            <label>{{ form.quantity.label }}{{ form.quantity }}{{ form.quantity.errors }}</label>
+            <button class="icon-button danger-button" type="button" title="Eliminar fila" @click="removeLine($event.currentTarget)" :disabled="lineCount <= 1">
+              <i class="bi bi-trash3" aria-hidden="true"></i>
+            </button>
+          </div>
+        {% endfor %}
+      </div>
+      <template x-ref="emptyLine">
+        <div class="sale-line-row">
+          <label>{{ formset.empty_form.product.label }}{{ formset.empty_form.product }}</label>
+          <label>{{ formset.empty_form.quantity.label }}{{ formset.empty_form.quantity }}</label>
+          <button class="icon-button danger-button" type="button" title="Eliminar fila" @click="removeLine($event.currentTarget)" :disabled="lineCount <= 1">
+            <i class="bi bi-trash3" aria-hidden="true"></i>
+          </button>
+        </div>
+      </template>
+    </div>
+  </section>
+  <aside class="ops-card form-side">
+    <h2>Regla de stock</h2>
+    <p class="empty-copy">Al guardar, la venta descuenta inventario de la sucursal seleccionada y crea ingreso contable.</p>
+    <button class="btn btn-primary w-100" type="submit"><i class="bi bi-check2" aria-hidden="true"></i>Registrar venta</button>
+  </aside>
+</form>
+{% endblock %}

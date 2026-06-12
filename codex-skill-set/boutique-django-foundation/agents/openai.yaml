@@ -1,0 +1,4 @@
+interface:
+  display_name: "Boutique Django Foundation"
+  short_description: "Arquitectura base Django para la boutique"
+  default_prompt: "Use $boutique-django-foundation to scaffold or evolve the Django project architecture for the boutique platform."

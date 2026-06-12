@@ -1,0 +1,34 @@
+{% extends "admin/base_admin.html" %}
+
+{% block title %}{{ title }}{% endblock %}
+
+{% block admin_content %}
+<div class="page-title-row">
+  <div>
+    <p class="eyebrow">CMS</p>
+    <h1>{{ title }}</h1>
+  </div>
+  <a class="btn btn-outline-secondary" href="{% url 'cms:dashboard' %}"><i class="bi bi-arrow-left" aria-hidden="true"></i>Volver</a>
+</div>
+
+<form class="editor-grid compact-editor" method="post" enctype="multipart/form-data">
+  {% csrf_token %}
+  <section class="work-panel form-panel">
+    {{ form.non_field_errors }}
+    <div class="form-grid">
+      <label>{{ form.title.label }}{{ form.title }}{{ form.title.errors }}</label>
+      <label>{{ form.sort_order.label }}{{ form.sort_order }}{{ form.sort_order.errors }}</label>
+      <label class="wide-field">{{ form.external_image_url.label }}{{ form.external_image_url }}{{ form.external_image_url.errors }}</label>
+      <label class="wide-field">{{ form.image.label }}{{ form.image }}{{ form.image.errors }}</label>
+      <label>{{ form.product.label }}{{ form.product }}{{ form.product.errors }}</label>
+      <label>{{ form.branch.label }}{{ form.branch }}{{ form.branch.errors }}</label>
+    </div>
+  </section>
+  <aside class="ops-card form-side">
+    <h2>Estado</h2>
+    <label class="form-check">{{ form.is_active }} <span>{{ form.is_active.label }}</span></label>
+    <label class="form-check">{{ form.is_published }} <span>{{ form.is_published.label }}</span></label>
+    <button class="btn btn-primary w-100" type="submit"><i class="bi bi-check2" aria-hidden="true"></i>Guardar imagen</button>
+  </aside>
+</form>
+{% endblock %}

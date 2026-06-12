@@ -1,0 +1,63 @@
+{% extends "admin/base_admin.html" %}
+
+{% block title %}Inventario{% endblock %}
+
+{% block admin_content %}
+<div class="page-title-row">
+  <div>
+    <p class="eyebrow">Inventario</p>
+    <h1>Existencias por sucursal</h1>
+  </div>
+  <div class="page-actions">
+    <a class="btn btn-outline-secondary" href="{% url 'inventory:movement_history' %}"><i class="bi bi-clock-history" aria-hidden="true"></i>Historial</a>
+    <a class="btn btn-primary" href="{% url 'inventory:movement_create' %}"><i class="bi bi-plus-lg" aria-hidden="true"></i>Registrar movimiento</a>
+  </div>
+</div>
+
+{% if messages %}
+  <div class="message-stack">
+    {% for message in messages %}
+      <div class="alert alert-{{ message.tags|default:'info' }}">{{ message }}</div>
+    {% endfor %}
+  </div>
+{% endif %}
+
+<section class="module-summary-grid">
+  <article>
+    <span>Unidades totales</span>
+    <strong>{{ total_units }}</strong>
+  </article>
+  <article>
+    <span>Productos activos</span>
+    <strong>{{ product_count }}</strong>
+  </article>
+  <article>
+    <span>Bajo minimo</span>
+    <strong>{{ low_stock_count }}</strong>
+  </article>
+  <article>
+    <span>Sucursales visibles</span>
+    <strong>{{ branches|length }}</strong>
+  </article>
+</section>
+
+<section class="work-panel">
+  <form class="filter-bar inventory-filter" method="get" hx-get="." hx-target="#inventory-results" hx-swap="outerHTML" hx-push-url="true">
+    <input class="form-control" type="search" name="q" value="{{ request.GET.q }}" placeholder="Buscar producto o SKU">
+    <select class="form-select" name="branch">
+      <option value="">Todas las sucursales</option>
+      {% for branch in branches %}
+        <option value="{{ branch.id }}" {% if request.GET.branch == branch.id|stringformat:"s" %}selected{% endif %}>{{ branch.name }}</option>
+      {% endfor %}
+    </select>
+    <select class="form-select" name="status">
+      <option value="all" {% if request.GET.status|default:"all" == "all" %}selected{% endif %}>Todo</option>
+      <option value="low" {% if request.GET.status == "low" %}selected{% endif %}>Bajo minimo</option>
+      <option value="zero" {% if request.GET.status == "zero" %}selected{% endif %}>Sin stock</option>
+    </select>
+    <button class="btn btn-outline-secondary" type="submit"><i class="bi bi-funnel" aria-hidden="true"></i>Filtrar</button>
+  </form>
+
+  {% include "admin/inventory/partials/inventory_table.html" %}
+</section>
+{% endblock %}

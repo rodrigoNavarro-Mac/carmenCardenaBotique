@@ -1,0 +1,33 @@
+<div id="featured-products" class="product-grid">
+  {% for product in featured_products %}
+    <article class="product-card">
+      <div class="media-tile">
+        {% if product.image %}
+          <img src="{{ product.image.url }}" alt="{{ product.name }}">
+        {% elif product.external_image_url %}
+          <img src="{{ product.external_image_url }}" alt="{{ product.name }}">
+        {% endif %}
+      </div>
+      <div class="product-meta">
+        <span>{{ product.category.name|default:"Boutique" }}</span>
+        <strong>${{ product.sale_price }}</strong>
+      </div>
+      <h3>{{ product.name }}</h3>
+      <p>{{ product.brand.name|default:"Seleccion Carmen Cardena" }}</p>
+    </article>
+  {% empty %}
+    {% for product in fallback_products %}
+      <article class="product-card">
+        <div class="media-tile">
+          <img src="{{ product.image_url }}" alt="{{ product.name }}">
+        </div>
+        <div class="product-meta">
+          <span>{{ product.category }}</span>
+          <strong>${{ product.price }}</strong>
+        </div>
+        <h3>{{ product.name }}</h3>
+        <p>Seleccion Carmen Cardena</p>
+      </article>
+    {% endfor %}
+  {% endfor %}
+</div>

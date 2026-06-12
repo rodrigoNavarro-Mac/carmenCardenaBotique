@@ -1,0 +1,68 @@
+{% extends "admin/base_admin.html" %}
+
+{% block title %}Catalogo{% endblock %}
+
+{% block admin_content %}
+<div class="page-title-row">
+  <div>
+    <p class="eyebrow">Catalogo</p>
+    <h1>Productos</h1>
+  </div>
+  <a class="btn btn-primary" href="{% url 'catalog:product_create' %}"><i class="bi bi-plus-lg" aria-hidden="true"></i>Nuevo producto</a>
+</div>
+
+{% include "admin/catalog/includes/catalog_tabs.html" with active_tab="products" %}
+
+<section class="module-summary-grid">
+  <article>
+    <span>Total productos</span>
+    <strong>{{ product_count }}</strong>
+  </article>
+  <article>
+    <span>Destacados activos</span>
+    <strong>{{ featured_count }}</strong>
+  </article>
+  <article>
+    <span>Categorias activas</span>
+    <strong>{{ category_count }}</strong>
+  </article>
+  <article>
+    <span>Marcas activas</span>
+    <strong>{{ brand_count }}</strong>
+  </article>
+</section>
+
+{% if messages %}
+  <div class="message-stack">
+    {% for message in messages %}
+      <div class="alert alert-{{ message.tags|default:'info' }}">{{ message }}</div>
+    {% endfor %}
+  </div>
+{% endif %}
+
+<section class="work-panel">
+  <form class="filter-bar" method="get" hx-get="." hx-target="#product-results" hx-swap="outerHTML" hx-push-url="true">
+    <input class="form-control" type="search" name="q" value="{{ request.GET.q }}" placeholder="Buscar por nombre o SKU">
+    <select class="form-select" name="status">
+      <option value="active" {% if request.GET.status|default:"active" == "active" %}selected{% endif %}>Activos</option>
+      <option value="inactive" {% if request.GET.status == "inactive" %}selected{% endif %}>Inactivos</option>
+      <option value="all" {% if request.GET.status == "all" %}selected{% endif %}>Todos</option>
+    </select>
+    <select class="form-select" name="category">
+      <option value="">Todas las categorias</option>
+      {% for category in categories %}
+        <option value="{{ category.id }}" {% if request.GET.category == category.id|stringformat:"s" %}selected{% endif %}>{{ category.name }}</option>
+      {% endfor %}
+    </select>
+    <select class="form-select" name="brand">
+      <option value="">Todas las marcas</option>
+      {% for brand in brands %}
+        <option value="{{ brand.id }}" {% if request.GET.brand == brand.id|stringformat:"s" %}selected{% endif %}>{{ brand.name }}</option>
+      {% endfor %}
+    </select>
+    <button class="btn btn-outline-secondary" type="submit"><i class="bi bi-funnel" aria-hidden="true"></i>Filtrar</button>
+  </form>
+
+  {% include "admin/catalog/partials/product_table.html" %}
+</section>
+{% endblock %}

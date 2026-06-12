@@ -1,0 +1,34 @@
+{% extends "admin/base_admin.html" %}
+
+{% block title %}{{ title }}{% endblock %}
+
+{% block admin_content %}
+<div class="page-title-row">
+  <div>
+    <p class="eyebrow">Sucursales</p>
+    <h1>{{ title }}</h1>
+  </div>
+  <a class="btn btn-outline-secondary" href="{% url 'branches:branch_list' %}"><i class="bi bi-arrow-left" aria-hidden="true"></i>Volver</a>
+</div>
+
+<form class="editor-grid" method="post" enctype="multipart/form-data">
+  {% csrf_token %}
+  <section class="work-panel form-panel">
+    {{ form.non_field_errors }}
+    <div class="form-grid">
+      <label>{{ form.name.label }}{{ form.name }}{{ form.name.errors }}</label>
+      <label>{{ form.phone.label }}{{ form.phone }}{{ form.phone.errors }}</label>
+      <label>{{ form.responsible_person.label }}{{ form.responsible_person }}{{ form.responsible_person.errors }}</label>
+      <label>{{ form.hours.label }}{{ form.hours }}{{ form.hours.errors }}</label>
+      <label class="wide-field">{{ form.maps_url.label }}{{ form.maps_url }}{{ form.maps_url.errors }}</label>
+      <label class="wide-field">{{ form.image.label }}{{ form.image }}{{ form.image.errors }}</label>
+      <label class="wide-field">{{ form.address.label }}{{ form.address }}{{ form.address.errors }}</label>
+    </div>
+  </section>
+  <aside class="ops-card form-side">
+    <h2>Estado</h2>
+    <label class="form-check">{{ form.is_active }} <span>{{ form.is_active.label }}</span></label>
+    <button class="btn btn-primary w-100" type="submit"><i class="bi bi-check2" aria-hidden="true"></i>Guardar sucursal</button>
+  </aside>
+</form>
+{% endblock %}

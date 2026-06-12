@@ -1,0 +1,88 @@
+{% extends "admin/base_admin.html" %}
+
+{% block title %}Panel administrativo{% endblock %}
+
+{% block admin_content %}
+<div class="page-title-row">
+  <div>
+    <p class="eyebrow">Operacion diaria</p>
+    <h1>Control de tienda</h1>
+  </div>
+  <div class="page-actions">
+    <a class="btn btn-outline-secondary" href="{% url 'finance:expense_create' %}"><i class="bi bi-cash-stack" aria-hidden="true"></i>Registrar gasto</a>
+    <a class="btn btn-primary" href="{% url 'sales:sale_create' %}"><i class="bi bi-plus-lg" aria-hidden="true"></i>Nueva venta</a>
+  </div>
+</div>
+
+<section class="metric-grid">
+  <article class="metric-card metric-primary">
+    <span>Ventas de hoy</span>
+    <strong>${{ todays_sales_total }}</strong>
+    <small>{{ todays_sales_count }} operaciones</small>
+  </article>
+  <article class="metric-card">
+    <span>Productos bajos</span>
+    <strong>{{ low_stock_count }}</strong>
+    <small>Requieren revision</small>
+  </article>
+  <article class="metric-card">
+    <span>Ingresos</span>
+    <strong>${{ todays_income }}</strong>
+    <small>Registrados hoy</small>
+  </article>
+  <article class="metric-card">
+    <span>Egresos</span>
+    <strong>${{ todays_expenses }}</strong>
+    <small>Gastos del dia</small>
+  </article>
+</section>
+
+<div class="admin-grid">
+  <section class="work-panel">
+    <div class="section-heading">
+      <div>
+        <p class="eyebrow">Inventario</p>
+        <h2>Actividad reciente</h2>
+      </div>
+      <button class="icon-button" type="button" title="Actualizar" hx-get="{% url 'admin_dashboard' %}" hx-target=".admin-content" hx-select=".admin-content" hx-swap="outerHTML">R</button>
+    </div>
+    <div class="activity-list">
+      {% for movement in recent_movements %}
+        <article class="activity-row">
+          <span class="status-dot"></span>
+          <div>
+            <strong>{{ movement.product.name }}</strong>
+            <p>{{ movement.get_movement_type_display }} &middot; {{ movement.branch.name }} &middot; {{ movement.quantity }} pzas</p>
+          </div>
+          <time>{{ movement.created_at|date:"d/m H:i" }}</time>
+        </article>
+      {% empty %}
+        <p class="empty-copy">Las ventas, movimientos de inventario y gastos apareceran aqui conforme se habiliten los modulos.</p>
+      {% endfor %}
+    </div>
+  </section>
+
+  <aside class="ops-panel" x-data="{ mode: 'ventas' }">
+    <div class="segmented-control">
+      <button type="button" :class="{ 'is-active': mode === 'ventas' }" @click="mode = 'ventas'">Ventas</button>
+      <button type="button" :class="{ 'is-active': mode === 'stock' }" @click="mode = 'stock'">Stock</button>
+      <button type="button" :class="{ 'is-active': mode === 'caja' }" @click="mode = 'caja'">Caja</button>
+    </div>
+    <div class="ops-card" x-show="mode === 'ventas'">
+      <h2>Flujo de venta</h2>
+      <p>Busqueda por SKU, validacion de stock por sucursal y comprobante compacto.</p>
+      <span class="badge text-bg-success">Listo para construir</span>
+    </div>
+    <div class="ops-card" x-show="mode === 'stock'">
+      <h2>Control de stock</h2>
+      <p>Entradas, ajustes, transferencias, mermas y alertas de bajo inventario.</p>
+      <span class="badge text-bg-warning">Prioridad MVP</span>
+    </div>
+    <div class="ops-card" x-show="mode === 'caja'">
+      <h2>Corte operativo</h2>
+      <p>Ingresos desde ventas, gastos capturados y utilidad estimada por sucursal.</p>
+      <span class="badge text-bg-info">Base contable</span>
+    </div>
+  </aside>
+</div>
+{% endblock %}

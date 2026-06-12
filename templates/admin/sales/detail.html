@@ -1,0 +1,52 @@
+{% extends "admin/base_admin.html" %}
+
+{% block title %}Venta #{{ sale.id }}{% endblock %}
+
+{% block admin_content %}
+<div class="page-title-row">
+  <div>
+    <p class="eyebrow">Recibo</p>
+    <h1>Venta #{{ sale.id }}</h1>
+  </div>
+  <a class="btn btn-outline-secondary" href="{% url 'sales:sale_list' %}"><i class="bi bi-arrow-left" aria-hidden="true"></i>Volver</a>
+</div>
+
+<section class="receipt-panel">
+  <header>
+    <strong>Carmen Cardena Boutique</strong>
+    <span>{{ sale.created_at|date:"d/m/Y H:i" }}</span>
+  </header>
+  <dl class="receipt-meta">
+    <div><dt>Sucursal</dt><dd>{{ sale.branch.name }}</dd></div>
+    <div><dt>Cliente</dt><dd>{{ sale.customer.name|default:"Venta mostrador" }}</dd></div>
+    <div>
+      <dt>Atendio</dt>
+      <dd>{% if sale.user %}{{ sale.user.get_full_name|default:sale.user.username }}{% else %}Sistema{% endif %}</dd>
+    </div>
+  </dl>
+  <table class="table admin-table">
+    <thead>
+      <tr>
+        <th>Producto</th>
+        <th>Cant.</th>
+        <th>Precio</th>
+        <th class="text-end">Total</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for line in sale.lines.all %}
+        <tr>
+          <td>{{ line.product.name }}</td>
+          <td>{{ line.quantity }}</td>
+          <td>${{ line.unit_price }}</td>
+          <td class="text-end">${{ line.line_total }}</td>
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  <footer>
+    <span>Total</span>
+    <strong>${{ sale.total }}</strong>
+  </footer>
+</section>
+{% endblock %}

@@ -1,0 +1,6 @@
+<nav class="module-tabs">
+  <a href="{% url 'catalog:product_list' %}" class="{% if active_tab == 'products' %}active{% endif %}"><i class="bi bi-bag" aria-hidden="true"></i>Productos</a>
+  <a href="{% url 'catalog:taxonomy_list' 'categorias' %}" class="{% if active_tab == 'categorias' %}active{% endif %}"><i class="bi bi-tags" aria-hidden="true"></i>Categorias</a>
+  <a href="{% url 'catalog:taxonomy_list' 'marcas' %}" class="{% if active_tab == 'marcas' %}active{% endif %}"><i class="bi bi-gem" aria-hidden="true"></i>Marcas</a>
+  <a href="{% url 'catalog:taxonomy_list' 'tipos' %}" class="{% if active_tab == 'tipos' %}active{% endif %}"><i class="bi bi-grid-3x3-gap" aria-hidden="true"></i>Tipos</a>
+</nav>

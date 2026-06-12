@@ -1,0 +1,47 @@
+<div id="branch-results">
+  <div class="branch-admin-grid">
+    {% for branch in branches %}
+      <article class="branch-admin-card">
+        <div>
+          <div class="branch-card-title">
+            <h2>{{ branch.name }}</h2>
+            {% if branch.is_active %}
+              <span class="badge text-bg-success">Activa</span>
+            {% else %}
+              <span class="badge text-bg-secondary">Inactiva</span>
+            {% endif %}
+          </div>
+          <p>{{ branch.address }}</p>
+          <dl>
+            <div><dt>Telefono</dt><dd>{{ branch.phone|default:"Sin telefono" }}</dd></div>
+            <div><dt>Horario</dt><dd>{{ branch.hours|default:"Sin horario" }}</dd></div>
+            <div><dt>Responsable</dt><dd>{{ branch.responsible_person|default:"Sin asignar" }}</dd></div>
+          </dl>
+        </div>
+        <div class="row-actions">
+          <a class="btn btn-sm btn-outline-secondary" href="{% url 'branches:branch_update' branch.id %}">Editar</a>
+          <form method="post" action="{% url 'branches:branch_toggle' branch.id %}">
+            {% csrf_token %}
+            <button class="btn btn-sm btn-outline-secondary" type="submit">
+              {% if branch.is_active %}Desactivar{% else %}Activar{% endif %}
+            </button>
+          </form>
+        </div>
+      </article>
+    {% empty %}
+      <p class="empty-copy">No hay sucursales con esos filtros.</p>
+    {% endfor %}
+  </div>
+
+  {% if page_obj.has_other_pages %}
+    <nav class="pagination-row">
+      {% if page_obj.has_previous %}
+        <a hx-get="?page={{ page_obj.previous_page_number }}" hx-target="#branch-results" hx-swap="outerHTML">Anterior</a>
+      {% endif %}
+      <span>Pagina {{ page_obj.number }} de {{ page_obj.paginator.num_pages }}</span>
+      {% if page_obj.has_next %}
+        <a hx-get="?page={{ page_obj.next_page_number }}" hx-target="#branch-results" hx-swap="outerHTML">Siguiente</a>
+      {% endif %}
+    </nav>
+  {% endif %}
+</div>

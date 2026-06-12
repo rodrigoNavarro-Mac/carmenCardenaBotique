@@ -1,0 +1,81 @@
+{% extends "admin/base_admin.html" %}
+
+{% block title %}Finanzas{% endblock %}
+
+{% block admin_content %}
+<div class="page-title-row">
+  <div>
+    <p class="eyebrow">Finanzas</p>
+    <h1>Resumen operativo</h1>
+  </div>
+  <a class="btn btn-primary" href="{% url 'finance:expense_create' %}"><i class="bi bi-plus-lg" aria-hidden="true"></i>Registrar gasto</a>
+</div>
+
+{% if messages %}
+  <div class="message-stack">
+    {% for message in messages %}
+      <div class="alert alert-{{ message.tags|default:'info' }}">{{ message }}</div>
+    {% endfor %}
+  </div>
+{% endif %}
+
+<form class="filter-bar finance-filter" method="get" hx-get="." hx-target="#expense-results" hx-swap="outerHTML" hx-push-url="true">
+  <input class="form-control" type="date" name="start" value="{{ start }}">
+  <input class="form-control" type="date" name="end" value="{{ end }}">
+  <select class="form-select" name="branch">
+    <option value="">Todas las sucursales</option>
+    {% for branch in branches %}
+      <option value="{{ branch.id }}" {% if branch_id == branch.id|stringformat:"s" %}selected{% endif %}>{{ branch.name }}</option>
+    {% endfor %}
+  </select>
+  <button class="btn btn-outline-secondary" type="submit"><i class="bi bi-funnel" aria-hidden="true"></i>Filtrar</button>
+</form>
+
+<section class="module-summary-grid">
+  <article>
+    <span>Ingresos</span>
+    <strong>${{ income_total }}</strong>
+  </article>
+  <article>
+    <span>Gastos</span>
+    <strong>${{ expense_total }}</strong>
+  </article>
+  <article>
+    <span>Utilidad estimada</span>
+    <strong>${{ estimated_profit }}</strong>
+  </article>
+  <article>
+    <span>Periodo</span>
+    <strong class="compact-value">{{ start }} / {{ end }}</strong>
+  </article>
+</section>
+
+<div class="admin-grid">
+  <section class="work-panel">
+    <div class="section-heading">
+      <div>
+        <p class="eyebrow">Gastos</p>
+        <h2>Egresos registrados</h2>
+      </div>
+    </div>
+    {% include "admin/finance/partials/expense_table.html" %}
+  </section>
+
+  <aside class="ops-card">
+    <h2>Ingresos recientes</h2>
+    <div class="activity-list">
+      {% for income in recent_income %}
+        <article class="activity-row finance-activity-row">
+          <span class="status-dot"></span>
+          <div>
+            <strong>${{ income.amount }}</strong>
+            <p>{{ income.branch.name }} &middot; {{ income.date }} {% if income.sale %}&middot; Venta #{{ income.sale.id }}{% endif %}</p>
+          </div>
+        </article>
+      {% empty %}
+        <p class="empty-copy">No hay ingresos para el periodo seleccionado.</p>
+      {% endfor %}
+    </div>
+  </aside>
+</div>
+{% endblock %}

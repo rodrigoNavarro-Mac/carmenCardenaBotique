@@ -1,0 +1,55 @@
+<div id="customer-results">
+  <div class="table-responsive">
+    <table class="table align-middle admin-table">
+      <thead>
+        <tr>
+          <th>Cliente</th>
+          <th>Contacto</th>
+          <th>Compras</th>
+          <th>Total comprado</th>
+          <th>Estado</th>
+          <th class="text-end">Acciones</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for customer in customers %}
+          <tr>
+            <td>
+              <strong>{{ customer.name }}</strong>
+              <span class="table-subcopy">{{ customer.notes|default:"Sin notas"|truncatechars:48 }}</span>
+            </td>
+            <td>
+              {{ customer.phone|default:"Sin telefono" }}
+              <span class="table-subcopy">{{ customer.email|default:"Sin correo" }}</span>
+            </td>
+            <td>{{ customer.sale_count }}</td>
+            <td>${{ customer.total_spent|default:"0.00" }}</td>
+            <td>
+              {% if customer.is_active %}
+                <span class="badge text-bg-success">Activo</span>
+              {% else %}
+                <span class="badge text-bg-secondary">Inactivo</span>
+              {% endif %}
+            </td>
+            <td class="text-end">
+              <div class="row-actions">
+                <a class="btn btn-sm btn-outline-secondary" href="{% url 'customers:customer_detail' customer.id %}"><i class="bi bi-eye" aria-hidden="true"></i>Ver</a>
+                <a class="btn btn-sm btn-outline-secondary" href="{% url 'customers:customer_update' customer.id %}"><i class="bi bi-pencil" aria-hidden="true"></i>Editar</a>
+                <form method="post" action="{% url 'customers:customer_toggle' customer.id %}">
+                  {% csrf_token %}
+                  <button class="btn btn-sm btn-outline-secondary" type="submit">
+                    {% if customer.is_active %}<i class="bi bi-pause" aria-hidden="true"></i>Desactivar{% else %}<i class="bi bi-play" aria-hidden="true"></i>Activar{% endif %}
+                  </button>
+                </form>
+              </div>
+            </td>
+          </tr>
+        {% empty %}
+          <tr>
+            <td colspan="6"><p class="empty-copy">No hay clientes con esos filtros.</p></td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>

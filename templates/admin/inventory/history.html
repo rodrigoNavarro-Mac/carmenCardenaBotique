@@ -1,0 +1,30 @@
+{% extends "admin/base_admin.html" %}
+
+{% block title %}Historial de inventario{% endblock %}
+
+{% block admin_content %}
+<div class="page-title-row">
+  <div>
+    <p class="eyebrow">Inventario</p>
+    <h1>Historial de movimientos</h1>
+  </div>
+  <a class="btn btn-outline-secondary" href="{% url 'inventory:inventory_list' %}"><i class="bi bi-arrow-left" aria-hidden="true"></i>Volver</a>
+</div>
+
+<section class="work-panel">
+  <div class="activity-list">
+    {% for movement in movements %}
+      <article class="activity-row">
+        <span class="status-dot"></span>
+        <div>
+          <strong>{{ movement.product.name }}</strong>
+          <p>{{ movement.get_movement_type_display }} &middot; {{ movement.branch.name }} &middot; {{ movement.quantity }} pzas {% if movement.reference %}&middot; {{ movement.reference }}{% endif %}</p>
+        </div>
+        <time>{{ movement.created_at|date:"d/m/Y H:i" }}</time>
+      </article>
+    {% empty %}
+      <p class="empty-copy">Aun no hay movimientos de inventario.</p>
+    {% endfor %}
+  </div>
+</section>
+{% endblock %}

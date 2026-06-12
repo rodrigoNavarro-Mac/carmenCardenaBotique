@@ -1,0 +1,33 @@
+{% extends "admin/base_admin.html" %}
+
+{% block title %}Editar landing{% endblock %}
+
+{% block admin_content %}
+<div class="page-title-row">
+  <div>
+    <p class="eyebrow">CMS</p>
+    <h1>Editar landing</h1>
+  </div>
+  <a class="btn btn-outline-secondary" href="{% url 'cms:dashboard' %}"><i class="bi bi-arrow-left" aria-hidden="true"></i>Volver</a>
+</div>
+
+<form class="editor-grid compact-editor" method="post">
+  {% csrf_token %}
+  <section class="work-panel form-panel">
+    {{ form.non_field_errors }}
+    <div class="form-grid">
+      <label>{{ form.boutique_name.label }}{{ form.boutique_name }}{{ form.boutique_name.errors }}</label>
+      <label>{{ form.headline.label }}{{ form.headline }}{{ form.headline.errors }}</label>
+      <label class="wide-field">{{ form.subheadline.label }}{{ form.subheadline }}{{ form.subheadline.errors }}</label>
+      <label>{{ form.whatsapp_url.label }}{{ form.whatsapp_url }}{{ form.whatsapp_url.errors }}</label>
+      <label>{{ form.instagram_url.label }}{{ form.instagram_url }}{{ form.instagram_url.errors }}</label>
+      <label class="wide-field">{{ form.facebook_url.label }}{{ form.facebook_url }}{{ form.facebook_url.errors }}</label>
+    </div>
+  </section>
+  <aside class="ops-card form-side">
+    <h2>Publicacion</h2>
+    <label class="form-check">{{ form.is_active }} <span>{{ form.is_active.label }}</span></label>
+    <button class="btn btn-primary w-100" type="submit"><i class="bi bi-check2" aria-hidden="true"></i>Guardar landing</button>
+  </aside>
+</form>
+{% endblock %}

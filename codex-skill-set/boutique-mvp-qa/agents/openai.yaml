@@ -1,0 +1,4 @@
+interface:
+  display_name: "Boutique MVP QA"
+  short_description: "Pruebas y aceptación del MVP multisucursal"
+  default_prompt: "Use $boutique-mvp-qa to verify MVP flows, acceptance criteria, permissions, and regression tests."

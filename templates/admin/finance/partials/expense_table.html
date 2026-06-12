@@ -1,0 +1,42 @@
+<div id="expense-results">
+  <div class="table-responsive">
+    <table class="table align-middle admin-table">
+      <thead>
+        <tr>
+          <th>Fecha</th>
+          <th>Sucursal</th>
+          <th>Concepto</th>
+          <th>Usuario</th>
+          <th class="text-end">Monto</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for expense in expenses %}
+          <tr>
+            <td>{{ expense.date }}</td>
+            <td>{{ expense.branch.name }}</td>
+            <td>{{ expense.concept }}</td>
+            <td>{% if expense.user %}{{ expense.user.get_full_name|default:expense.user.username }}{% else %}Sistema{% endif %}</td>
+            <td class="text-end"><strong>${{ expense.amount }}</strong></td>
+          </tr>
+        {% empty %}
+          <tr>
+            <td colspan="5"><p class="empty-copy">No hay gastos registrados para este periodo.</p></td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  {% if page_obj.has_other_pages %}
+    <nav class="pagination-row">
+      {% if page_obj.has_previous %}
+        <a hx-get="?page={{ page_obj.previous_page_number }}" hx-target="#expense-results" hx-swap="outerHTML">Anterior</a>
+      {% endif %}
+      <span>Pagina {{ page_obj.number }} de {{ page_obj.paginator.num_pages }}</span>
+      {% if page_obj.has_next %}
+        <a hx-get="?page={{ page_obj.next_page_number }}" hx-target="#expense-results" hx-swap="outerHTML">Siguiente</a>
+      {% endif %}
+    </nav>
+  {% endif %}
+</div>

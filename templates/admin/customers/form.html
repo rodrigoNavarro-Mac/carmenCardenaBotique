@@ -1,0 +1,31 @@
+{% extends "admin/base_admin.html" %}
+
+{% block title %}{{ title }}{% endblock %}
+
+{% block admin_content %}
+<div class="page-title-row">
+  <div>
+    <p class="eyebrow">Clientes</p>
+    <h1>{{ title }}</h1>
+  </div>
+  <a class="btn btn-outline-secondary" href="{% url 'customers:customer_list' %}"><i class="bi bi-arrow-left" aria-hidden="true"></i>Volver</a>
+</div>
+
+<form class="editor-grid compact-editor" method="post">
+  {% csrf_token %}
+  <section class="work-panel form-panel">
+    {{ form.non_field_errors }}
+    <div class="form-grid">
+      <label>{{ form.name.label }}{{ form.name }}{{ form.name.errors }}</label>
+      <label>{{ form.phone.label }}{{ form.phone }}{{ form.phone.errors }}</label>
+      <label class="wide-field">{{ form.email.label }}{{ form.email }}{{ form.email.errors }}</label>
+      <label class="wide-field">{{ form.notes.label }}{{ form.notes }}{{ form.notes.errors }}</label>
+    </div>
+  </section>
+  <aside class="ops-card form-side">
+    <h2>Estado</h2>
+    <label class="form-check">{{ form.is_active }} <span>{{ form.is_active.label }}</span></label>
+    <button class="btn btn-primary w-100" type="submit"><i class="bi bi-check2" aria-hidden="true"></i>Guardar cliente</button>
+  </aside>
+</form>
+{% endblock %}

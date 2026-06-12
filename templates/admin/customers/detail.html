@@ -1,0 +1,68 @@
+{% extends "admin/base_admin.html" %}
+
+{% block title %}{{ customer.name }}{% endblock %}
+
+{% block admin_content %}
+<div class="page-title-row">
+  <div>
+    <p class="eyebrow">Cliente</p>
+    <h1>{{ customer.name }}</h1>
+  </div>
+  <div class="page-actions">
+    <a class="btn btn-outline-secondary" href="{% url 'customers:customer_list' %}"><i class="bi bi-arrow-left" aria-hidden="true"></i>Volver</a>
+    <a class="btn btn-primary" href="{% url 'customers:customer_update' customer.id %}"><i class="bi bi-pencil" aria-hidden="true"></i>Editar</a>
+  </div>
+</div>
+
+<section class="module-summary-grid">
+  <article>
+    <span>Compras</span>
+    <strong>{{ sale_count }}</strong>
+  </article>
+  <article>
+    <span>Total comprado</span>
+    <strong>${{ total_spent }}</strong>
+  </article>
+  <article>
+    <span>Telefono</span>
+    <strong class="compact-value">{{ customer.phone|default:"-" }}</strong>
+  </article>
+  <article>
+    <span>Estado</span>
+    <strong>{% if customer.is_active %}Activo{% else %}Inactivo{% endif %}</strong>
+  </article>
+</section>
+
+<div class="admin-grid">
+  <section class="work-panel">
+    <div class="section-heading">
+      <div>
+        <p class="eyebrow">Historial</p>
+        <h2>Compras recientes</h2>
+      </div>
+    </div>
+    <div class="activity-list">
+      {% for sale in sales %}
+        <article class="activity-row">
+          <span class="status-dot"></span>
+          <div>
+            <strong>Venta #{{ sale.id }}</strong>
+            <p>{{ sale.branch.name }} &middot; {{ sale.created_at|date:"d/m/Y H:i" }} &middot; ${{ sale.total }}</p>
+          </div>
+          <a class="btn btn-sm btn-outline-secondary" href="{% url 'sales:sale_detail' sale.id %}"><i class="bi bi-receipt" aria-hidden="true"></i>Recibo</a>
+        </article>
+      {% empty %}
+        <p class="empty-copy">Este cliente aun no tiene compras registradas.</p>
+      {% endfor %}
+    </div>
+  </section>
+  <aside class="ops-card">
+    <h2>Notas</h2>
+    <p class="empty-copy">{{ customer.notes|default:"Sin notas registradas." }}</p>
+    <dl class="detail-list">
+      <div><dt>Correo</dt><dd>{{ customer.email|default:"Sin correo" }}</dd></div>
+      <div><dt>Registro</dt><dd>{{ customer.created_at|date:"d/m/Y" }}</dd></div>
+    </dl>
+  </aside>
+</div>
+{% endblock %}

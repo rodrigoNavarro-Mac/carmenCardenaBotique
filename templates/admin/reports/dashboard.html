@@ -1,0 +1,123 @@
+{% extends "admin/base_admin.html" %}
+
+{% block title %}Reportes{% endblock %}
+
+{% block admin_content %}
+<div class="page-title-row">
+  <div>
+    <p class="eyebrow">Reportes</p>
+    <h1>Indicadores y consultas</h1>
+  </div>
+</div>
+
+<form class="filter-bar finance-filter" method="get">
+  <input class="form-control" type="date" name="start" value="{{ start }}">
+  <input class="form-control" type="date" name="end" value="{{ end }}">
+  <select class="form-select" name="branch">
+    <option value="">Todas las sucursales</option>
+    {% for branch in branches %}
+      <option value="{{ branch.id }}" {% if branch_id == branch.id|stringformat:"s" %}selected{% endif %}>{{ branch.name }}</option>
+    {% endfor %}
+  </select>
+  <button class="btn btn-outline-secondary" type="submit"><i class="bi bi-funnel" aria-hidden="true"></i>Filtrar</button>
+</form>
+
+<section class="module-summary-grid">
+  <article>
+    <span>Ventas</span>
+    <strong>{{ sales_count }}</strong>
+  </article>
+  <article>
+    <span>Total vendido</span>
+    <strong>${{ sales_total }}</strong>
+  </article>
+  <article>
+    <span>Utilidad estimada</span>
+    <strong>${{ estimated_profit }}</strong>
+  </article>
+  <article>
+    <span>Bajo stock</span>
+    <strong>{{ low_stock_count }}</strong>
+  </article>
+</section>
+
+<div class="report-grid">
+  <section class="work-panel">
+    <div class="section-heading">
+      <div>
+        <p class="eyebrow">Ventas</p>
+        <h2>Ventas recientes</h2>
+      </div>
+    </div>
+    <div class="table-responsive">
+      <table class="table align-middle admin-table">
+        <thead><tr><th>Venta</th><th>Sucursal</th><th>Cliente</th><th class="text-end">Total</th></tr></thead>
+        <tbody>
+          {% for sale in sales %}
+            <tr>
+              <td>#{{ sale.id }}<span class="table-subcopy">{{ sale.created_at|date:"d/m/Y H:i" }}</span></td>
+              <td>{{ sale.branch.name }}</td>
+              <td>{{ sale.customer.name|default:"Mostrador" }}</td>
+              <td class="text-end">${{ sale.total }}</td>
+            </tr>
+          {% empty %}
+            <tr><td colspan="4"><p class="empty-copy">No hay ventas en el periodo.</p></td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section class="work-panel">
+    <div class="section-heading">
+      <div>
+        <p class="eyebrow">Inventario</p>
+        <h2>Bajo stock</h2>
+      </div>
+    </div>
+    <div class="table-responsive">
+      <table class="table align-middle admin-table">
+        <thead><tr><th>Producto</th><th>Sucursal</th><th>Existencia</th><th>Minimo</th></tr></thead>
+        <tbody>
+          {% for item in low_stock %}
+            <tr>
+              <td>{{ item.product.name }}<span class="table-subcopy">{{ item.product.sku }}</span></td>
+              <td>{{ item.branch.name }}</td>
+              <td>{{ item.quantity }}</td>
+              <td>{{ item.low_stock_threshold }}</td>
+            </tr>
+          {% empty %}
+            <tr><td colspan="4"><p class="empty-copy">No hay productos bajo minimo.</p></td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section class="work-panel wide-report">
+    <div class="section-heading">
+      <div>
+        <p class="eyebrow">Existencias</p>
+        <h2>Inventario general</h2>
+      </div>
+    </div>
+    <div class="table-responsive">
+      <table class="table align-middle admin-table">
+        <thead><tr><th>Producto</th><th>Marca</th><th>Sucursal</th><th>Existencia</th></tr></thead>
+        <tbody>
+          {% for item in inventory %}
+            <tr>
+              <td>{{ item.product.name }}<span class="table-subcopy">{{ item.product.sku }}</span></td>
+              <td>{{ item.product.brand.name|default:"Sin marca" }}</td>
+              <td>{{ item.branch.name }}</td>
+              <td>{{ item.quantity }}</td>
+            </tr>
+          {% empty %}
+            <tr><td colspan="4"><p class="empty-copy">No hay inventario para mostrar.</p></td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </section>
+</div>
+{% endblock %}

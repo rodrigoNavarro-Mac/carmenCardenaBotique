@@ -1,0 +1,66 @@
+<div id="inventory-results">
+  <div class="table-responsive">
+    <table class="table align-middle admin-table">
+      <thead>
+        <tr>
+          <th>Producto</th>
+          <th>Sucursal</th>
+          <th>Existencia</th>
+          <th>Minimo</th>
+          <th>Estado</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for item in items %}
+          <tr>
+            <td>
+              <div class="table-product">
+                <div class="table-thumb">
+                  {% if item.product.image %}
+                    <img src="{{ item.product.image.url }}" alt="{{ item.product.name }}">
+                  {% elif item.product.external_image_url %}
+                    <img src="{{ item.product.external_image_url }}" alt="{{ item.product.name }}">
+                  {% endif %}
+                </div>
+                <div>
+                  <strong>{{ item.product.name }}</strong>
+                  <span>{{ item.product.sku }} · {{ item.product.brand.name|default:"Sin marca" }}</span>
+                </div>
+              </div>
+            </td>
+            <td>{{ item.branch.name }}</td>
+            <td><strong>{{ item.quantity }}</strong></td>
+            <td>{{ item.low_stock_threshold }}</td>
+            <td>
+              {% if item.quantity == 0 %}
+                <span class="badge text-bg-danger">Sin stock</span>
+              {% elif item.quantity <= item.low_stock_threshold %}
+                <span class="badge text-bg-warning">Bajo minimo</span>
+              {% else %}
+                <span class="badge text-bg-success">Disponible</span>
+              {% endif %}
+            </td>
+          </tr>
+        {% empty %}
+          <tr>
+            <td colspan="5">
+              <p class="empty-copy">No hay existencias con esos filtros.</p>
+            </td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  {% if page_obj.has_other_pages %}
+    <nav class="pagination-row">
+      {% if page_obj.has_previous %}
+        <a hx-get="?page={{ page_obj.previous_page_number }}" hx-target="#inventory-results" hx-swap="outerHTML">Anterior</a>
+      {% endif %}
+      <span>Pagina {{ page_obj.number }} de {{ page_obj.paginator.num_pages }}</span>
+      {% if page_obj.has_next %}
+        <a hx-get="?page={{ page_obj.next_page_number }}" hx-target="#inventory-results" hx-swap="outerHTML">Siguiente</a>
+      {% endif %}
+    </nav>
+  {% endif %}
+</div>

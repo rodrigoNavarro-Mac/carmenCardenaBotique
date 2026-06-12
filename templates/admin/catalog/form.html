@@ -1,0 +1,38 @@
+{% extends "admin/base_admin.html" %}
+
+{% block title %}{{ title }}{% endblock %}
+
+{% block admin_content %}
+<div class="page-title-row">
+  <div>
+    <p class="eyebrow">Catalogo</p>
+    <h1>{{ title }}</h1>
+  </div>
+  <a class="btn btn-outline-secondary" href="{% url 'catalog:product_list' %}"><i class="bi bi-arrow-left" aria-hidden="true"></i>Volver</a>
+</div>
+
+<form class="editor-grid" method="post" enctype="multipart/form-data">
+  {% csrf_token %}
+  <section class="work-panel form-panel">
+    {{ form.non_field_errors }}
+    <div class="form-grid">
+      <label>{{ form.name.label }}{{ form.name }}{{ form.name.errors }}</label>
+      <label>{{ form.sku.label }}{{ form.sku }}{{ form.sku.errors }}</label>
+      <label>{{ form.category.label }}{{ form.category }}{{ form.category.errors }}</label>
+      <label>{{ form.product_type.label }}{{ form.product_type }}{{ form.product_type.errors }}</label>
+      <label>{{ form.brand.label }}{{ form.brand }}{{ form.brand.errors }}</label>
+      <label>{{ form.sale_price.label }}{{ form.sale_price }}{{ form.sale_price.errors }}</label>
+      <label>{{ form.cost_price.label }}{{ form.cost_price }}{{ form.cost_price.errors }}</label>
+      <label class="wide-field">{{ form.external_image_url.label }}{{ form.external_image_url }}{{ form.external_image_url.errors }}</label>
+      <label class="wide-field">{{ form.image.label }}{{ form.image }}{{ form.image.errors }}</label>
+      <label class="wide-field">{{ form.description.label }}{{ form.description }}{{ form.description.errors }}</label>
+    </div>
+  </section>
+  <aside class="ops-card form-side">
+    <h2>Publicacion</h2>
+    <label class="form-check">{{ form.is_active }} <span>{{ form.is_active.label }}</span></label>
+    <label class="form-check">{{ form.is_featured }} <span>{{ form.is_featured.label }}</span></label>
+    <button class="btn btn-primary w-100" type="submit"><i class="bi bi-check2" aria-hidden="true"></i>Guardar producto</button>
+  </aside>
+</form>
+{% endblock %}

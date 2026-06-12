@@ -1,0 +1,46 @@
+<div id="taxonomy-results">
+  <div class="taxonomy-grid">
+    {% for item in items %}
+      <article class="taxonomy-card">
+        <div class="taxonomy-card-head">
+          <div>
+            <span>{{ config.singular }}</span>
+            <h2>{{ item.name }}</h2>
+          </div>
+          {% if item.is_active %}
+            <span class="badge text-bg-success">Activa</span>
+          {% else %}
+            <span class="badge text-bg-secondary">Inactiva</span>
+          {% endif %}
+        </div>
+        <p>{{ item.description|default:"Sin descripcion" }}</p>
+        <div class="taxonomy-card-foot">
+          <span>{{ item.product_count }} productos</span>
+          <div class="row-actions">
+            <a class="btn btn-sm btn-outline-secondary" href="{% url 'catalog:taxonomy_update' kind item.id %}">Editar</a>
+            <form method="post" action="{% url 'catalog:taxonomy_toggle' kind item.id %}">
+              {% csrf_token %}
+              <button class="btn btn-sm btn-outline-secondary" type="submit">
+                {% if item.is_active %}Desactivar{% else %}Activar{% endif %}
+              </button>
+            </form>
+          </div>
+        </div>
+      </article>
+    {% empty %}
+      <p class="empty-copy">No hay registros con esos filtros.</p>
+    {% endfor %}
+  </div>
+
+  {% if page_obj.has_other_pages %}
+    <nav class="pagination-row">
+      {% if page_obj.has_previous %}
+        <a hx-get="?page={{ page_obj.previous_page_number }}" hx-target="#taxonomy-results" hx-swap="outerHTML">Anterior</a>
+      {% endif %}
+      <span>Pagina {{ page_obj.number }} de {{ page_obj.paginator.num_pages }}</span>
+      {% if page_obj.has_next %}
+        <a hx-get="?page={{ page_obj.next_page_number }}" hx-target="#taxonomy-results" hx-swap="outerHTML">Siguiente</a>
+      {% endif %}
+    </nav>
+  {% endif %}
+</div>
