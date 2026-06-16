@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from .models import GalleryImage, LandingConfig
+from .models import GalleryImage, LandingBlock, LandingBlockItem, LandingConfig, LandingPage
 
 
 @admin.register(LandingConfig)
@@ -14,3 +14,23 @@ class GalleryImageAdmin(admin.ModelAdmin):
     list_display = ("title", "sort_order", "is_active", "is_published")
     list_filter = ("is_active", "is_published")
     search_fields = ("title",)
+
+
+class LandingBlockItemInline(admin.TabularInline):
+    model = LandingBlockItem
+    extra = 0
+
+
+@admin.register(LandingPage)
+class LandingPageAdmin(admin.ModelAdmin):
+    list_display = ("title", "slug", "boutique_name", "is_active", "updated_at")
+    list_filter = ("is_active",)
+    search_fields = ("title", "boutique_name")
+
+
+@admin.register(LandingBlock)
+class LandingBlockAdmin(admin.ModelAdmin):
+    list_display = ("title", "type", "page", "sort_order", "status", "is_visible", "updated_at")
+    list_filter = ("type", "status", "is_visible")
+    search_fields = ("title", "subtitle", "body")
+    inlines = [LandingBlockItemInline]

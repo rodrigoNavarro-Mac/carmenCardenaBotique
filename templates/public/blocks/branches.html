@@ -1,0 +1,23 @@
+<section id="sucursales" class="content-band surface-muted">
+  <div class="section-heading">
+    <div>
+      <p class="eyebrow">{{ block.subtitle|default:"Operacion local" }}</p>
+      <h2>{{ block.title|default:"Sucursales" }}</h2>
+      {% if block.body %}<p>{{ block.body }}</p>{% endif %}
+    </div>
+  </div>
+  <div class="branch-list">
+    {% for branch in branches %}
+      <article class="branch-row">
+        <div>
+          <h3>{{ branch.name }}</h3>
+          <p>{{ branch.address }}</p>
+          {% if branch.hours %}<small>{{ branch.hours }}</small>{% endif %}
+        </div>
+        {% if branch.maps_url %}<a href="{{ branch.maps_url }}">Mapa</a>{% endif %}
+      </article>
+    {% empty %}
+      <p class="empty-copy">Muy pronto compartiremos nuestras sucursales disponibles.</p>
+    {% endfor %}
+  </div>
+</section>

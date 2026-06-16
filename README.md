@@ -1,6 +1,6 @@
 # Carmen Cardena Boutique
 
-Aplicacion web para una boutique multisucursal. Incluye landing publica para clientes y panel administrativo para catalogo, inventario por sucursal, ventas, clientes, finanzas, CMS y reportes.
+Aplicacion web para una boutique multisucursal. Incluye landing publica para clientes y panel administrativo para catalogo, inventario por sucursal, ventas POS, clientes, composturas, caja, finanzas, CMS y reportes.
 
 Construida con **Django Templates + Bootstrap 5 + HTMX + Alpine.js**, manteniendo una arquitectura server-rendered simple, rapida y facil de desplegar.
 
@@ -13,10 +13,11 @@ MVP funcional en desarrollo:
 - Catalogo: productos, categorias, marcas y tipos.
 - Sucursales.
 - Inventario por sucursal con movimientos.
-- Ventas con descuento automatico de stock e ingreso contable.
+- Ventas POS con descuento automatico de stock, pagos mixtos, ticket y caja abierta por sucursal.
+- Composturas por prenda con fecha prometida y estado operativo.
 - Clientes con historial de compras.
-- Finanzas: ingresos, egresos y utilidad estimada.
-- CMS: configuracion de landing y galeria.
+- Finanzas: ingresos reales, egresos, caja POS, movimientos y cortes de caja.
+- CMS: constructor de landing por bloques con preview real, orden visual, borrador/publicado y galeria.
 - Reportes: ventas, inventario, bajo stock y resumen financiero.
 
 ## Stack
@@ -41,8 +42,8 @@ catalog/     productos, categorias, marcas, tipos
 inventory/   existencias por sucursal y movimientos
 sales/       ventas, lineas y recibos
 customers/   clientes e historial
-finance/     ingresos y gastos
-cms/         landing y galeria publica
+finance/     ingresos, gastos, caja POS y cortes
+cms/         constructor de landing, bloques y galeria publica
 reports/     reportes operativos
 core/        vistas base, auditoria y helpers compartidos
 templates/   Django templates
@@ -135,6 +136,7 @@ Mas detalle en [docs/DEPLOY_RENDER.md](docs/DEPLOY_RENDER.md).
 - [Arquitectura](docs/ARCHITECTURE.md)
 - [Deploy en Render](docs/DEPLOY_RENDER.md)
 - [Operaciones y flujos](docs/OPERATIONS.md)
+- [Cambios funcionales](docs/CHANGELOG.md)
 
 ## Nota Sobre Imagenes en Produccion
 

@@ -1,0 +1,46 @@
+{% extends "admin/base_admin.html" %}
+
+{% block title %}Corte #{{ session.id }}{% endblock %}
+
+{% block admin_content %}
+<div class="page-title-row">
+  <div>
+    <p class="eyebrow">Corte de caja</p>
+    <h1>Corte #{{ session.id }}</h1>
+  </div>
+  <a class="btn btn-outline-secondary" href="{% url 'finance:cash_cut_list' %}"><i class="bi bi-arrow-left" aria-hidden="true"></i>Cortes</a>
+</div>
+
+<section class="module-summary-grid">
+  <article><span>Total cobrado</span><strong>${{ session.expected_total }}</strong></article>
+  <article><span>Efectivo esperado</span><strong>${{ session.expected_cash }}</strong></article>
+  <article><span>Efectivo contado</span><strong>${{ session.counted_cash }}</strong></article>
+  <article><span>Diferencia</span><strong>${{ session.cash_difference }}</strong></article>
+</section>
+
+<section class="receipt-panel">
+  <header>
+    <strong>{{ session.branch.name }}</strong>
+    <span>{{ session.opened_at|date:"d/m/Y H:i" }}{% if session.closed_at %} &middot; {{ session.closed_at|date:"d/m/Y H:i" }}{% endif %}</span>
+  </header>
+  <dl class="receipt-meta">
+    <div><dt>Tarjeta</dt><dd>${{ session.expected_card }}</dd></div>
+    <div><dt>Transferencia</dt><dd>${{ session.expected_transfer }}</dd></div>
+    <div><dt>Otro</dt><dd>${{ session.expected_other }}</dd></div>
+  </dl>
+  {% if session.notes %}<p class="empty-copy">{{ session.notes }}</p>{% endif %}
+  <table class="table admin-table">
+    <thead><tr><th>Ingreso</th><th>Tipo pago</th><th>Venta</th><th class="text-end">Monto</th></tr></thead>
+    <tbody>
+      {% for income in session.income_entries.all %}
+        <tr>
+          <td>{{ income.created_at|date:"d/m/Y H:i" }}</td>
+          <td>{{ income.get_payment_method_display }}</td>
+          <td>{% if income.sale %}#{{ income.sale.id }}{% else %}Ingreso manual{% endif %}</td>
+          <td class="text-end">${{ income.amount }}</td>
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</section>
+{% endblock %}

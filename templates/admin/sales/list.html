@@ -8,9 +8,14 @@
     <p class="eyebrow">Ventas</p>
     <h1>Historial de ventas</h1>
   </div>
+  <div class="page-actions">
+  {% if admin_permissions.sales.can_view %}
+    <a class="btn btn-outline-secondary" href="{% url 'sales:alteration_list' %}"><i class="bi bi-scissors" aria-hidden="true"></i>Composturas</a>
+  {% endif %}
   {% if admin_permissions.sales.can_create %}
     <a class="btn btn-primary" href="{% url 'sales:sale_create' %}"><i class="bi bi-plus-lg" aria-hidden="true"></i>Nueva venta</a>
   {% endif %}
+  </div>
 </div>
 
 {% if messages %}

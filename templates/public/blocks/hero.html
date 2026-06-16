@@ -1,0 +1,20 @@
+<section class="landing-hero"{% if block.image or block.external_image_url %} style="background-image: linear-gradient(90deg, rgba(20, 16, 18, 0.78), rgba(20, 16, 18, 0.32)), url('{% if block.image %}{{ block.image.url }}{% else %}{{ block.external_image_url }}{% endif %}');"{% endif %}>
+  <div class="hero-copy">
+    <p class="eyebrow">{{ block.subtitle|default:"Boutique multisucursal" }}</p>
+    <h1>{{ block.title }}</h1>
+    {% if block.body %}<p>{{ block.body }}</p>{% endif %}
+    <div class="hero-actions">
+      {% if block.cta_label and block.cta_url %}
+        <a class="btn btn-primary" href="{{ block.cta_url }}">{{ block.cta_label }}</a>
+      {% endif %}
+      {% if block.secondary_cta_label and block.secondary_cta_url %}
+        <a class="btn btn-ghost-light" href="{{ block.secondary_cta_url }}">{{ block.secondary_cta_label }}</a>
+      {% endif %}
+    </div>
+    <div class="hero-stats">
+      <span><strong>Looks</strong> para eventos</span>
+      <span><strong>Asesoria</strong> en tienda</span>
+      <span><strong>MX</strong> seleccion local</span>
+    </div>
+  </div>
+</section>

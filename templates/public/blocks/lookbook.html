@@ -1,0 +1,38 @@
+<section id="lookbook" class="content-band lookbook-band">
+  <div class="split-heading">
+    <div>
+      <p class="eyebrow">{{ block.subtitle|default:"Lookbook" }}</p>
+      <h2>{{ block.title }}</h2>
+    </div>
+    {% if block.body %}<p>{{ block.body }}</p>{% endif %}
+  </div>
+
+  <div class="lookbook-stage">
+    <div class="lookbook-copy">
+      {% for item in block.items.all %}
+        <button
+          type="button"
+          class="lookbook-tab"
+          :class="{ 'is-active': look === {{ forloop.counter0 }} }"
+          @click="look = {{ forloop.counter0 }}"
+        >
+          <span>0{{ forloop.counter }}</span>
+          <strong>{{ item.title }}</strong>
+          <small>{{ item.body|default:item.subtitle }}</small>
+        </button>
+      {% endfor %}
+    </div>
+    <div class="lookbook-media">
+      {% for item in block.items.all %}
+        {% if item.image or item.external_image_url %}
+          <img
+            src="{% if item.image %}{{ item.image.url }}{% else %}{{ item.external_image_url }}{% endif %}"
+            alt="{{ item.title }}"
+            x-show="look === {{ forloop.counter0 }}"
+            x-transition.opacity.duration.250ms
+          >
+        {% endif %}
+      {% endfor %}
+    </div>
+  </div>
+</section>

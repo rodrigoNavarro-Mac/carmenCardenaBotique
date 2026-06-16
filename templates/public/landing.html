@@ -1,13 +1,16 @@
 {% extends "base.html" %}
 
-{% block title %}{{ config.boutique_name|default:"Carmen Cardena Boutique" }}{% endblock %}
+{% block title %}{{ page.boutique_name|default:config.boutique_name|default:"Carmen Cardena Boutique" }}{% endblock %}
 
 {% block body %}
 <main id="main-content" class="public-shell" x-data="{ look: 0 }" tabindex="-1">
+  {% if preview_mode %}
+    <div class="preview-ribbon">Vista previa CMS: incluye borradores y bloques ocultos</div>
+  {% endif %}
   <nav class="public-nav glass-nav">
     <a class="brand-mark" href="/">
       <span class="brand-symbol">CC</span>
-      <span>{{ config.boutique_name|default:"Carmen Cardena Boutique" }}</span>
+      <span>{{ page.boutique_name|default:config.boutique_name|default:"Carmen Cardena Boutique" }}</span>
     </a>
     <div class="nav-actions">
       <a href="#destacados">Destacados</a>
@@ -19,164 +22,51 @@
     </div>
   </nav>
 
-  <section class="landing-hero">
-    <div class="hero-copy">
-      <p class="eyebrow">Boutique multisucursal</p>
-      <h1>{{ config.headline|default:"Moda seleccionada para cada ocasion" }}</h1>
-      <p>{{ config.subheadline|default:"Looks, marcas y piezas listas para descubrir en tienda." }}</p>
-      <div class="hero-actions">
-        {% if config.whatsapp_url %}
-          <a class="btn btn-primary" href="{{ config.whatsapp_url }}">Contactar por WhatsApp</a>
-        {% else %}
-          <a class="btn btn-primary" href="#destacados">Ver destacados</a>
+  {% if has_block_landing %}
+    {% for block in blocks %}
+      <div class="landing-block-shell{% if preview_mode and selected_block_id == block.id %} is-preview-selected{% endif %}" data-preview-block-id="{{ block.id }}">
+        {% if block.type == "hero" %}
+          {% include "public/blocks/hero.html" %}
+        {% elif block.type == "lookbook" %}
+          {% include "public/blocks/lookbook.html" %}
+        {% elif block.type == "featured_products" %}
+          {% include "public/blocks/featured_products.html" %}
+        {% elif block.type == "editorial" %}
+          {% include "public/blocks/editorial.html" %}
+        {% elif block.type == "gallery" %}
+          {% include "public/blocks/gallery.html" %}
+        {% elif block.type == "branches" %}
+          {% include "public/blocks/branches.html" %}
+        {% elif block.type == "cta" %}
+          {% include "public/blocks/cta.html" %}
         {% endif %}
-        <a class="btn btn-ghost-light" href="#lookbook">Explorar lookbook</a>
       </div>
-      <div class="hero-stats">
-        <span><strong>Looks</strong> para eventos</span>
-        <span><strong>Asesoria</strong> en tienda</span>
-        <span><strong>MX</strong> seleccion local</span>
-      </div>
-    </div>
-  </section>
-
-  <section id="lookbook" class="content-band lookbook-band">
-    <div class="split-heading">
-      <div>
-        <p class="eyebrow">Lookbook</p>
-        <h2>Ideas de outfit para sentirte lista desde el primer espejo.</h2>
-      </div>
-      <p>Encuentra piezas para salir, trabajar, viajar o resolver un plan de ultimo minuto con estilo.</p>
-    </div>
-
-    <div class="lookbook-stage">
-      <div class="lookbook-copy">
-        {% for item in lookbook_items %}
-          <button
-            type="button"
-            class="lookbook-tab"
-            :class="{ 'is-active': look === {{ forloop.counter0 }} }"
-            @click="look = {{ forloop.counter0 }}"
-          >
-            <span>0{{ forloop.counter }}</span>
-            <strong>{{ item.label }}</strong>
-            <small>{{ item.title }}</small>
-          </button>
-        {% endfor %}
-      </div>
-      <div class="lookbook-media">
-        {% for item in lookbook_items %}
-          <img
-            src="{{ item.image_url }}"
-            alt="{{ item.label }}"
-            x-show="look === {{ forloop.counter0 }}"
-            x-transition.opacity.duration.250ms
-          >
-        {% endfor %}
-      </div>
-    </div>
-  </section>
-
-  <section id="destacados" class="content-band">
-    <div class="section-heading">
-      <div>
-        <p class="eyebrow">Seleccion de temporada</p>
-        <h2>Destacados</h2>
-      </div>
-      <form class="filter-pills" hx-get="{% url 'landing_featured' %}" hx-target="#featured-products" hx-swap="outerHTML">
-        <button class="pill is-active" name="categoria" value="todo" type="submit">Todo</button>
-        <button class="pill" name="categoria" value="noche" type="submit">Noche</button>
-        <button class="pill" name="categoria" value="oficina" type="submit">Oficina</button>
-        <button class="pill" name="categoria" value="accesorios" type="submit">Accesorios</button>
-      </form>
-    </div>
-    {% include "public/partials/featured_products.html" %}
-  </section>
-
-  <section id="experiencia" class="content-band editorial-strip">
-    <div>
-      <p class="eyebrow">Experiencia boutique</p>
-      <h2>Ven por una prenda y sal con un look que se siente tuyo.</h2>
-    </div>
-    <div class="capability-grid">
-      <article>
-        <span>01</span>
-        <h3>Asesoria cercana</h3>
-        <p>Te ayudamos a elegir cortes, colores y combinaciones segun la ocasion.</p>
-      </article>
-      <article>
-        <span>02</span>
-        <h3>Piezas seleccionadas</h3>
-        <p>Colecciones curadas para encontrar prendas especiales sin recorrer toda la ciudad.</p>
-      </article>
-      <article>
-        <span>03</span>
-        <h3>Detalles que elevan</h3>
-        <p>Accesorios, capas y acabados para cerrar tu outfit con seguridad.</p>
-      </article>
-    </div>
-  </section>
-
-  <section id="galeria" class="content-band gallery-band">
-    <div class="section-heading">
-      <div>
-        <p class="eyebrow">Galeria</p>
-        <h2>Inspiracion para tu proximo look</h2>
-      </div>
-    </div>
-    <div class="gallery-grid">
-      {% for image in gallery %}
-        <figure>
-          {% if image.image %}
-            <img src="{{ image.image.url }}" alt="{{ image.title }}">
-          {% elif image.external_image_url %}
-            <img src="{{ image.external_image_url }}" alt="{{ image.title }}">
+    {% endfor %}
+  {% else %}
+    <section class="landing-hero">
+      <div class="hero-copy">
+        <p class="eyebrow">Boutique multisucursal</p>
+        <h1>{{ config.headline|default:"Moda seleccionada para cada ocasion" }}</h1>
+        <p>{{ config.subheadline|default:"Looks, marcas y piezas listas para descubrir en tienda." }}</p>
+        <div class="hero-actions">
+          {% if config.whatsapp_url %}
+            <a class="btn btn-primary" href="{{ config.whatsapp_url }}">Contactar por WhatsApp</a>
+          {% else %}
+            <a class="btn btn-primary" href="#destacados">Ver destacados</a>
           {% endif %}
-          <figcaption>{{ image.title }}</figcaption>
-        </figure>
-      {% empty %}
-        {% for product in fallback_products %}
-          <figure>
-            <img src="{{ product.image_url }}" alt="{{ product.name }}">
-            <figcaption>{{ product.name }}</figcaption>
-          </figure>
-        {% endfor %}
-      {% endfor %}
-    </div>
-  </section>
-
-  <section id="sucursales" class="content-band surface-muted">
-    <div class="section-heading">
-      <div>
-        <p class="eyebrow">Operacion local</p>
-        <h2>Sucursales</h2>
+        </div>
       </div>
-    </div>
-    <div class="branch-list">
-      {% for branch in branches %}
-        <article class="branch-row">
-          <div>
-            <h3>{{ branch.name }}</h3>
-            <p>{{ branch.address }}</p>
-          </div>
-          {% if branch.maps_url %}<a href="{{ branch.maps_url }}">Mapa</a>{% endif %}
-        </article>
-      {% empty %}
-        <p class="empty-copy">Muy pronto compartiremos nuestras sucursales disponibles.</p>
-      {% endfor %}
-    </div>
-  </section>
-
-  <section class="cta-band">
-    <div>
-      <p class="eyebrow">Te esperamos</p>
-      <h2>Escribenos y encuentra el outfit para tu siguiente plan.</h2>
-    </div>
-    {% if config.whatsapp_url %}
-      <a class="btn btn-primary" href="{{ config.whatsapp_url }}">Mandar WhatsApp</a>
-    {% else %}
-      <a class="btn btn-primary" href="#sucursales">Ver sucursales</a>
-    {% endif %}
-  </section>
+    </section>
+    <section id="destacados" class="content-band">
+      <div class="section-heading">
+        <div>
+          <p class="eyebrow">Seleccion de temporada</p>
+          <h2>Destacados</h2>
+        </div>
+      </div>
+      {% include "public/partials/featured_products.html" %}
+    </section>
+    {% include "public/blocks/branches.html" %}
+  {% endif %}
 </main>
 {% endblock %}

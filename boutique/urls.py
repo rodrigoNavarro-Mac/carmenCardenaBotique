@@ -4,7 +4,7 @@ from django.contrib import admin
 from django.contrib.auth.views import LoginView, LogoutView
 from django.urls import include, path
 
-from core.views import admin_dashboard, landing, landing_featured
+from core.views import admin_dashboard, admin_information, landing, landing_featured
 
 
 urlpatterns = [
@@ -15,6 +15,7 @@ urlpatterns = [
     path("admin-panel/login/", LoginView.as_view(template_name="accounts/login.html"), name="admin_login"),
     path("admin-panel/logout/", LogoutView.as_view(), name="admin_logout"),
     path("admin-panel/", admin_dashboard, name="admin_dashboard"),
+    path("admin-panel/informacion/", admin_information, name="admin_information"),
     path("admin-panel/catalogo/", include("catalog.urls")),
     path("admin-panel/inventario/", include("inventory.urls")),
     path("admin-panel/ventas/", include("sales.urls")),

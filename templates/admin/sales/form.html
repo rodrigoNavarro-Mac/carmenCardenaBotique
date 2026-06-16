@@ -4,55 +4,14 @@
 
 {% block extra_scripts %}
 <script>
-  function saleLineManager() {
-    return {
-      lineCount: 0,
-      init() {
-        this.$nextTick(() => this.syncCount());
-      },
-      syncCount() {
-        if (!this.totalInput()) {
-          return;
-        }
-        this.lineCount = this.$refs.rows.querySelectorAll(".sale-line-row").length;
-        this.totalInput().value = this.lineCount;
-      },
-      totalInput() {
-        return this.$el.querySelector('input[name="lines-TOTAL_FORMS"]') || document.querySelector('input[name="lines-TOTAL_FORMS"]');
-      },
-      addLine() {
-        const totalInput = this.totalInput();
-        if (!totalInput) {
-          return;
-        }
-        const index = Number(totalInput.value);
-        const html = this.$refs.emptyLine.innerHTML.replaceAll("__prefix__", index);
-        this.$refs.rows.insertAdjacentHTML("beforeend", html);
-        totalInput.value = index + 1;
-        this.syncCount();
-      },
-      removeLine(button) {
-        if (this.lineCount <= 1) {
-          return;
-        }
-        button.closest(".sale-line-row").remove();
-        this.reindexLines();
-        this.syncCount();
-      },
-      reindexLines() {
-        this.$refs.rows.querySelectorAll(".sale-line-row").forEach((row, index) => {
-          row.querySelectorAll("[name], [id], label[for]").forEach((node) => {
-            ["name", "id", "for"].forEach((attr) => {
-              const value = node.getAttribute(attr);
-              if (value) {
-                node.setAttribute(attr, value.replace(/lines-(\d+|__prefix__)-/g, `lines-${index}-`));
-              }
-            });
-          });
-        });
+  {% if show_customer_modal %}
+    window.addEventListener("load", () => {
+      const modal = document.getElementById("customerModal");
+      if (modal && window.bootstrap) {
+        window.bootstrap.Modal.getOrCreateInstance(modal).show();
       }
-    };
-  }
+    });
+  {% endif %}
 </script>
 {% endblock %}
 
@@ -65,40 +24,108 @@
   <a class="btn btn-outline-secondary" href="{% url 'sales:sale_list' %}"><i class="bi bi-arrow-left" aria-hidden="true"></i>Volver</a>
 </div>
 
-<form class="editor-grid sale-editor" method="post" data-prevent-double-submit>
+{{ product_prices|json_script:"product-prices" }}
+
+<form class="editor-grid sale-editor" method="post" data-prevent-double-submit data-sale-editor data-product-prices-id="product-prices">
   {% csrf_token %}
   <section class="work-panel form-panel">
     {{ header_form.non_field_errors }}
     <div class="form-grid">
       <label>{{ header_form.branch.label }}{{ header_form.branch }}{{ header_form.branch.errors }}</label>
-      <label>{{ header_form.customer.label }}{{ header_form.customer }}{{ header_form.customer.errors }}</label>
+      <div>
+        <label>{{ header_form.customer.label }}</label>
+        <div class="inline-field-action">
+          {{ header_form.customer }}
+          <button class="btn btn-outline-secondary" type="button" data-bs-toggle="modal" data-bs-target="#customerModal">
+            <i class="bi bi-person-plus" aria-hidden="true"></i>Nuevo
+          </button>
+        </div>
+        {{ header_form.customer.errors }}
+      </div>
     </div>
 
-    <div class="sale-lines" x-data="saleLineManager()">
+    <div class="sale-lines">
       <div class="sale-lines-head">
         <h2>Productos</h2>
-        <button class="btn btn-outline-secondary btn-sm" type="button" @click="addLine()">
+        <button class="btn btn-outline-secondary btn-sm" type="button" data-add-sale-line>
           <i class="bi bi-plus-lg" aria-hidden="true"></i>
           Agregar fila
         </button>
       </div>
       {{ formset.management_form }}
-      <div class="sale-line-list" x-ref="rows">
+      <div class="sale-line-list" data-sale-rows>
         {% for form in formset %}
           <div class="sale-line-row">
             <label>{{ form.product.label }}{{ form.product }}{{ form.product.errors }}</label>
             <label>{{ form.quantity.label }}{{ form.quantity }}{{ form.quantity.errors }}</label>
-            <button class="icon-button danger-button" type="button" title="Eliminar fila" @click="removeLine($event.currentTarget)" :disabled="lineCount <= 1">
+            <div class="sale-line-total">
+              <span>Importe</span>
+              <strong data-line-total>$0.00</strong>
+            </div>
+            <label class="form-check sale-line-check">{{ form.requires_alteration }}<span>{{ form.requires_alteration.label }}</span>{{ form.requires_alteration.errors }}</label>
+            <label data-alteration-field>{{ form.alteration_due_date.label }}{{ form.alteration_due_date }}{{ form.alteration_due_date.errors }}</label>
+            <label class="sale-line-notes" data-alteration-field>{{ form.alteration_notes.label }}{{ form.alteration_notes }}{{ form.alteration_notes.errors }}</label>
+            <button class="icon-button danger-button" type="button" title="Eliminar fila" data-remove-sale-line>
               <i class="bi bi-trash3" aria-hidden="true"></i>
             </button>
           </div>
         {% endfor %}
       </div>
-      <template x-ref="emptyLine">
+      <template data-empty-sale-line>
         <div class="sale-line-row">
           <label>{{ formset.empty_form.product.label }}{{ formset.empty_form.product }}</label>
           <label>{{ formset.empty_form.quantity.label }}{{ formset.empty_form.quantity }}</label>
-          <button class="icon-button danger-button" type="button" title="Eliminar fila" @click="removeLine($event.currentTarget)" :disabled="lineCount <= 1">
+          <div class="sale-line-total">
+            <span>Importe</span>
+            <strong data-line-total>$0.00</strong>
+          </div>
+          <label class="form-check sale-line-check">{{ formset.empty_form.requires_alteration }}<span>{{ formset.empty_form.requires_alteration.label }}</span></label>
+          <label data-alteration-field>{{ formset.empty_form.alteration_due_date.label }}{{ formset.empty_form.alteration_due_date }}</label>
+          <label class="sale-line-notes" data-alteration-field>{{ formset.empty_form.alteration_notes.label }}{{ formset.empty_form.alteration_notes }}</label>
+          <button class="icon-button danger-button" type="button" title="Eliminar fila" data-remove-sale-line>
+            <i class="bi bi-trash3" aria-hidden="true"></i>
+          </button>
+        </div>
+      </template>
+    </div>
+
+    <div class="sale-lines payment-lines">
+      <div class="sale-lines-head">
+        <h2>Pagos</h2>
+        <button class="btn btn-outline-secondary btn-sm" type="button" data-add-payment-line>
+          <i class="bi bi-plus-lg" aria-hidden="true"></i>
+          Agregar pago
+        </button>
+      </div>
+      {{ payment_formset.management_form }}
+      <div class="sale-line-list" data-payment-rows>
+        {% for form in payment_formset %}
+          <div class="payment-line-row">
+            <label>{{ form.payment_method.label }}{{ form.payment_method }}{{ form.payment_method.errors }}</label>
+            <label>{{ form.amount.label }}{{ form.amount }}{{ form.amount.errors }}</label>
+            <label data-payment-cash-field>{{ form.cash_received.label }}{{ form.cash_received }}{{ form.cash_received.errors }}</label>
+            <label>{{ form.reference.label }}{{ form.reference }}{{ form.reference.errors }}</label>
+            <div class="sale-line-total">
+              <span>Cambio</span>
+              <strong data-payment-change>$0.00</strong>
+            </div>
+            <button class="icon-button danger-button" type="button" title="Eliminar pago" data-remove-payment-line>
+              <i class="bi bi-trash3" aria-hidden="true"></i>
+            </button>
+          </div>
+        {% endfor %}
+      </div>
+      <template data-empty-payment-line>
+        <div class="payment-line-row">
+          <label>{{ payment_formset.empty_form.payment_method.label }}{{ payment_formset.empty_form.payment_method }}</label>
+          <label>{{ payment_formset.empty_form.amount.label }}{{ payment_formset.empty_form.amount }}</label>
+          <label data-payment-cash-field>{{ payment_formset.empty_form.cash_received.label }}{{ payment_formset.empty_form.cash_received }}</label>
+          <label>{{ payment_formset.empty_form.reference.label }}{{ payment_formset.empty_form.reference }}</label>
+          <div class="sale-line-total">
+            <span>Cambio</span>
+            <strong data-payment-change>$0.00</strong>
+          </div>
+          <button class="icon-button danger-button" type="button" title="Eliminar pago" data-remove-payment-line>
             <i class="bi bi-trash3" aria-hidden="true"></i>
           </button>
         </div>
@@ -106,9 +133,45 @@
     </div>
   </section>
   <aside class="ops-card form-side">
-    <h2>Regla de stock</h2>
-    <p class="empty-copy">Al guardar, la venta descuenta inventario de la sucursal seleccionada y crea ingreso contable.</p>
+    <h2>Resumen de venta</h2>
+    <dl class="sale-live-summary">
+      <div class="summary-row summary-total"><dt>Subtotal</dt><dd data-sale-subtotal>$0.00</dd></div>
+      <div class="summary-row summary-paid"><dt>Pago recibido</dt><dd data-sale-paid>$0.00</dd></div>
+      <div class="summary-row summary-change" data-change-row><dt>Cambio</dt><dd data-sale-change>$0.00</dd></div>
+      <div class="summary-row summary-balance"><dt>Saldo</dt><dd data-sale-balance>$0.00</dd></div>
+    </dl>
+    <p class="empty-copy">Puedes dividir el cobro en efectivo, tarjeta, transferencia u otro. Si queda saldo, la venta queda parcial.</p>
     <button class="btn btn-primary w-100" type="submit"><i class="bi bi-check2" aria-hidden="true"></i>Registrar venta</button>
   </aside>
 </form>
+
+<div class="modal fade customer-modal" id="customerModal" tabindex="-1" aria-labelledby="customerModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <form class="modal-content" method="post">
+      {% csrf_token %}
+      <input type="hidden" name="form_action" value="create_customer">
+      <div class="modal-header customer-modal-header">
+        <div>
+          <p class="eyebrow">Clientes</p>
+          <h2 class="modal-title fs-5" id="customerModalLabel">Nuevo cliente</h2>
+        </div>
+        <button class="btn-close" type="button" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+      </div>
+      <div class="modal-body">
+        {{ customer_form.non_field_errors }}
+        <div class="form-grid modal-form-grid">
+          <label>{{ customer_form.name.label }}{{ customer_form.name }}{{ customer_form.name.errors }}</label>
+          <label>{{ customer_form.phone.label }}{{ customer_form.phone }}{{ customer_form.phone.errors }}</label>
+          <label class="wide-field">{{ customer_form.email.label }}{{ customer_form.email }}{{ customer_form.email.errors }}</label>
+          <label class="wide-field">{{ customer_form.notes.label }}{{ customer_form.notes }}{{ customer_form.notes.errors }}</label>
+        </div>
+        <label class="form-check modal-active-check">{{ customer_form.is_active }} <span>{{ customer_form.is_active.label }}</span></label>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-outline-secondary" type="button" data-bs-dismiss="modal">Cancelar</button>
+        <button class="btn btn-primary" type="submit"><i class="bi bi-check2" aria-hidden="true"></i>Guardar cliente</button>
+      </div>
+    </form>
+  </div>
+</div>
 {% endblock %}

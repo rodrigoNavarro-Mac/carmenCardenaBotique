@@ -1,0 +1,16 @@
+<section id="experiencia" class="content-band editorial-strip">
+  <div>
+    <p class="eyebrow">{{ block.subtitle|default:"Experiencia boutique" }}</p>
+    <h2>{{ block.title }}</h2>
+    {% if block.body %}<p>{{ block.body }}</p>{% endif %}
+  </div>
+  <div class="capability-grid">
+    {% for item in block.items.all %}
+      <article>
+        <span>0{{ forloop.counter }}</span>
+        <h3>{{ item.title }}</h3>
+        <p>{{ item.body|default:item.subtitle }}</p>
+      </article>
+    {% endfor %}
+  </div>
+</section>

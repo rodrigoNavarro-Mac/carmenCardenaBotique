@@ -1,0 +1,47 @@
+{% extends "admin/base_admin.html" %}
+
+{% block title %}Cortes de caja{% endblock %}
+
+{% block admin_content %}
+<div class="page-title-row">
+  <div>
+    <p class="eyebrow">Finanzas</p>
+    <h1>Cortes de caja</h1>
+  </div>
+  <div class="page-actions">
+    <a class="btn btn-outline-secondary" href="{% url 'finance:dashboard' %}"><i class="bi bi-arrow-left" aria-hidden="true"></i>Finanzas</a>
+    <a class="btn btn-primary" href="{% url 'finance:cash_session_open' %}"><i class="bi bi-unlock" aria-hidden="true"></i>Abrir caja</a>
+  </div>
+</div>
+
+{% if messages %}
+  <div class="message-stack">
+    {% for message in messages %}
+      <div class="alert alert-{{ message.tags|default:'info' }}">{{ message }}</div>
+    {% endfor %}
+  </div>
+{% endif %}
+
+<section class="work-panel">
+  <div class="table-responsive">
+    <table class="table align-middle admin-table">
+      <thead><tr><th>Corte</th><th>Sucursal</th><th>Total</th><th>Efectivo esperado</th><th>Contado</th><th>Diferencia</th><th class="text-end">Acciones</th></tr></thead>
+      <tbody>
+        {% for cut in sessions %}
+          <tr>
+            <td>#{{ cut.id }}<span class="table-subcopy">{{ cut.opened_at|date:"d/m/Y H:i" }}</span></td>
+            <td>{{ cut.branch.name }}</td>
+            <td><strong>${{ cut.expected_total }}</strong></td>
+            <td>${{ cut.expected_cash }}</td>
+            <td>${{ cut.counted_cash }}</td>
+            <td>${{ cut.cash_difference }}</td>
+            <td class="text-end"><a class="btn btn-sm btn-outline-secondary" href="{% url 'finance:cash_cut_detail' cut.id %}"><i class="bi bi-receipt" aria-hidden="true"></i>Detalle</a></td>
+          </tr>
+        {% empty %}
+          <tr><td colspan="7"><p class="empty-copy">Aun no hay cortes registrados.</p></td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</section>
+{% endblock %}

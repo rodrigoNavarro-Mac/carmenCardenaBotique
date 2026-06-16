@@ -113,6 +113,8 @@ def action_from_url_name(url_name):
         return "can_edit"
     if "permission" in url_name:
         return "can_edit"
+    if "publish" in url_name or "move" in url_name or "reorder" in url_name or "page" in url_name:
+        return "can_edit"
     if "toggle" in url_name or "cancel" in url_name or "delete" in url_name:
         return "can_delete"
     return "can_view"

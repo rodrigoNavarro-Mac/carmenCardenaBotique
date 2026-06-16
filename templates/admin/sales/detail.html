@@ -2,6 +2,25 @@
 
 {% block title %}Venta #{{ sale.id }}{% endblock %}
 
+{% block extra_scripts %}
+<script>
+  window.addEventListener("load", () => {
+    {% if show_ticket_modal %}
+    const modal = document.getElementById("ticketModal");
+    if (modal && window.bootstrap) {
+      window.bootstrap.Modal.getOrCreateInstance(modal).show();
+    }
+    {% endif %}
+    {% if request.GET.settle == "1" %}
+    const settleModal = document.getElementById("settleModal");
+    if (settleModal && window.bootstrap) {
+      window.bootstrap.Modal.getOrCreateInstance(settleModal).show();
+    }
+    {% endif %}
+  });
+</script>
+{% endblock %}
+
 {% block admin_content %}
 <div class="page-title-row">
   <div>
@@ -10,11 +29,18 @@
   </div>
   <div class="page-actions">
     <a class="btn btn-outline-secondary" href="{% url 'sales:sale_list' %}"><i class="bi bi-arrow-left" aria-hidden="true"></i>Volver</a>
-    {% if sale.status == "PAID" and admin_permissions.sales.can_delete %}
+    <a class="btn btn-outline-secondary" href="{% url 'sales:alteration_list' %}"><i class="bi bi-scissors" aria-hidden="true"></i>Composturas</a>
+    <button class="btn btn-outline-secondary" type="button" data-bs-toggle="modal" data-bs-target="#ticketModal"><i class="bi bi-receipt" aria-hidden="true"></i>Ticket</button>
+    {% if sale.status == "PARTIAL" %}
+      <button class="btn btn-primary" type="button" data-bs-toggle="modal" data-bs-target="#settleModal"><i class="bi bi-cash-coin" aria-hidden="true"></i>Liquidar saldo</button>
+    {% endif %}
+    {% if sale.status == "PAID" or sale.status == "PARTIAL" %}
+      {% if admin_permissions.sales.can_delete %}
       <form method="post" action="{% url 'sales:sale_cancel' sale.id %}">
         {% csrf_token %}
-        <button class="btn btn-outline-secondary" type="submit" data-confirm="Cancelar esta venta restaurara el stock y quitara el ingreso financiero. Continuar?"><i class="bi bi-x-circle" aria-hidden="true"></i>Cancelar venta</button>
+        <button class="btn btn-outline-secondary" type="submit" data-confirm="Cancelar esta venta restaurara el stock y quitara los ingresos financieros. Continuar?"><i class="bi bi-x-circle" aria-hidden="true"></i>Cancelar venta</button>
       </form>
+      {% endif %}
     {% endif %}
   </div>
 </div>
@@ -34,6 +60,8 @@
       {{ sale.created_at|date:"d/m/Y H:i" }}
       {% if sale.status == "CANCELLED" %}
         <span class="badge text-bg-danger">Cancelada</span>
+      {% elif sale.status == "PARTIAL" %}
+        <span class="badge text-bg-warning">{{ sale.get_status_display }}</span>
       {% else %}
         <span class="badge text-bg-success">{{ sale.get_status_display }}</span>
       {% endif %}
@@ -46,6 +74,13 @@
       <dt>Atendio</dt>
       <dd>{% if sale.user %}{{ sale.user.get_full_name|default:sale.user.username }}{% else %}Sistema{% endif %}</dd>
     </div>
+    <div><dt>Pagado</dt><dd>${{ sale.amount_paid }}</dd></div>
+    <div><dt>Saldo pendiente</dt><dd>${{ sale.balance_due }}</dd></div>
+    <div><dt>Tipo de pago</dt><dd>{{ sale.get_payment_method_display }}</dd></div>
+    {% if sale.payment_method == "CASH" %}
+      <div><dt>Efectivo recibido</dt><dd>${{ sale.cash_received }}</dd></div>
+      <div><dt>Cambio</dt><dd>${{ sale.change_due }}</dd></div>
+    {% endif %}
   </dl>
   <table class="table admin-table">
     <thead>
@@ -53,6 +88,7 @@
         <th>Producto</th>
         <th>Cant.</th>
         <th>Precio</th>
+        <th>Compostura</th>
         <th class="text-end">Total</th>
       </tr>
     </thead>
@@ -62,14 +98,95 @@
           <td>{{ line.product.name }}</td>
           <td>{{ line.quantity }}</td>
           <td>${{ line.unit_price }}</td>
+          <td>
+            {% if line.requires_alteration %}
+              <form class="alteration-status-control" method="post" action="{% url 'sales:sale_line_alteration_update' sale.id line.id %}">
+                {% csrf_token %}
+                <input type="hidden" name="next" value="{{ request.get_full_path }}">
+                <select class="form-select form-select-sm" name="alteration_status" onchange="this.form.submit()">
+                  {% for value, label in alteration_status_choices %}
+                    <option value="{{ value }}" {% if line.alteration_status == value %}selected{% endif %}>{{ label }}</option>
+                  {% endfor %}
+                </select>
+              </form>
+              {% if line.alteration_due_date %}<span class="table-subcopy">Entrega: {{ line.alteration_due_date|date:"d/m/Y" }}</span>{% endif %}
+              {% if line.alteration_notes %}<span class="table-subcopy">{{ line.alteration_notes }}</span>{% endif %}
+            {% else %}
+              <span class="table-subcopy">Sin compostura</span>
+            {% endif %}
+          </td>
           <td class="text-end">${{ line.line_total }}</td>
         </tr>
       {% endfor %}
     </tbody>
   </table>
-  <footer>
-    <span>Total</span>
-    <strong>${{ sale.total }}</strong>
+  <footer class="receipt-totals">
+    <span>Total <strong>${{ sale.total }}</strong></span>
+    <span>Pagado <strong>${{ sale.amount_paid }}</strong></span>
+    <span>Saldo <strong>${{ sale.balance_due }}</strong></span>
   </footer>
 </section>
+
+{% if sale.status == "PARTIAL" %}
+<div class="modal fade ticket-modal" id="settleModal" tabindex="-1" aria-labelledby="settleModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <form class="modal-content" method="post" action="{% url 'sales:sale_settle' sale.id %}" data-settle-form data-settle-balance="{{ sale.balance_due }}">
+      {% csrf_token %}
+      <div class="modal-header ticket-modal-header">
+        <div>
+          <p class="eyebrow">Pago pendiente</p>
+          <h2 class="modal-title fs-5" id="settleModalLabel">Liquidar saldo</h2>
+        </div>
+        <button class="btn-close" type="button" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+      </div>
+      <div class="modal-body">
+        <dl class="sale-live-summary">
+          <div class="summary-balance"><dt>Saldo a liquidar</dt><dd data-settle-total>${{ sale.balance_due }}</dd></div>
+          <div class="summary-change" data-settle-change-row><dt>Cambio</dt><dd data-settle-change>$0.00</dd></div>
+        </dl>
+        {{ settle_payment_formset.management_form }}
+        <div class="sale-line-list" data-settle-payment-rows>
+          {% for form in settle_payment_formset %}
+            <div class="payment-line-row">
+              <label>{{ form.payment_method.label }}{{ form.payment_method }}{{ form.payment_method.errors }}</label>
+              <label>{{ form.amount.label }}{{ form.amount }}{{ form.amount.errors }}</label>
+              <label data-payment-cash-field>{{ form.cash_received.label }}{{ form.cash_received }}{{ form.cash_received.errors }}</label>
+              <label>{{ form.reference.label }}{{ form.reference }}{{ form.reference.errors }}</label>
+              <div class="sale-line-total">
+                <span>Cambio</span>
+                <strong data-payment-change>$0.00</strong>
+              </div>
+            </div>
+          {% endfor %}
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-outline-secondary" type="button" data-bs-dismiss="modal">Cancelar</button>
+        <button class="btn btn-primary" type="submit"><i class="bi bi-check2" aria-hidden="true"></i>Liquidar</button>
+      </div>
+    </form>
+  </div>
+</div>
+{% endif %}
+
+<div class="modal fade ticket-modal" id="ticketModal" tabindex="-1" aria-labelledby="ticketModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header ticket-modal-header">
+        <div>
+          <p class="eyebrow">Ticket</p>
+          <h2 class="modal-title fs-5" id="ticketModalLabel">Venta registrada</h2>
+        </div>
+        <button class="btn-close" type="button" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+      </div>
+      <div class="modal-body">
+        {% include "admin/sales/includes/ticket.html" %}
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-outline-secondary" type="button" data-bs-dismiss="modal">Cerrar</button>
+        <button class="btn btn-primary" type="button" onclick="window.print()"><i class="bi bi-printer" aria-hidden="true"></i>Imprimir</button>
+      </div>
+    </div>
+  </div>
+</div>
 {% endblock %}

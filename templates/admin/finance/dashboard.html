@@ -8,9 +8,14 @@
     <p class="eyebrow">Finanzas</p>
     <h1>Resumen operativo</h1>
   </div>
+  <div class="page-actions">
+  <a class="btn btn-outline-secondary" href="{% url 'finance:cash_session_current' %}"><i class="bi bi-cash-register" aria-hidden="true"></i>Caja actual</a>
+  <a class="btn btn-outline-secondary" href="{% url 'finance:cash_cut_list' %}"><i class="bi bi-calculator" aria-hidden="true"></i>Cortes de caja</a>
+  <a class="btn btn-outline-secondary" href="{% url 'finance:cash_session_open' %}"><i class="bi bi-unlock" aria-hidden="true"></i>Abrir caja</a>
   {% if admin_permissions.finance.can_create %}
     <a class="btn btn-primary" href="{% url 'finance:expense_create' %}"><i class="bi bi-plus-lg" aria-hidden="true"></i>Registrar gasto</a>
   {% endif %}
+  </div>
 </div>
 
 {% if messages %}
@@ -52,6 +57,33 @@
   </article>
 </section>
 
+{% if open_cash_sessions %}
+<section class="work-panel">
+  <div class="section-heading">
+    <div>
+      <p class="eyebrow">POS</p>
+      <h2>Cajas abiertas</h2>
+    </div>
+  </div>
+  <div class="table-responsive">
+    <table class="table align-middle admin-table">
+      <thead><tr><th>Sucursal</th><th>Apertura</th><th>Fondo</th><th>Usuario</th><th class="text-end">Acciones</th></tr></thead>
+      <tbody>
+        {% for session in open_cash_sessions %}
+          <tr>
+            <td>{{ session.branch.name }}</td>
+            <td>{{ session.opened_at|date:"d/m/Y H:i" }}</td>
+            <td>${{ session.opening_cash }}</td>
+            <td>{% if session.opened_by %}{{ session.opened_by.get_full_name|default:session.opened_by.username }}{% else %}Sistema{% endif %}</td>
+            <td class="text-end"><a class="btn btn-sm btn-outline-secondary" href="{% url 'finance:cash_session_detail' session.id %}"><i class="bi bi-cash-register" aria-hidden="true"></i>Ver caja</a></td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</section>
+{% endif %}
+
 <div class="admin-grid">
   <section class="work-panel">
     <div class="section-heading">
@@ -71,11 +103,30 @@
           <span class="status-dot"></span>
           <div>
             <strong>${{ income.amount }}</strong>
-            <p>{{ income.branch.name }} &middot; {{ income.date }} {% if income.sale %}&middot; Venta #{{ income.sale.id }}{% endif %}</p>
+            <p>{{ income.branch.name }} &middot; {{ income.date }} &middot; {{ income.get_payment_method_display }} {% if income.sale %}&middot; Venta #{{ income.sale.id }}{% endif %}</p>
           </div>
         </article>
       {% empty %}
         <p class="empty-copy">No hay ingresos para el periodo seleccionado.</p>
+      {% endfor %}
+    </div>
+    <div class="section-heading compact-heading">
+      <div>
+        <p class="eyebrow">Caja</p>
+        <h2>Cortes recientes</h2>
+      </div>
+    </div>
+    <div class="activity-list">
+      {% for cut in recent_cuts %}
+        <article class="activity-row finance-activity-row">
+          <span class="status-dot"></span>
+          <div>
+            <strong>${{ cut.expected_total }}</strong>
+            <p>{{ cut.branch.name }} &middot; {{ cut.closed_at|date:"d/m/Y H:i" }} &middot; Dif. ${{ cut.cash_difference }}</p>
+          </div>
+        </article>
+      {% empty %}
+        <p class="empty-copy">Aun no hay cortes de caja.</p>
       {% endfor %}
     </div>
   </aside>

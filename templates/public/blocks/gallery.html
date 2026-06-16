@@ -1,0 +1,28 @@
+<section id="galeria" class="content-band gallery-band">
+  <div class="section-heading">
+    <div>
+      <p class="eyebrow">{{ block.subtitle|default:"Galeria" }}</p>
+      <h2>{{ block.title|default:"Inspiracion para tu proximo look" }}</h2>
+      {% if block.body %}<p>{{ block.body }}</p>{% endif %}
+    </div>
+  </div>
+  <div class="gallery-grid">
+    {% for item in block.items.all %}
+      <figure>
+        {% if item.image %}
+          <img src="{{ item.image.url }}" alt="{{ item.title }}">
+        {% elif item.external_image_url %}
+          <img src="{{ item.external_image_url }}" alt="{{ item.title }}">
+        {% endif %}
+        <figcaption>{{ item.title }}</figcaption>
+      </figure>
+    {% empty %}
+      {% for product in fallback_products %}
+        <figure>
+          <img src="{{ product.image_url }}" alt="{{ product.name }}">
+          <figcaption>{{ product.name }}</figcaption>
+        </figure>
+      {% endfor %}
+    {% endfor %}
+  </div>
+</section>

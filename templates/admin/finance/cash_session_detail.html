@@ -1,0 +1,112 @@
+{% extends "admin/base_admin.html" %}
+
+{% block title %}Caja #{{ session.id }}{% endblock %}
+
+{% block admin_content %}
+<div class="page-title-row">
+  <div>
+    <p class="eyebrow">Caja</p>
+    <h1>{{ session.branch.name }}</h1>
+  </div>
+  <div class="page-actions">
+    <a class="btn btn-outline-secondary" href="{% url 'finance:dashboard' %}"><i class="bi bi-arrow-left" aria-hidden="true"></i>Finanzas</a>
+    {% if session.status == "OPEN" %}
+      <button class="btn btn-outline-secondary" type="button" data-bs-toggle="modal" data-bs-target="#movementModal"><i class="bi bi-plus-lg" aria-hidden="true"></i>Movimiento</button>
+      <button class="btn btn-primary" type="button" data-bs-toggle="modal" data-bs-target="#closeModal"><i class="bi bi-lock" aria-hidden="true"></i>Cerrar caja</button>
+    {% endif %}
+  </div>
+</div>
+
+{% if messages %}
+  <div class="message-stack">
+    {% for message in messages %}
+      <div class="alert alert-{{ message.tags|default:'info' }}">{{ message }}</div>
+    {% endfor %}
+  </div>
+{% endif %}
+
+<section class="module-summary-grid">
+  <article><span>Efectivo esperado</span><strong>${{ totals.expected_cash_drawer }}</strong></article>
+  <article><span>Tarjeta</span><strong>${{ totals.expected_card }}</strong></article>
+  <article><span>Transferencia</span><strong>${{ totals.expected_transfer }}</strong></article>
+  <article><span>Total cobrado</span><strong>${{ totals.expected_total }}</strong></article>
+</section>
+
+<div class="admin-grid">
+  <section class="work-panel">
+    <div class="section-heading"><div><p class="eyebrow">Cobros</p><h2>Ingresos de la caja</h2></div></div>
+    <div class="table-responsive">
+      <table class="table align-middle admin-table">
+        <thead><tr><th>Hora</th><th>Venta</th><th>Pago</th><th class="text-end">Monto</th></tr></thead>
+        <tbody>
+          {% for income in session.income_entries.all %}
+            <tr>
+              <td>{{ income.created_at|date:"H:i" }}</td>
+              <td>{% if income.sale %}<a href="{% url 'sales:sale_detail' income.sale.id %}">#{{ income.sale.id }}</a>{% else %}Ingreso{% endif %}</td>
+              <td>{{ income.get_payment_method_display }}</td>
+              <td class="text-end">${{ income.amount }}</td>
+            </tr>
+          {% empty %}
+            <tr><td colspan="4"><p class="empty-copy">Aun no hay ingresos en esta caja.</p></td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <aside class="ops-card">
+    <h2>Movimientos</h2>
+    <div class="activity-list">
+      {% for movement in session.movements.all %}
+        <article class="activity-row finance-activity-row">
+          <span class="status-dot"></span>
+          <div>
+            <strong>${{ movement.amount }}</strong>
+            <p>{{ movement.get_movement_type_display }} &middot; {{ movement.concept }}</p>
+          </div>
+        </article>
+      {% empty %}
+        <p class="empty-copy">Sin movimientos manuales.</p>
+      {% endfor %}
+    </div>
+  </aside>
+</div>
+
+<div class="modal fade customer-modal" id="movementModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <form class="modal-content" method="post" action="{% url 'finance:cash_session_movement_create' session.id %}">
+      {% csrf_token %}
+      <div class="modal-header customer-modal-header"><div><p class="eyebrow">Caja</p><h2 class="modal-title fs-5">Movimiento</h2></div><button class="btn-close" type="button" data-bs-dismiss="modal" aria-label="Cerrar"></button></div>
+      <div class="modal-body">
+        <div class="form-grid modal-form-grid">
+          <label>{{ movement_form.movement_type.label }}{{ movement_form.movement_type }}</label>
+          <label>{{ movement_form.amount.label }}{{ movement_form.amount }}</label>
+          <label class="wide-field">{{ movement_form.concept.label }}{{ movement_form.concept }}</label>
+          <label class="wide-field">{{ movement_form.notes.label }}{{ movement_form.notes }}</label>
+        </div>
+      </div>
+      <div class="modal-footer"><button class="btn btn-outline-secondary" type="button" data-bs-dismiss="modal">Cancelar</button><button class="btn btn-primary" type="submit">Guardar</button></div>
+    </form>
+  </div>
+</div>
+
+<div class="modal fade ticket-modal" id="closeModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <form class="modal-content" method="post" action="{% url 'finance:cash_session_close' session.id %}">
+      {% csrf_token %}
+      <div class="modal-header ticket-modal-header"><div><p class="eyebrow">Cierre</p><h2 class="modal-title fs-5">Cerrar caja</h2></div><button class="btn-close" type="button" data-bs-dismiss="modal" aria-label="Cerrar"></button></div>
+      <div class="modal-body">
+        <dl class="sale-live-summary">
+          <div class="summary-total"><dt>Efectivo esperado</dt><dd>${{ totals.expected_cash_drawer }}</dd></div>
+          <div class="summary-paid"><dt>Total cobrado</dt><dd>${{ totals.expected_total }}</dd></div>
+        </dl>
+        <div class="form-grid">
+          <label>{{ close_form.counted_cash.label }}{{ close_form.counted_cash }}</label>
+          <label class="wide-field">{{ close_form.notes.label }}{{ close_form.notes }}</label>
+        </div>
+      </div>
+      <div class="modal-footer"><button class="btn btn-outline-secondary" type="button" data-bs-dismiss="modal">Cancelar</button><button class="btn btn-primary" type="submit">Cerrar caja</button></div>
+    </form>
+  </div>
+</div>
+{% endblock %}

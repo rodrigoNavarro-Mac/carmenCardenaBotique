@@ -3,121 +3,304 @@
 {% block title %}Reportes{% endblock %}
 
 {% block admin_content %}
-<div class="page-title-row">
-  <div>
-    <p class="eyebrow">Reportes</p>
-    <h1>Indicadores y consultas</h1>
+<div class="control-dashboard reports-dashboard">
+  <section class="dashboard-hero">
+    <div>
+      <p class="eyebrow">Reportes</p>
+      <h1>Indicadores y consultas</h1>
+      <p>Lectura operativa de ventas, cobros reales, caja, cortes, saldos, composturas e inventario para el periodo seleccionado.</p>
+    </div>
+    <div class="dashboard-actions">
+      {% if admin_permissions.finance.can_view %}<a class="btn btn-outline-secondary" href="{% url 'finance:cash_cut_list' %}"><i class="bi bi-clipboard2-check" aria-hidden="true"></i>Cortes</a>{% endif %}
+      {% if admin_permissions.sales.can_view %}<a class="btn btn-primary" href="{% url 'sales:sale_list' %}"><i class="bi bi-receipt" aria-hidden="true"></i>Ventas</a>{% endif %}
+    </div>
+  </section>
+
+  <form class="filter-bar finance-filter" method="get">
+    <input class="form-control" type="date" name="start" value="{{ start }}">
+    <input class="form-control" type="date" name="end" value="{{ end }}">
+    <select class="form-select" name="branch">
+      <option value="">Todas las sucursales</option>
+      {% for branch in branches %}
+        <option value="{{ branch.id }}" {% if branch_id == branch.id|stringformat:"s" %}selected{% endif %}>{{ branch.name }}</option>
+      {% endfor %}
+    </select>
+    <button class="btn btn-outline-secondary" type="submit"><i class="bi bi-funnel" aria-hidden="true"></i>Filtrar</button>
+  </form>
+
+  <section class="module-summary-grid">
+    <article>
+      <span>Cobros reales</span>
+      <strong>${{ income_total }}</strong>
+      <small>{{ sales_count }} ventas validas</small>
+    </article>
+    <article>
+      <span>Total vendido</span>
+      <strong>${{ sales_total }}</strong>
+      <small>Sin ventas canceladas</small>
+    </article>
+    <article>
+      <span>Flujo neto</span>
+      <strong>${{ estimated_profit }}</strong>
+      <small>Ingresos menos gastos</small>
+    </article>
+    <article>
+      <span>Saldos pendientes</span>
+      <strong>${{ pending_balance_total }}</strong>
+      <small>{{ partial_sales_count }} ventas parciales</small>
+    </article>
+    <article>
+      <span>Cajas abiertas</span>
+      <strong>{{ open_cash_count }}</strong>
+      <small>{{ closed_cash_count }} cerradas en periodo</small>
+    </article>
+    <article>
+      <span>Diferencia cortes</span>
+      <strong>${{ cash_difference_total }}</strong>
+      <small>{{ cash_cut_count }} cortes registrados</small>
+    </article>
+    <article>
+      <span>Composturas</span>
+      <strong>{{ pending_alterations_count }}</strong>
+      <small>{{ ready_alterations_count }} listas</small>
+    </article>
+    <article>
+      <span>Bajo stock</span>
+      <strong>{{ low_stock_count }}</strong>
+      <small>Productos bajo minimo</small>
+    </article>
+  </section>
+
+  <div class="dashboard-grid secondary-grid">
+    <section class="work-panel dashboard-panel">
+      <div class="section-heading">
+        <div>
+          <p class="eyebrow">Cobros</p>
+          <h2>Metodo de pago</h2>
+        </div>
+      </div>
+      <div class="payment-method-grid">
+        {% for method in payment_method_cards %}
+          <article>
+            <span>{{ method.label }}</span>
+            <strong>${{ method.total }}</strong>
+            <small>{{ method.count }} movimientos</small>
+          </article>
+        {% endfor %}
+      </div>
+    </section>
+
+    <section class="work-panel dashboard-panel">
+      <div class="section-heading">
+        <div>
+          <p class="eyebrow">Sucursal</p>
+          <h2>Ventas por sucursal</h2>
+        </div>
+      </div>
+      <div class="table-responsive">
+        <table class="table align-middle admin-table">
+          <thead><tr><th>Sucursal</th><th>Ventas</th><th class="text-end">Cobrado</th><th class="text-end">Saldo</th></tr></thead>
+          <tbody>
+            {% for branch in branch_report %}
+              <tr>
+                <td>{{ branch.branch__name|default:"Sin sucursal" }}</td>
+                <td>{{ branch.sales_count }}<span class="table-subcopy">Vendido: ${{ branch.sales_total }}</span></td>
+                <td class="text-end">${{ branch.paid_total }}</td>
+                <td class="text-end">${{ branch.balance_total }}</td>
+              </tr>
+            {% empty %}
+              <tr><td colspan="4"><p class="empty-copy">No hay ventas por sucursal en el periodo.</p></td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </section>
   </div>
-</div>
 
-<form class="filter-bar finance-filter" method="get">
-  <input class="form-control" type="date" name="start" value="{{ start }}">
-  <input class="form-control" type="date" name="end" value="{{ end }}">
-  <select class="form-select" name="branch">
-    <option value="">Todas las sucursales</option>
-    {% for branch in branches %}
-      <option value="{{ branch.id }}" {% if branch_id == branch.id|stringformat:"s" %}selected{% endif %}>{{ branch.name }}</option>
-    {% endfor %}
-  </select>
-  <button class="btn btn-outline-secondary" type="submit"><i class="bi bi-funnel" aria-hidden="true"></i>Filtrar</button>
-</form>
-
-<section class="module-summary-grid">
-  <article>
-    <span>Ventas</span>
-    <strong>{{ sales_count }}</strong>
-  </article>
-  <article>
-    <span>Total vendido</span>
-    <strong>${{ sales_total }}</strong>
-  </article>
-  <article>
-    <span>Utilidad estimada</span>
-    <strong>${{ estimated_profit }}</strong>
-  </article>
-  <article>
-    <span>Bajo stock</span>
-    <strong>{{ low_stock_count }}</strong>
-  </article>
-</section>
-
-<div class="report-grid">
-  <section class="work-panel">
-    <div class="section-heading">
-      <div>
-        <p class="eyebrow">Ventas</p>
-        <h2>Ventas recientes</h2>
+  <div class="report-grid">
+    <section class="work-panel">
+      <div class="section-heading">
+        <div>
+          <p class="eyebrow">Caja</p>
+          <h2>Sesiones de caja</h2>
+        </div>
       </div>
-    </div>
-    <div class="table-responsive">
-      <table class="table align-middle admin-table">
-        <thead><tr><th>Venta</th><th>Sucursal</th><th>Cliente</th><th class="text-end">Total</th></tr></thead>
-        <tbody>
-          {% for sale in sales %}
-            <tr>
-              <td>#{{ sale.id }}<span class="table-subcopy">{{ sale.created_at|date:"d/m/Y H:i" }}</span></td>
-              <td>{{ sale.branch.name }}</td>
-              <td>{{ sale.customer.name|default:"Mostrador" }}</td>
-              <td class="text-end">${{ sale.total }}</td>
-            </tr>
-          {% empty %}
-            <tr><td colspan="4"><p class="empty-copy">No hay ventas en el periodo.</p></td></tr>
-          {% endfor %}
-        </tbody>
-      </table>
-    </div>
-  </section>
-
-  <section class="work-panel">
-    <div class="section-heading">
-      <div>
-        <p class="eyebrow">Inventario</p>
-        <h2>Bajo stock</h2>
+      <div class="table-responsive">
+        <table class="table align-middle admin-table">
+          <thead><tr><th>Caja</th><th>Estado</th><th>Apertura</th><th>Cierre</th><th class="text-end">Diferencia</th></tr></thead>
+          <tbody>
+            {% for session in cash_sessions %}
+              <tr>
+                <td>{{ session.branch.name }}<span class="table-subcopy">Fondo: ${{ session.opening_cash }}</span></td>
+                <td>{{ session.get_status_display }}</td>
+                <td>{{ session.opened_at|date:"d/m/Y H:i" }}<span class="table-subcopy">{{ session.opened_by.username|default:"Sistema" }}</span></td>
+                <td>{% if session.closed_at %}{{ session.closed_at|date:"d/m/Y H:i" }}{% else %}Abierta{% endif %}<span class="table-subcopy">{{ session.closed_by.username|default:"" }}</span></td>
+                <td class="text-end">${{ session.cash_difference }}</td>
+              </tr>
+            {% empty %}
+              <tr><td colspan="5"><p class="empty-copy">No hay sesiones de caja en el periodo.</p></td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
       </div>
-    </div>
-    <div class="table-responsive">
-      <table class="table align-middle admin-table">
-        <thead><tr><th>Producto</th><th>Sucursal</th><th>Existencia</th><th>Minimo</th></tr></thead>
-        <tbody>
-          {% for item in low_stock %}
-            <tr>
-              <td>{{ item.product.name }}<span class="table-subcopy">{{ item.product.sku }}</span></td>
-              <td>{{ item.branch.name }}</td>
-              <td>{{ item.quantity }}</td>
-              <td>{{ item.low_stock_threshold }}</td>
-            </tr>
-          {% empty %}
-            <tr><td colspan="4"><p class="empty-copy">No hay productos bajo minimo.</p></td></tr>
-          {% endfor %}
-        </tbody>
-      </table>
-    </div>
-  </section>
+    </section>
 
-  <section class="work-panel wide-report">
-    <div class="section-heading">
-      <div>
-        <p class="eyebrow">Existencias</p>
-        <h2>Inventario general</h2>
+    <section class="work-panel">
+      <div class="section-heading">
+        <div>
+          <p class="eyebrow">Cortes</p>
+          <h2>Cortes registrados</h2>
+        </div>
       </div>
-    </div>
-    <div class="table-responsive">
-      <table class="table align-middle admin-table">
-        <thead><tr><th>Producto</th><th>Marca</th><th>Sucursal</th><th>Existencia</th></tr></thead>
-        <tbody>
-          {% for item in inventory %}
-            <tr>
-              <td>{{ item.product.name }}<span class="table-subcopy">{{ item.product.sku }}</span></td>
-              <td>{{ item.product.brand.name|default:"Sin marca" }}</td>
-              <td>{{ item.branch.name }}</td>
-              <td>{{ item.quantity }}</td>
-            </tr>
-          {% empty %}
-            <tr><td colspan="4"><p class="empty-copy">No hay inventario para mostrar.</p></td></tr>
-          {% endfor %}
-        </tbody>
-      </table>
-    </div>
-  </section>
+      <div class="table-responsive">
+        <table class="table align-middle admin-table">
+          <thead><tr><th>Corte</th><th>Esperado</th><th>Contado</th><th class="text-end">Diferencia</th></tr></thead>
+          <tbody>
+            {% for cut in cash_cuts %}
+              <tr>
+                <td>{{ cut.branch.name }}<span class="table-subcopy">{{ cut.date|date:"d/m/Y" }}</span></td>
+                <td>${{ cut.expected_total }}<span class="table-subcopy">Efectivo: ${{ cut.expected_cash }}</span></td>
+                <td>${{ cut.counted_cash }}</td>
+                <td class="text-end">${{ cut.cash_difference }}</td>
+              </tr>
+            {% empty %}
+              <tr><td colspan="4"><p class="empty-copy">No hay cortes registrados en el periodo.</p></td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="work-panel">
+      <div class="section-heading">
+        <div>
+          <p class="eyebrow">Ventas</p>
+          <h2>Ventas recientes</h2>
+        </div>
+      </div>
+      <div class="table-responsive">
+        <table class="table align-middle admin-table">
+          <thead><tr><th>Venta</th><th>Sucursal</th><th>Cliente</th><th>Pagado</th><th class="text-end">Total</th></tr></thead>
+          <tbody>
+            {% for sale in sales %}
+              <tr>
+                <td>#{{ sale.id }}<span class="table-subcopy">{{ sale.created_at|date:"d/m/Y H:i" }}</span></td>
+                <td>{{ sale.branch.name }}</td>
+                <td>{{ sale.customer.name|default:"Mostrador" }}</td>
+                <td>${{ sale.amount_paid }}<span class="table-subcopy">Saldo: ${{ sale.balance_due }}</span></td>
+                <td class="text-end">${{ sale.total }}</td>
+              </tr>
+            {% empty %}
+              <tr><td colspan="5"><p class="empty-copy">No hay ventas en el periodo.</p></td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="work-panel">
+      <div class="section-heading">
+        <div>
+          <p class="eyebrow">Pendientes</p>
+          <h2>Ventas por liquidar</h2>
+        </div>
+      </div>
+      <div class="table-responsive">
+        <table class="table align-middle admin-table">
+          <thead><tr><th>Venta</th><th>Cliente</th><th>Pagado</th><th class="text-end">Saldo</th></tr></thead>
+          <tbody>
+            {% for sale in partial_sales %}
+              <tr>
+                <td>#{{ sale.id }}<span class="table-subcopy">{{ sale.branch.name }}</span></td>
+                <td>{{ sale.customer.name|default:"Mostrador" }}</td>
+                <td>${{ sale.amount_paid }}</td>
+                <td class="text-end">${{ sale.balance_due }}</td>
+              </tr>
+            {% empty %}
+              <tr><td colspan="4"><p class="empty-copy">No hay ventas por liquidar.</p></td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="work-panel">
+      <div class="section-heading">
+        <div>
+          <p class="eyebrow">Taller</p>
+          <h2>Composturas pendientes</h2>
+        </div>
+      </div>
+      <div class="table-responsive">
+        <table class="table align-middle admin-table">
+          <thead><tr><th>Producto</th><th>Venta</th><th>Estado</th><th>Fecha entrega</th></tr></thead>
+          <tbody>
+            {% for line in pending_alterations %}
+              <tr>
+                <td>{{ line.product.name }}<span class="table-subcopy">{{ line.alteration_notes|default:"Sin notas" }}</span></td>
+                <td>#{{ line.sale.id }}<span class="table-subcopy">{{ line.sale.branch.name }}</span></td>
+                <td>{{ line.get_alteration_status_display }}</td>
+                <td>{% if line.alteration_due_date %}{{ line.alteration_due_date|date:"d/m/Y" }}{% else %}Sin fecha{% endif %}</td>
+              </tr>
+            {% empty %}
+              <tr><td colspan="4"><p class="empty-copy">No hay composturas pendientes.</p></td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="work-panel">
+      <div class="section-heading">
+        <div>
+          <p class="eyebrow">Inventario</p>
+          <h2>Bajo stock</h2>
+        </div>
+      </div>
+      <div class="table-responsive">
+        <table class="table align-middle admin-table">
+          <thead><tr><th>Producto</th><th>Sucursal</th><th>Existencia</th><th>Minimo</th></tr></thead>
+          <tbody>
+            {% for item in low_stock %}
+              <tr>
+                <td>{{ item.product.name }}<span class="table-subcopy">{{ item.product.sku }}</span></td>
+                <td>{{ item.branch.name }}</td>
+                <td>{{ item.quantity }}</td>
+                <td>{{ item.low_stock_threshold }}</td>
+              </tr>
+            {% empty %}
+              <tr><td colspan="4"><p class="empty-copy">No hay productos bajo minimo.</p></td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="work-panel wide-report">
+      <div class="section-heading">
+        <div>
+          <p class="eyebrow">Existencias</p>
+          <h2>Inventario general</h2>
+        </div>
+      </div>
+      <div class="table-responsive">
+        <table class="table align-middle admin-table">
+          <thead><tr><th>Producto</th><th>Marca</th><th>Sucursal</th><th>Existencia</th></tr></thead>
+          <tbody>
+            {% for item in inventory %}
+              <tr>
+                <td>{{ item.product.name }}<span class="table-subcopy">{{ item.product.sku }}</span></td>
+                <td>{{ item.product.brand.name|default:"Sin marca" }}</td>
+                <td>{{ item.branch.name }}</td>
+                <td>{{ item.quantity }}</td>
+              </tr>
+            {% empty %}
+              <tr><td colspan="4"><p class="empty-copy">No hay inventario para mostrar.</p></td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </section>
+  </div>
 </div>
 {% endblock %}

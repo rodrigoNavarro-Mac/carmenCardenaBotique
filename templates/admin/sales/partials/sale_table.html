@@ -7,6 +7,8 @@
           <th>Sucursal</th>
           <th>Cliente</th>
           <th>Total</th>
+          <th>Pagado / saldo</th>
+          <th>Pago</th>
           <th>Estado</th>
           <th class="text-end">Acciones</th>
         </tr>
@@ -22,8 +24,18 @@
             <td>{{ sale.customer.name|default:"Venta mostrador" }}</td>
             <td><strong>${{ sale.total }}</strong></td>
             <td>
+              <strong>${{ sale.amount_paid }}</strong>
+              <span class="table-subcopy">Saldo: ${{ sale.balance_due }}</span>
+            </td>
+            <td>
+              {{ sale.get_payment_method_display }}
+              {% if sale.payment_method == "CASH" %}<span class="table-subcopy">Cambio: ${{ sale.change_due }}</span>{% endif %}
+            </td>
+            <td>
               {% if sale.status == "PAID" %}
                 <span class="badge text-bg-success">{{ sale.get_status_display }}</span>
+              {% elif sale.status == "PARTIAL" %}
+                <span class="badge text-bg-warning">{{ sale.get_status_display }}</span>
               {% elif sale.status == "CANCELLED" %}
                 <span class="badge text-bg-danger">{{ sale.get_status_display }}</span>
               {% else %}
@@ -33,18 +45,20 @@
             <td class="text-end">
               <div class="row-actions">
                 <a class="btn btn-sm btn-outline-secondary" href="{% url 'sales:sale_detail' sale.id %}"><i class="bi bi-receipt" aria-hidden="true"></i>Recibo</a>
-                {% if sale.status == "PAID" and admin_permissions.sales.can_delete %}
+                {% if sale.status == "PAID" or sale.status == "PARTIAL" %}
+                  {% if admin_permissions.sales.can_delete %}
                   <form method="post" action="{% url 'sales:sale_cancel' sale.id %}">
                     {% csrf_token %}
-                    <button class="btn btn-sm btn-outline-secondary" type="submit" data-confirm="Cancelar esta venta restaurara el stock y quitara el ingreso financiero. Continuar?"><i class="bi bi-x-circle" aria-hidden="true"></i>Cancelar</button>
+                    <button class="btn btn-sm btn-outline-secondary" type="submit" data-confirm="Cancelar esta venta restaurara el stock y quitara los ingresos financieros. Continuar?"><i class="bi bi-x-circle" aria-hidden="true"></i>Cancelar</button>
                   </form>
+                  {% endif %}
                 {% endif %}
               </div>
             </td>
           </tr>
         {% empty %}
           <tr>
-            <td colspan="6"><p class="empty-copy">Aun no hay ventas registradas.</p></td>
+            <td colspan="8"><p class="empty-copy">Aun no hay ventas registradas.</p></td>
           </tr>
         {% endfor %}
       </tbody>

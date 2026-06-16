@@ -1,25 +1,173 @@
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
+from django.db import transaction
+from django.db.models import Max
+from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
+from django.views.decorators.clickjacking import xframe_options_sameorigin
+from django.views.decorators.http import require_POST
 
-from .forms import GalleryImageForm, LandingConfigForm
-from .models import GalleryImage, LandingConfig
+from .forms import GalleryImageForm, LandingBlockForm, LandingBlockItemFormSet, LandingConfigForm, LandingPageForm
+from .models import GalleryImage, LandingBlock, LandingConfig, LandingPage
+
+
+def get_landing_page():
+    page = LandingPage.objects.filter(is_active=True).first() or LandingPage.objects.first()
+    if page:
+        return page
+    config = LandingConfig.objects.filter(is_active=True).first() or LandingConfig.objects.first()
+    return LandingPage.objects.create(
+        title="Landing principal",
+        slug="home",
+        boutique_name=config.boutique_name if config else "Carmen Cardena Boutique",
+        is_active=True,
+    )
+
+
+def next_block_order(page):
+    max_order = page.blocks.aggregate(max_order=Max("sort_order"))["max_order"] or 0
+    return max_order + 10
 
 
 @login_required
 def cms_dashboard(request):
-    config = LandingConfig.objects.filter(is_active=True).first() or LandingConfig.objects.first()
-    gallery = GalleryImage.objects.select_related("product", "branch")
+    page = get_landing_page()
+    blocks = page.blocks.prefetch_related("items")
+    selected_block = blocks.first()
     return render(
         request,
         "admin/cms/dashboard.html",
         {
-            "config": config,
-            "gallery": gallery,
-            "published_count": gallery.filter(is_active=True, is_published=True).count(),
-            "gallery_count": gallery.count(),
+            "page": page,
+            "blocks": blocks,
+            "published_count": blocks.filter(status=LandingBlock.Status.PUBLISHED, is_visible=True).count(),
+            "draft_count": blocks.filter(status=LandingBlock.Status.DRAFT).count(),
+            "block_count": blocks.count(),
+            "block_types": LandingBlock.BlockType.choices,
+            "selected_block": selected_block,
         },
     )
+
+
+@login_required
+def landing_page_edit(request):
+    page = get_landing_page()
+    form = LandingPageForm(request.POST or None, instance=page)
+    if request.method == "POST" and form.is_valid():
+        page = form.save()
+        if page.is_active:
+            LandingPage.objects.exclude(pk=page.pk).update(is_active=False)
+        messages.success(request, "Datos generales de la landing actualizados.")
+        return redirect("cms:dashboard")
+    return render(request, "admin/cms/page_form.html", {"form": form})
+
+
+@login_required
+def block_create(request):
+    page = get_landing_page()
+    block = LandingBlock(page=page, sort_order=next_block_order(page))
+    form = LandingBlockForm(request.POST or None, request.FILES or None, instance=block)
+    formset = LandingBlockItemFormSet(request.POST or None, request.FILES or None, instance=block)
+    if request.method == "POST" and form.is_valid() and formset.is_valid():
+        with transaction.atomic():
+            block = form.save(commit=False)
+            block.page = page
+            block.save()
+            formset.instance = block
+            formset.save()
+        messages.success(request, "Bloque creado.")
+        return redirect("cms:dashboard")
+    return render(
+        request,
+        "admin/cms/block_form.html",
+        {"form": form, "formset": formset, "title": "Nuevo bloque", "block": block},
+    )
+
+
+@login_required
+def block_update(request, pk):
+    block = get_object_or_404(LandingBlock, pk=pk)
+    form = LandingBlockForm(request.POST or None, request.FILES or None, instance=block)
+    formset = LandingBlockItemFormSet(request.POST or None, request.FILES or None, instance=block)
+    if request.method == "POST" and form.is_valid() and formset.is_valid():
+        with transaction.atomic():
+            block = form.save()
+            formset.instance = block
+            formset.save()
+        messages.success(request, "Bloque actualizado.")
+        return redirect("cms:dashboard")
+    return render(
+        request,
+        "admin/cms/block_form.html",
+        {"form": form, "formset": formset, "title": "Editar bloque", "block": block},
+    )
+
+
+@login_required
+@require_POST
+def block_publish_toggle(request, pk):
+    block = get_object_or_404(LandingBlock, pk=pk)
+    block.status = LandingBlock.Status.DRAFT if block.status == LandingBlock.Status.PUBLISHED else LandingBlock.Status.PUBLISHED
+    block.save(update_fields=["status", "updated_at"])
+    messages.success(request, "Estado de publicacion actualizado.")
+    return redirect("cms:dashboard")
+
+
+@login_required
+@require_POST
+def block_visibility_toggle(request, pk):
+    block = get_object_or_404(LandingBlock, pk=pk)
+    block.is_visible = not block.is_visible
+    block.save(update_fields=["is_visible", "updated_at"])
+    messages.success(request, "Visibilidad del bloque actualizada.")
+    return redirect("cms:dashboard")
+
+
+@login_required
+@require_POST
+def block_move(request, pk, direction):
+    block = get_object_or_404(LandingBlock, pk=pk)
+    siblings = list(block.page.blocks.all())
+    current_index = next((index for index, sibling in enumerate(siblings) if sibling.pk == block.pk), None)
+    if current_index is None:
+        return redirect("cms:dashboard")
+    target_index = current_index - 1 if direction == "up" else current_index + 1
+    if 0 <= target_index < len(siblings):
+        target = siblings[target_index]
+        block.sort_order, target.sort_order = target.sort_order, block.sort_order
+        block.save(update_fields=["sort_order", "updated_at"])
+        target.save(update_fields=["sort_order", "updated_at"])
+        messages.success(request, "Orden actualizado.")
+    return redirect("cms:dashboard")
+
+
+@login_required
+@require_POST
+def block_reorder(request):
+    page = get_landing_page()
+    raw_order = request.POST.get("order", "")
+    block_ids = [int(value) for value in raw_order.split(",") if value.isdigit()]
+    page_block_ids = set(page.blocks.filter(id__in=block_ids).values_list("id", flat=True))
+
+    if len(page_block_ids) != len(block_ids):
+        return JsonResponse({"ok": False, "error": "Orden invalido."}, status=400)
+
+    with transaction.atomic():
+        for index, block_id in enumerate(block_ids, start=1):
+            LandingBlock.objects.filter(page=page, id=block_id).update(sort_order=index * 10)
+
+    return JsonResponse({"ok": True})
+
+
+@login_required
+@xframe_options_sameorigin
+def landing_preview(request):
+    from core.views import _landing_context
+
+    context = _landing_context(include_drafts=True)
+    selected_block = request.GET.get("selected_block")
+    context["selected_block_id"] = int(selected_block) if selected_block and selected_block.isdigit() else None
+    return render(request, "public/landing.html", context)
 
 
 @login_required

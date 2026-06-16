@@ -18,6 +18,7 @@
       <span class="admin-menu-label">Operacion</span>
       {% if admin_permissions.inventory.can_view %}<a href="{% url 'inventory:inventory_list' %}" class="{% if request.resolver_match.namespace == 'inventory' %}active{% endif %}" {% if request.resolver_match.namespace == 'inventory' %}aria-current="page"{% endif %}><i class="bi bi-box-seam" aria-hidden="true"></i>Inventario</a>{% endif %}
       {% if admin_permissions.sales.can_view %}<a href="{% url 'sales:sale_list' %}" class="{% if request.resolver_match.namespace == 'sales' %}active{% endif %}" {% if request.resolver_match.namespace == 'sales' %}aria-current="page"{% endif %}><i class="bi bi-receipt" aria-hidden="true"></i>Ventas</a>{% endif %}
+      {% if admin_permissions.sales.can_view %}<a href="{% url 'sales:alteration_list' %}" class="{% if request.resolver_match.url_name == 'alteration_list' %}active{% endif %}" {% if request.resolver_match.url_name == 'alteration_list' %}aria-current="page"{% endif %}><i class="bi bi-scissors" aria-hidden="true"></i>Composturas</a>{% endif %}
       {% if admin_permissions.customers.can_view %}<a href="{% url 'customers:customer_list' %}" class="{% if request.resolver_match.namespace == 'customers' %}active{% endif %}" {% if request.resolver_match.namespace == 'customers' %}aria-current="page"{% endif %}><i class="bi bi-people" aria-hidden="true"></i>Clientes</a>{% endif %}
       <span class="admin-menu-label">Control</span>
       {% if admin_permissions.finance.can_view %}<a href="{% url 'finance:dashboard' %}" class="{% if request.resolver_match.namespace == 'finance' %}active{% endif %}" {% if request.resolver_match.namespace == 'finance' %}aria-current="page"{% endif %}><i class="bi bi-cash-coin" aria-hidden="true"></i>Finanzas</a>{% endif %}
@@ -26,6 +27,8 @@
       {% if admin_permissions.users.can_view %}
         <a href="{% url 'admin_accounts:user_list' %}" class="{% if request.resolver_match.namespace == 'admin_accounts' %}active{% endif %}" {% if request.resolver_match.namespace == 'admin_accounts' %}aria-current="page"{% endif %}><i class="bi bi-person-gear" aria-hidden="true"></i>Usuarios</a>
       {% endif %}
+      <span class="admin-menu-label">Ayuda</span>
+      <a href="{% url 'admin_information' %}" class="{% if request.resolver_match.url_name == 'admin_information' %}active{% endif %}" {% if request.resolver_match.url_name == 'admin_information' %}aria-current="page"{% endif %}><i class="bi bi-info-circle" aria-hidden="true"></i>Guia de uso</a>
     </nav>
   </aside>
   <div class="admin-main">

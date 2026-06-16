@@ -3,89 +3,210 @@
 {% block title %}Panel administrativo{% endblock %}
 
 {% block admin_content %}
-<div class="control-dashboard">
+<div class="control-dashboard pos-dashboard">
 <section class="dashboard-hero">
   <div>
-    <p class="eyebrow">Operacion diaria</p>
+    <p class="eyebrow">Operacion POS</p>
     <h1>Centro de control</h1>
-    <p>Lectura rapida de ventas, caja, inventario y actividad reciente para administrar la boutique sin cambiar de modulo.</p>
+    <p>Cajas abiertas, cobros reales, saldos pendientes, composturas e inventario en una sola lectura para operar cada sucursal sin perder control.</p>
   </div>
   <div class="dashboard-actions">
     <button class="icon-button" type="button" title="Actualizar" hx-get="{% url 'admin_dashboard' %}" hx-target=".admin-content" hx-select=".admin-content" hx-swap="outerHTML"><i class="bi bi-arrow-clockwise" aria-hidden="true"></i></button>
-    {% if admin_permissions.finance.can_create %}<a class="btn btn-outline-secondary" href="{% url 'finance:expense_create' %}"><i class="bi bi-cash-stack" aria-hidden="true"></i>Registrar gasto</a>{% endif %}
+    {% if admin_permissions.finance.can_view %}<a class="btn btn-outline-secondary" href="{% url 'finance:cash_session_current' %}"><i class="bi bi-safe2" aria-hidden="true"></i>Caja actual</a>{% endif %}
+    {% if admin_permissions.finance.can_create %}<a class="btn btn-outline-secondary" href="{% url 'finance:cash_session_open' %}"><i class="bi bi-unlock" aria-hidden="true"></i>Abrir caja</a>{% endif %}
     {% if admin_permissions.sales.can_create %}<a class="btn btn-primary" href="{% url 'sales:sale_create' %}"><i class="bi bi-plus-lg" aria-hidden="true"></i>Nueva venta</a>{% endif %}
   </div>
 </section>
 
-<section class="dashboard-metrics" aria-label="Resumen del dia">
+<section class="dashboard-metrics" aria-label="Resumen operativo del dia">
   <article class="metric-card metric-primary metric-wide">
     <div class="metric-card-head">
-      <div class="metric-icon"><i class="bi bi-bag-check" aria-hidden="true"></i></div>
-      <span class="metric-trend">Hoy</span>
+      <div class="metric-icon"><i class="bi bi-cash-coin" aria-hidden="true"></i></div>
+      <span class="metric-trend">Cobros reales</span>
     </div>
-    <span>Ventas del dia</span>
-    <strong>${{ todays_sales_total }}</strong>
-    <small>{{ todays_sales_count }} operaciones registradas</small>
+    <span>Cobrado hoy</span>
+    <strong>${{ todays_income }}</strong>
+    <small>{{ todays_sales_count }} ventas / vendido ${{ todays_sales_total }}</small>
   </article>
   <article class="metric-card">
     <div class="metric-card-head">
-      <div class="metric-icon"><i class="bi bi-graph-up-arrow" aria-hidden="true"></i></div>
+      <div class="metric-icon success"><i class="bi bi-safe2" aria-hidden="true"></i></div>
       <span class="metric-trend positive">Caja</span>
     </div>
-    <span>Flujo neto</span>
-    <strong>${{ todays_net }}</strong>
-    <small>Ingresos menos gastos del dia</small>
+    <span>Cajas abiertas</span>
+    <strong>{{ open_cash_count }}</strong>
+    <small>{{ branches_without_cash_count }} sucursales sin caja abierta</small>
   </article>
   <article class="metric-card">
     <div class="metric-card-head">
-      <div class="metric-icon warning"><i class="bi bi-exclamation-triangle" aria-hidden="true"></i></div>
-      <span class="metric-trend warning">Revision</span>
+      <div class="metric-icon warning"><i class="bi bi-hourglass-split" aria-hidden="true"></i></div>
+      <span class="metric-trend warning">Pendiente</span>
     </div>
-    <span>Stock bajo</span>
-    <strong>{{ low_stock_count }}</strong>
-    <small>Productos por revisar</small>
+    <span>Saldos por liquidar</span>
+    <strong>${{ pending_balance_total }}</strong>
+    <small>{{ partial_sales_count }} ventas con pago parcial</small>
   </article>
   <article class="metric-card">
     <div class="metric-card-head">
-      <div class="metric-icon"><i class="bi bi-shop" aria-hidden="true"></i></div>
-      <span class="metric-trend neutral">Activas</span>
+      <div class="metric-icon"><i class="bi bi-scissors" aria-hidden="true"></i></div>
+      <span class="metric-trend neutral">Taller</span>
     </div>
-    <span>Operacion activa</span>
-    <strong>{{ active_branches_count }}</strong>
-    <small>{{ active_products_count }} productos activos</small>
+    <span>Composturas activas</span>
+    <strong>{{ pending_alterations_count }}</strong>
+    <small>{{ low_stock_count }} alertas de stock bajo</small>
   </article>
 </section>
 
 <section class="control-strip" aria-label="Acciones rapidas">
   <div class="control-strip-copy">
     <p class="eyebrow">Acciones rapidas</p>
-    <h2>Trabajo frecuente</h2>
+    <h2>Flujo de mostrador</h2>
   </div>
   <div class="quick-action-grid">
-    {% if admin_permissions.catalog.can_create %}<a class="quick-action" href="{% url 'catalog:product_create' %}">
-      <i class="bi bi-bag-plus" aria-hidden="true"></i>
-      <span>Producto</span>
-      <small>Alta en catalogo</small>
+    {% if admin_permissions.sales.can_create %}<a class="quick-action" href="{% url 'sales:sale_create' %}">
+      <i class="bi bi-receipt-cutoff" aria-hidden="true"></i>
+      <span>Venta</span>
+      <small>Pago mixto y ticket</small>
     </a>{% endif %}
-    {% if admin_permissions.inventory.can_create %}<a class="quick-action" href="{% url 'inventory:movement_create' %}">
-      <i class="bi bi-box-arrow-in-down" aria-hidden="true"></i>
-      <span>Stock</span>
-      <small>Entrada o ajuste</small>
+    {% if admin_permissions.finance.can_view %}<a class="quick-action" href="{% url 'finance:cash_session_current' %}">
+      <i class="bi bi-safe2" aria-hidden="true"></i>
+      <span>Caja actual</span>
+      <small>Entradas, salidas y cierre</small>
     </a>{% endif %}
-    {% if admin_permissions.customers.can_create %}<a class="quick-action" href="{% url 'customers:customer_create' %}">
-      <i class="bi bi-person-plus" aria-hidden="true"></i>
-      <span>Cliente</span>
-      <small>Nuevo registro</small>
+    {% if admin_permissions.sales.can_view %}<a class="quick-action" href="{% url 'sales:alteration_list' %}">
+      <i class="bi bi-scissors" aria-hidden="true"></i>
+      <span>Composturas</span>
+      <small>Estados de taller</small>
     </a>{% endif %}
-    {% if admin_permissions.reports.can_view %}<a class="quick-action" href="{% url 'reports:dashboard' %}">
-      <i class="bi bi-bar-chart" aria-hidden="true"></i>
-      <span>Reportes</span>
-      <small>Analisis general</small>
+    {% if admin_permissions.finance.can_view %}<a class="quick-action" href="{% url 'finance:cash_cut_list' %}">
+      <i class="bi bi-clipboard2-check" aria-hidden="true"></i>
+      <span>Cortes</span>
+      <small>Cajas cerradas</small>
     </a>{% endif %}
   </div>
 </section>
 
 <div class="dashboard-grid dashboard-grid-primary">
+  <section class="work-panel dashboard-panel">
+    <div class="section-heading">
+      <div>
+        <p class="eyebrow">Caja</p>
+        <h2>Sesiones abiertas</h2>
+      </div>
+      {% if admin_permissions.finance.can_view %}<a class="btn btn-sm btn-outline-secondary" href="{% url 'finance:cash_session_current' %}"><i class="bi bi-safe2" aria-hidden="true"></i>Ver caja</a>{% endif %}
+    </div>
+    <div class="cash-session-list">
+      {% for item in open_cash_summaries %}
+        <article class="cash-session-row">
+          <div>
+            <strong>{{ item.session.branch.name }}</strong>
+            <p>Abierta {{ item.session.opened_at|date:"d/m H:i" }} por {{ item.session.opened_by.username|default:"Sistema" }}</p>
+          </div>
+          <dl>
+            <div>
+              <dt>Efectivo esperado</dt>
+              <dd>${{ item.summary.expected_cash_drawer }}</dd>
+            </div>
+            <div>
+              <dt>Cobrado</dt>
+              <dd>${{ item.summary.expected_total }}</dd>
+            </div>
+            <div>
+              <dt>Tarjeta / transf.</dt>
+              <dd>${{ item.summary.expected_card }} / ${{ item.summary.expected_transfer }}</dd>
+            </div>
+          </dl>
+          {% if admin_permissions.finance.can_view %}<a class="btn btn-sm btn-primary" href="{% url 'finance:cash_session_detail' item.session.id %}">Operar</a>{% endif %}
+        </article>
+      {% empty %}
+        <div class="empty-state">
+          <i class="bi bi-lock" aria-hidden="true"></i>
+          <div>
+            <strong>No hay cajas abiertas.</strong>
+            <p>Abre caja por sucursal antes de registrar ventas.</p>
+          </div>
+          {% if admin_permissions.finance.can_create %}<a class="btn btn-sm btn-primary" href="{% url 'finance:cash_session_open' %}">Abrir caja</a>{% endif %}
+        </div>
+      {% endfor %}
+    </div>
+  </section>
+
+  <aside class="work-panel dashboard-panel">
+    <div class="section-heading">
+      <div>
+        <p class="eyebrow">Cobros</p>
+        <h2>Metodo de pago</h2>
+      </div>
+    </div>
+    <div class="payment-method-grid">
+      {% for method in payment_method_cards %}
+        <article>
+          <i class="bi {{ method.icon }}" aria-hidden="true"></i>
+          <span>{{ method.label }}</span>
+          <strong>${{ method.value }}</strong>
+        </article>
+      {% endfor %}
+    </div>
+    <div class="pos-note">
+      <strong>Flujo neto: ${{ todays_net }}</strong>
+      <span>Ingresos cobrados menos gastos registrados hoy.</span>
+    </div>
+  </aside>
+</div>
+
+<div class="dashboard-grid secondary-grid">
+  <section class="work-panel dashboard-panel">
+    <div class="section-heading">
+      <div>
+        <p class="eyebrow">Pendientes</p>
+        <h2>Ventas por liquidar</h2>
+      </div>
+      <a class="btn btn-sm btn-outline-secondary" href="{% url 'sales:sale_list' %}?status=PARTIAL"><i class="bi bi-hourglass-split" aria-hidden="true"></i>Parciales</a>
+    </div>
+    <div class="activity-list compact-activity">
+      {% for sale in partial_sales %}
+        <article class="activity-row">
+          <span class="activity-icon warning"><i class="bi bi-receipt" aria-hidden="true"></i></span>
+          <div>
+            <strong>Venta #{{ sale.id }} / saldo ${{ sale.balance_due }}</strong>
+            <p>{{ sale.branch.name }} / {{ sale.customer.name|default:"Cliente mostrador" }}</p>
+          </div>
+          <a class="btn btn-sm btn-outline-secondary" href="{% url 'sales:sale_detail' sale.id %}">Liquidar</a>
+        </article>
+      {% empty %}
+        <p class="empty-copy">No hay saldos pendientes.</p>
+      {% endfor %}
+    </div>
+  </section>
+
+  <aside class="work-panel dashboard-panel">
+    <div class="section-heading">
+      <div>
+        <p class="eyebrow">Taller</p>
+        <h2>Composturas</h2>
+      </div>
+      <a class="btn btn-sm btn-outline-secondary" href="{% url 'sales:alteration_list' %}"><i class="bi bi-scissors" aria-hidden="true"></i>Ver todas</a>
+    </div>
+    <div class="alteration-watch-list">
+      {% for line in pending_alterations %}
+        <article>
+          <div>
+            <strong>{{ line.product.name }}</strong>
+            <span>Venta #{{ line.sale.id }} / {{ line.sale.branch.name }}</span>
+          </div>
+          <div>
+            <b>{{ line.get_alteration_status_display }}</b>
+            <small>{% if line.alteration_due_date %}{{ line.alteration_due_date|date:"d/m/Y" }}{% else %}Sin fecha{% endif %}</small>
+          </div>
+        </article>
+      {% empty %}
+        <p class="empty-copy">No hay composturas activas.</p>
+      {% endfor %}
+    </div>
+  </aside>
+</div>
+
+<div class="dashboard-grid secondary-grid">
   <section class="work-panel dashboard-panel">
     <div class="section-heading">
       <div>
@@ -100,7 +221,7 @@
           <span class="activity-icon"><i class="bi bi-receipt" aria-hidden="true"></i></span>
           <div>
             <strong>Venta #{{ sale.id }} / ${{ sale.total }}</strong>
-            <p>{{ sale.branch.name }} / {{ sale.customer.name|default:"Cliente mostrador" }}</p>
+            <p>{{ sale.branch.name }} / {{ sale.customer.name|default:"Cliente mostrador" }} / {{ sale.get_status_display }}</p>
           </div>
           <time>{{ sale.created_at|date:"d/m H:i" }}</time>
         </article>
@@ -129,51 +250,6 @@
         </article>
       {% empty %}
         <p class="empty-copy">Sin alertas de stock bajo.</p>
-      {% endfor %}
-    </div>
-  </aside>
-</div>
-
-<div class="dashboard-grid secondary-grid">
-  <section class="work-panel dashboard-panel">
-    <div class="section-heading">
-      <div>
-        <p class="eyebrow">Inventario</p>
-        <h2>Movimientos recientes</h2>
-      </div>
-    </div>
-    <div class="activity-list compact-activity">
-      {% for movement in recent_movements %}
-        <article class="activity-row">
-          <span class="activity-icon muted"><i class="bi bi-arrow-left-right" aria-hidden="true"></i></span>
-          <div>
-            <strong>{{ movement.product.name }}</strong>
-            <p>{{ movement.get_movement_type_display }} / {{ movement.branch.name }} / {{ movement.quantity }} pzas</p>
-          </div>
-          <time>{{ movement.created_at|date:"d/m H:i" }}</time>
-        </article>
-      {% empty %}
-        <p class="empty-copy">Los movimientos apareceran aqui.</p>
-      {% endfor %}
-    </div>
-  </section>
-
-  <aside class="work-panel dashboard-panel">
-    <div class="section-heading">
-      <div>
-        <p class="eyebrow">Sucursales</p>
-        <h2>Ventas de hoy</h2>
-      </div>
-    </div>
-    <div class="branch-sales-list">
-      {% for branch in branch_sales %}
-        <article>
-          <span>{{ branch.branch__name }}</span>
-          <strong>${{ branch.total }}</strong>
-          <small>{{ branch.sales_count }} ventas</small>
-        </article>
-      {% empty %}
-        <p class="empty-copy">Sin ventas por sucursal hoy.</p>
       {% endfor %}
     </div>
   </aside>

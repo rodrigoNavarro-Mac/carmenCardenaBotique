@@ -1,0 +1,111 @@
+{% extends "admin/base_admin.html" %}
+
+{% block title %}Guia de uso{% endblock %}
+
+{% block admin_content %}
+<div class="control-dashboard help-dashboard">
+  <section class="dashboard-hero">
+    <div>
+      <p class="eyebrow">Informacion interna</p>
+      <h1>Guia de uso por rol</h1>
+      <p>{% if is_admin_guide %}Vista administrativa completa: cada rol aparece separado con sus modulos, permisos, funciones y errores comunes.{% else %}Esta vista muestra solo la informacion correspondiente a tu rol y a los modulos que puedes consultar.{% endif %}</p>
+    </div>
+    <div class="dashboard-actions">
+      <a class="btn btn-outline-secondary" href="{% url 'admin_dashboard' %}"><i class="bi bi-speedometer2" aria-hidden="true"></i>Dashboard</a>
+    </div>
+  </section>
+
+  {% for guide in role_guides %}
+    <section class="role-guide" id="rol-{{ guide.role|lower }}">
+      <header class="role-guide-head">
+        <div>
+          <p class="eyebrow">Rol</p>
+          <h2>{{ guide.role_label }}</h2>
+        </div>
+        <span>{{ guide.modules|length }} modulos visibles</span>
+      </header>
+
+      <div class="help-grid">
+        <article class="help-note">
+          <h3>Responsabilidad</h3>
+          <ul>
+            {% for note in guide.notes %}
+              <li>{{ note }}</li>
+            {% endfor %}
+          </ul>
+        </article>
+        <article class="help-note">
+          <h3>Flujo sugerido</h3>
+          <ol>
+            {% for step in guide.workflow %}
+              <li>{{ step }}</li>
+            {% endfor %}
+          </ol>
+        </article>
+      </div>
+
+      <div class="permission-table">
+        <table class="admin-table table">
+          <thead>
+            <tr>
+              <th>Modulo</th>
+              <th>Ver</th>
+              <th>Crear</th>
+              <th>Editar</th>
+              <th>Eliminar</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for module in guide.modules %}
+              <tr>
+                <td><i class="bi {{ module.icon }}" aria-hidden="true"></i>{{ module.label }}</td>
+                <td>{% if module.permissions.can_view %}<span class="permission-pill yes">Si</span>{% else %}<span class="permission-pill no">No</span>{% endif %}</td>
+                <td>{% if module.permissions.can_create %}<span class="permission-pill yes">Si</span>{% else %}<span class="permission-pill no">No</span>{% endif %}</td>
+                <td>{% if module.permissions.can_edit %}<span class="permission-pill yes">Si</span>{% else %}<span class="permission-pill no">No</span>{% endif %}</td>
+                <td>{% if module.permissions.can_delete %}<span class="permission-pill yes">Si</span>{% else %}<span class="permission-pill no">No</span>{% endif %}</td>
+              </tr>
+            {% empty %}
+              <tr>
+                <td colspan="5">Este rol no tiene modulos visibles configurados.</td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+
+      <div class="module-guide-grid">
+        {% for module in guide.modules %}
+          <article class="module-guide-card">
+            <header>
+              <span class="module-guide-icon"><i class="bi {{ module.icon }}" aria-hidden="true"></i></span>
+              <div>
+                <p class="eyebrow">Modulo</p>
+                <h3>{{ module.label }}</h3>
+              </div>
+            </header>
+            <p>{{ module.purpose }}</p>
+
+            <div class="module-guide-section">
+              <h4>Como se usa</h4>
+              <ul>
+                {% for function in module.functions %}
+                  <li>{{ function }}</li>
+                {% endfor %}
+              </ul>
+            </div>
+
+            <div class="module-guide-section">
+              <h4>Posibles errores</h4>
+              <ul>
+                {% for error in module.errors %}
+                  <li>{{ error }}</li>
+                {% endfor %}
+              </ul>
+            </div>
+          </article>
+        {% endfor %}
+      </div>
+    </section>
+  {% endfor %}
+</div>
+{% endblock %}

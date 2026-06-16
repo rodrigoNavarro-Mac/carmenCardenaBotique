@@ -54,7 +54,17 @@ Cada cambio crea `InventoryMovement`.
 
 ### `sales`
 
-Registra ventas y lineas. Una venta valida stock, descuenta inventario, crea movimientos `SALE` y genera ingreso contable.
+Registra ventas POS, lineas, pagos y composturas.
+
+Entidades principales:
+
+- `Sale`: encabezado de venta, totales resumidos y estado (`PAID`, `PARTIAL`, `CANCELLED`, `RETURNED`).
+- `SaleLine`: productos vendidos, cantidad, precio, total y datos de compostura por prenda.
+- `SalePayment`: pagos reales de una venta, ligados a una caja abierta y a un ingreso financiero.
+
+Una venta valida stock, requiere caja abierta para la sucursal, descuenta inventario, crea movimientos `SALE`, registra pagos e ingresos reales.
+
+Los campos `amount_paid`, `balance_due`, `payment_method`, `cash_received` y `change_due` de `Sale` se conservan como resumen visual/compatibilidad. La fuente operativa de pagos es `SalePayment`.
 
 ### `customers`
 
@@ -62,7 +72,17 @@ Directorio de clientes e historial de compras.
 
 ### `finance`
 
-Ingresos desde ventas y egresos capturados manualmente. Calcula utilidad operativa estimada.
+Controla ingresos, egresos, caja POS y cortes.
+
+Entidades principales:
+
+- `IncomeEntry`: ingreso real generado por cada pago de venta o liquidacion.
+- `Expense`: egresos por sucursal.
+- `CashRegisterSession`: caja o turno de caja por sucursal, con apertura/cierre y totales.
+- `CashDrawerMovement`: entradas, salidas, retiros, gastos de caja y ajustes.
+- `CashRegisterCut`: modelo historico previo de cortes; el flujo nuevo usa `CashRegisterSession` cerrada como corte real.
+
+Solo puede existir una caja abierta por sucursal. Las ventas y liquidaciones deben estar ligadas a la caja abierta.
 
 ### `cms`
 
@@ -100,3 +120,44 @@ Actualmente existen servicios para:
 
 - `inventory.services.register_stock_movement`
 - `sales.services.register_sale`
+- `sales.services.settle_sale_balance`
+- `finance.services.open_cash_session`
+- `finance.services.register_cash_movement`
+- `finance.services.close_cash_session`
+
+## Flujo POS
+
+```text
+Abrir caja por sucursal
+  -> Registrar venta con productos y pagos
+  -> SalePayment por cada cobro
+  -> IncomeEntry ligado a CashRegisterSession
+  -> Movimientos de caja opcionales
+  -> Cerrar caja con efectivo contado
+```
+
+La caja cerrada conserva los totales esperados y diferencia, lo que permite auditoria posterior.
+
+## Composturas
+
+Las composturas viven en `SaleLine`, no en inventario ni finanzas. Esto permite que una prenda vendida y descontada de stock siga teniendo seguimiento operativo:
+
+- En taller
+- Lista para entregar
+- Entregada
+
+El modulo `Composturas` lista solo lineas marcadas con compostura y permite cambiar estado.
+
+## UI y Paleta
+
+La paleta de colores vive en `static/css/palette.css`. Los estilos nuevos deben usar variables semanticas (`--color-success`, `--color-info`, `--color-warning-soft`, `--shadow-modal`, etc.) para facilitar cambios de identidad visual.
+
+La logica ligera de UI vive en `static/js/app.js`, incluyendo:
+
+- calculo de importes en venta,
+- pagos mixtos,
+- cambio en efectivo,
+- campos condicionales de compostura,
+- preview de liquidacion.
+
+El dashboard administrativo consume datos operativos de `sales`, `finance` e `inventory` para funcionar como centro de control POS. Prioriza cobros reales, cajas abiertas, saldos pendientes, composturas activas y alertas de inventario.

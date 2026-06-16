@@ -1,0 +1,75 @@
+{% extends "admin/base_admin.html" %}
+
+{% block title %}Nuevo corte{% endblock %}
+
+{% block admin_content %}
+<div class="page-title-row">
+  <div>
+    <p class="eyebrow">Caja</p>
+    <h1>Nuevo corte</h1>
+  </div>
+  <a class="btn btn-outline-secondary" href="{% url 'finance:cash_cut_list' %}"><i class="bi bi-arrow-left" aria-hidden="true"></i>Cortes</a>
+</div>
+
+{% if messages %}
+  <div class="message-stack">
+    {% for message in messages %}
+      <div class="alert alert-{{ message.tags|default:'info' }}">{{ message }}</div>
+    {% endfor %}
+  </div>
+{% endif %}
+
+<form class="editor-grid compact-editor" method="post" data-prevent-double-submit>
+  {% csrf_token %}
+  <section class="work-panel form-panel">
+    {{ form.non_field_errors }}
+    <div class="form-grid">
+      <label>{{ form.branch.label }}{{ form.branch }}{{ form.branch.errors }}</label>
+      <label>{{ form.date.label }}{{ form.date }}{{ form.date.errors }}</label>
+      <label>{{ form.counted_cash.label }}{{ form.counted_cash }}{{ form.counted_cash.errors }}</label>
+      <label class="wide-field">{{ form.notes.label }}{{ form.notes }}{{ form.notes.errors }}</label>
+    </div>
+  </section>
+  <aside class="ops-card form-side">
+    <h2>Vista previa</h2>
+    {% if preview_totals %}
+      <dl class="sale-live-summary">
+        <div><dt>Efectivo</dt><dd>${{ preview_totals.expected_cash }}</dd></div>
+        <div><dt>Tarjeta</dt><dd>${{ preview_totals.expected_card }}</dd></div>
+        <div><dt>Transferencia</dt><dd>${{ preview_totals.expected_transfer }}</dd></div>
+        <div><dt>Total</dt><dd>${{ preview_totals.expected_total }}</dd></div>
+      </dl>
+    {% else %}
+      <p class="empty-copy">Selecciona sucursal y fecha para previsualizar ingresos pendientes.</p>
+    {% endif %}
+    <button class="btn btn-outline-secondary w-100 mb-2" type="submit" formmethod="get"><i class="bi bi-search" aria-hidden="true"></i>Previsualizar</button>
+    <button class="btn btn-primary w-100" type="submit"><i class="bi bi-check2" aria-hidden="true"></i>Generar corte</button>
+  </aside>
+</form>
+
+<section class="work-panel">
+  <div class="section-heading">
+    <div>
+      <p class="eyebrow">Ingresos</p>
+      <h2>Pendientes de corte</h2>
+    </div>
+  </div>
+  <div class="table-responsive">
+    <table class="table align-middle admin-table">
+      <thead><tr><th>Fecha</th><th>Venta</th><th>Tipo pago</th><th class="text-end">Monto</th></tr></thead>
+      <tbody>
+        {% for income in preview_entries %}
+          <tr>
+            <td>{{ income.date }}</td>
+            <td>{% if income.sale %}#{{ income.sale.id }}{% else %}Ingreso manual{% endif %}</td>
+            <td>{{ income.get_payment_method_display }}</td>
+            <td class="text-end"><strong>${{ income.amount }}</strong></td>
+          </tr>
+        {% empty %}
+          <tr><td colspan="4"><p class="empty-copy">No hay ingresos pendientes para esos filtros.</p></td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</section>
+{% endblock %}

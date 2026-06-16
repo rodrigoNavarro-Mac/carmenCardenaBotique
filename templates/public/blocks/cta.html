@@ -1,0 +1,10 @@
+<section class="cta-band">
+  <div>
+    <p class="eyebrow">{{ block.subtitle|default:"Te esperamos" }}</p>
+    <h2>{{ block.title }}</h2>
+    {% if block.body %}<p>{{ block.body }}</p>{% endif %}
+  </div>
+  {% if block.cta_label and block.cta_url %}
+    <a class="btn btn-primary" href="{{ block.cta_url }}">{{ block.cta_label }}</a>
+  {% endif %}
+</section>

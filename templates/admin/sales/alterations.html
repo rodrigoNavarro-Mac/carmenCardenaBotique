@@ -1,0 +1,97 @@
+{% extends "admin/base_admin.html" %}
+
+{% block title %}Composturas{% endblock %}
+
+{% block admin_content %}
+<div class="page-title-row">
+  <div>
+    <p class="eyebrow">Ventas</p>
+    <h1>Composturas</h1>
+  </div>
+  <div class="page-actions">
+    <a class="btn btn-outline-secondary" href="{% url 'sales:sale_list' %}"><i class="bi bi-arrow-left" aria-hidden="true"></i>Ventas</a>
+    {% if admin_permissions.sales.can_create %}
+      <a class="btn btn-primary" href="{% url 'sales:sale_create' %}"><i class="bi bi-plus-lg" aria-hidden="true"></i>Nueva venta</a>
+    {% endif %}
+  </div>
+</div>
+
+{% if messages %}
+  <div class="message-stack">
+    {% for message in messages %}
+      <div class="alert alert-{{ message.tags|default:'info' }}">{{ message }}</div>
+    {% endfor %}
+  </div>
+{% endif %}
+
+<section class="work-panel">
+  <form class="filter-bar alteration-filter" method="get">
+    <input class="form-control" type="search" name="q" value="{{ request.GET.q }}" placeholder="Buscar prenda">
+    <select class="form-select" name="branch">
+      <option value="">Todas las sucursales</option>
+      {% for branch in branches %}
+        <option value="{{ branch.id }}" {% if request.GET.branch == branch.id|stringformat:"s" %}selected{% endif %}>{{ branch.name }}</option>
+      {% endfor %}
+    </select>
+    <select class="form-select" name="status">
+      <option value="">Todos los estados</option>
+      {% for value, label in alteration_status_choices %}
+        {% if value != "NONE" %}
+          <option value="{{ value }}" {% if request.GET.status == value %}selected{% endif %}>{{ label }}</option>
+        {% endif %}
+      {% endfor %}
+    </select>
+    <button class="btn btn-outline-secondary" type="submit"><i class="bi bi-funnel" aria-hidden="true"></i>Filtrar</button>
+  </form>
+
+  <div class="table-responsive">
+    <table class="table align-middle admin-table">
+      <thead>
+        <tr>
+          <th>Prenda</th>
+          <th>Venta</th>
+          <th>Sucursal</th>
+          <th>Cliente</th>
+          <th>Entrega</th>
+          <th>Estado</th>
+          <th class="text-end">Acciones</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for line in alteration_lines %}
+          <tr>
+            <td>
+              <strong>{{ line.product.name }}</strong>
+              {% if line.alteration_notes %}<span class="table-subcopy">{{ line.alteration_notes }}</span>{% endif %}
+            </td>
+            <td>#{{ line.sale.id }}<span class="table-subcopy">{{ line.sale.created_at|date:"d/m/Y H:i" }}</span></td>
+            <td>{{ line.sale.branch.name }}</td>
+            <td>{{ line.sale.customer.name|default:"Venta mostrador" }}</td>
+            <td>{% if line.alteration_due_date %}{{ line.alteration_due_date|date:"d/m/Y" }}{% else %}<span class="table-subcopy">Sin fecha</span>{% endif %}</td>
+            <td>
+              <form class="alteration-status-control" method="post" action="{% url 'sales:sale_line_alteration_update' line.sale.id line.id %}">
+                {% csrf_token %}
+                <input type="hidden" name="next" value="{{ request.get_full_path }}">
+                <select class="form-select form-select-sm" name="alteration_status" onchange="this.form.submit()">
+                  {% for value, label in alteration_status_choices %}
+                    {% if value != "NONE" %}
+                      <option value="{{ value }}" {% if line.alteration_status == value %}selected{% endif %}>{{ label }}</option>
+                    {% endif %}
+                  {% endfor %}
+                </select>
+              </form>
+            </td>
+            <td class="text-end">
+              <a class="btn btn-sm btn-outline-secondary" href="{% url 'sales:sale_detail' line.sale.id %}"><i class="bi bi-receipt" aria-hidden="true"></i>Recibo</a>
+            </td>
+          </tr>
+        {% empty %}
+          <tr>
+            <td colspan="7"><p class="empty-copy">No hay prendas en compostura con estos filtros.</p></td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</section>
+{% endblock %}

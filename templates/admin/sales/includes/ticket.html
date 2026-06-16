@@ -1,0 +1,39 @@
+<div class="ticket-print">
+  <div class="ticket-head">
+    <strong>Carmen Cardena Boutique</strong>
+    <span>Venta #{{ sale.id }}</span>
+    <small>{{ sale.created_at|date:"d/m/Y H:i" }}</small>
+  </div>
+  <dl class="ticket-meta">
+    <div><dt>Sucursal</dt><dd>{{ sale.branch.name }}</dd></div>
+    <div><dt>Cliente</dt><dd>{{ sale.customer.name|default:"Venta mostrador" }}</dd></div>
+    <div><dt>Atendio</dt><dd>{% if sale.user %}{{ sale.user.get_full_name|default:sale.user.username }}{% else %}Sistema{% endif %}</dd></div>
+    <div><dt>Pago</dt><dd>{{ sale.get_payment_method_display }}</dd></div>
+  </dl>
+  <table class="ticket-lines">
+    <tbody>
+      {% for line in sale.lines.all %}
+        <tr>
+          <td>
+            <strong>{{ line.product.name }}</strong>
+            <span>{{ line.quantity }} x ${{ line.unit_price }}</span>
+            {% if line.requires_alteration %}
+              <small>Compostura: {{ line.get_alteration_status_display }}{% if line.alteration_due_date %} · {{ line.alteration_due_date|date:"d/m/Y" }}{% endif %}</small>
+            {% endif %}
+          </td>
+          <td>${{ line.line_total }}</td>
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  <dl class="ticket-totals">
+    <div><dt>Total</dt><dd>${{ sale.total }}</dd></div>
+    <div><dt>Pagado</dt><dd>${{ sale.amount_paid }}</dd></div>
+    {% if sale.payment_method == "CASH" %}
+      <div><dt>Efectivo</dt><dd>${{ sale.cash_received }}</dd></div>
+      <div><dt>Cambio</dt><dd>${{ sale.change_due }}</dd></div>
+    {% endif %}
+    <div><dt>Saldo</dt><dd>${{ sale.balance_due }}</dd></div>
+  </dl>
+  <p class="ticket-note">Gracias por tu compra.</p>
+</div>

@@ -1,0 +1,74 @@
+{% extends "admin/base_admin.html" %}
+
+{% block title %}{{ title }}{% endblock %}
+
+{% block admin_content %}
+<div class="page-title-row">
+  <div>
+    <p class="eyebrow">CMS</p>
+    <h1>{{ title }}</h1>
+  </div>
+  <a class="btn btn-outline-secondary" href="{% url 'cms:dashboard' %}"><i class="bi bi-arrow-left" aria-hidden="true"></i>Volver</a>
+</div>
+
+<form class="editor-grid cms-editor" method="post" enctype="multipart/form-data" data-prevent-double-submit>
+  {% csrf_token %}
+  <section class="work-panel form-panel">
+    {{ form.non_field_errors }}
+    <div class="form-grid">
+      <label>{{ form.type.label }}{{ form.type }}{{ form.type.errors }}</label>
+      <label>{{ form.sort_order.label }}{{ form.sort_order }}{{ form.sort_order.errors }}</label>
+      <label>{{ form.title.label }}{{ form.title }}{{ form.title.errors }}</label>
+      <label>{{ form.subtitle.label }}{{ form.subtitle }}{{ form.subtitle.errors }}</label>
+      <label class="wide-field">{{ form.body.label }}{{ form.body }}{{ form.body.errors }}</label>
+      <label>{{ form.cta_label.label }}{{ form.cta_label }}{{ form.cta_label.errors }}</label>
+      <label>{{ form.cta_url.label }}{{ form.cta_url }}{{ form.cta_url.errors }}</label>
+      <label>{{ form.secondary_cta_label.label }}{{ form.secondary_cta_label }}{{ form.secondary_cta_label.errors }}</label>
+      <label>{{ form.secondary_cta_url.label }}{{ form.secondary_cta_url }}{{ form.secondary_cta_url.errors }}</label>
+      <label class="wide-field">{{ form.external_image_url.label }}{{ form.external_image_url }}{{ form.external_image_url.errors }}</label>
+      <label class="wide-field">{{ form.image.label }}{{ form.image }}{{ form.image.errors }}</label>
+    </div>
+
+    <div class="cms-item-editor">
+      <div class="section-heading">
+        <div>
+          <p class="eyebrow">Items</p>
+          <h2>Contenido repetible</h2>
+        </div>
+      </div>
+      {{ formset.management_form }}
+      {{ formset.non_form_errors }}
+      {% for item_form in formset %}
+        <article class="cms-item-form">
+          {{ item_form.id }}
+          <div class="form-grid">
+            <label>{{ item_form.title.label }}{{ item_form.title }}{{ item_form.title.errors }}</label>
+            <label>{{ item_form.sort_order.label }}{{ item_form.sort_order }}{{ item_form.sort_order.errors }}</label>
+            <label>{{ item_form.subtitle.label }}{{ item_form.subtitle }}{{ item_form.subtitle.errors }}</label>
+            <label>{{ item_form.cta_label.label }}{{ item_form.cta_label }}{{ item_form.cta_label.errors }}</label>
+            <label class="wide-field">{{ item_form.body.label }}{{ item_form.body }}{{ item_form.body.errors }}</label>
+            <label>{{ item_form.cta_url.label }}{{ item_form.cta_url }}{{ item_form.cta_url.errors }}</label>
+            <label class="wide-field">{{ item_form.external_image_url.label }}{{ item_form.external_image_url }}{{ item_form.external_image_url.errors }}</label>
+            <label class="wide-field">{{ item_form.image.label }}{{ item_form.image }}{{ item_form.image.errors }}</label>
+          </div>
+          <div class="cms-item-state">
+            <label class="form-check">{{ item_form.is_visible }} <span>{{ item_form.is_visible.label }}</span></label>
+            {% if item_form.DELETE %}
+              <label class="form-check">{{ item_form.DELETE }} <span>Eliminar item</span></label>
+            {% endif %}
+          </div>
+        </article>
+      {% endfor %}
+    </div>
+  </section>
+  <aside class="ops-card form-side">
+    <h2>Estado</h2>
+    <label>{{ form.status.label }}{{ form.status }}{{ form.status.errors }}</label>
+    <label class="form-check">{{ form.is_visible }} <span>{{ form.is_visible.label }}</span></label>
+    <button class="btn btn-primary w-100" type="submit"><i class="bi bi-check2" aria-hidden="true"></i>Guardar bloque</button>
+    {% if block.pk %}
+      <a class="btn btn-outline-secondary w-100" href="{% url 'cms:landing_preview' %}" target="_blank" rel="noopener"><i class="bi bi-eye" aria-hidden="true"></i>Vista previa</a>
+    {% endif %}
+  </aside>
+</form>
+{% endblock %}

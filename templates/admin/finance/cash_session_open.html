@@ -1,0 +1,30 @@
+{% extends "admin/base_admin.html" %}
+
+{% block title %}Abrir caja{% endblock %}
+
+{% block admin_content %}
+<div class="page-title-row">
+  <div>
+    <p class="eyebrow">Caja</p>
+    <h1>Abrir caja</h1>
+  </div>
+  <a class="btn btn-outline-secondary" href="{% url 'finance:dashboard' %}"><i class="bi bi-arrow-left" aria-hidden="true"></i>Finanzas</a>
+</div>
+
+<form class="editor-grid compact-editor" method="post" data-prevent-double-submit>
+  {% csrf_token %}
+  <section class="work-panel form-panel">
+    {{ form.non_field_errors }}
+    <div class="form-grid">
+      <label>{{ form.branch.label }}{{ form.branch }}{{ form.branch.errors }}</label>
+      <label>{{ form.opening_cash.label }}{{ form.opening_cash }}{{ form.opening_cash.errors }}</label>
+      <label class="wide-field">{{ form.notes.label }}{{ form.notes }}{{ form.notes.errors }}</label>
+    </div>
+  </section>
+  <aside class="ops-card form-side">
+    <h2>Apertura</h2>
+    <p class="empty-copy">La sucursal debe tener caja abierta para registrar ventas o liquidaciones.</p>
+    <button class="btn btn-primary w-100" type="submit"><i class="bi bi-unlock" aria-hidden="true"></i>Abrir caja</button>
+  </aside>
+</form>
+{% endblock %}

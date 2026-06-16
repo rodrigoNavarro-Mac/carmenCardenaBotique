@@ -1,0 +1,16 @@
+<section id="destacados" class="content-band">
+  <div class="section-heading">
+    <div>
+      <p class="eyebrow">{{ block.subtitle|default:"Seleccion de temporada" }}</p>
+      <h2>{{ block.title|default:"Destacados" }}</h2>
+      {% if block.body %}<p>{{ block.body }}</p>{% endif %}
+    </div>
+    <form class="filter-pills" hx-get="{% url 'landing_featured' %}" hx-target="#featured-products" hx-swap="outerHTML">
+      <button class="pill is-active" name="categoria" value="todo" type="submit">Todo</button>
+      <button class="pill" name="categoria" value="noche" type="submit">Noche</button>
+      <button class="pill" name="categoria" value="oficina" type="submit">Oficina</button>
+      <button class="pill" name="categoria" value="accesorios" type="submit">Accesorios</button>
+    </form>
+  </div>
+  {% include "public/partials/featured_products.html" %}
+</section>

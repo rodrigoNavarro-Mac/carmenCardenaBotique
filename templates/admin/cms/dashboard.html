@@ -6,14 +6,18 @@
 <div class="page-title-row">
   <div>
     <p class="eyebrow">CMS</p>
-    <h1>Contenido publico</h1>
+    <h1>Landing publica</h1>
   </div>
   <div class="page-actions">
+    {% if admin_permissions.cms.can_view %}
+      <a class="btn btn-outline-secondary" href="{% url 'cms:landing_preview' %}" target="_blank" rel="noopener"><i class="bi bi-eye" aria-hidden="true"></i>Vista previa</a>
+      <a class="btn btn-outline-secondary" href="/"><i class="bi bi-globe2" aria-hidden="true"></i>Ver sitio</a>
+    {% endif %}
     {% if admin_permissions.cms.can_edit %}
-      <a class="btn btn-outline-secondary" href="{% url 'cms:landing_config_edit' %}"><i class="bi bi-pencil" aria-hidden="true"></i>Editar landing</a>
+      <a class="btn btn-outline-secondary" href="{% url 'cms:landing_page_edit' %}"><i class="bi bi-sliders" aria-hidden="true"></i>Datos generales</a>
     {% endif %}
     {% if admin_permissions.cms.can_create %}
-      <a class="btn btn-primary" href="{% url 'cms:gallery_create' %}"><i class="bi bi-plus-lg" aria-hidden="true"></i>Nueva imagen</a>
+      <a class="btn btn-primary" href="{% url 'cms:block_create' %}"><i class="bi bi-plus-lg" aria-hidden="true"></i>Nuevo bloque</a>
     {% endif %}
   </div>
 </div>
@@ -26,68 +30,173 @@
   </div>
 {% endif %}
 
-<section class="module-summary-grid">
+<section class="module-summary-grid cms-summary-grid">
   <article>
     <span>Nombre publico</span>
-    <strong class="compact-value">{{ config.boutique_name|default:"Sin configurar" }}</strong>
+    <strong class="compact-value">{{ page.boutique_name }}</strong>
   </article>
   <article>
-    <span>Imagenes</span>
-    <strong>{{ gallery_count }}</strong>
+    <span>Bloques</span>
+    <strong>{{ block_count }}</strong>
   </article>
   <article>
-    <span>Publicadas</span>
+    <span>Publicados</span>
     <strong>{{ published_count }}</strong>
   </article>
   <article>
-    <span>Landing</span>
-    <strong>{% if config.is_active %}Activa{% else %}Inactiva{% endif %}</strong>
+    <span>Borradores</span>
+    <strong>{{ draft_count }}</strong>
   </article>
 </section>
 
-<section class="work-panel">
-  <div class="section-heading">
-    <div>
-      <p class="eyebrow">Galeria</p>
-      <h2>Imagenes publicas</h2>
+<section
+  class="cms-builder-shell"
+  data-cms-builder
+  data-preview-base="{% url 'cms:landing_preview' %}"
+>
+  <aside class="cms-outline-panel">
+    <div class="cms-panel-head">
+      <div>
+        <p class="eyebrow">Estructura</p>
+        <h2>Bloques</h2>
+      </div>
+      {% if admin_permissions.cms.can_edit %}
+        <span class="cms-drag-note"><i class="bi bi-grip-vertical" aria-hidden="true"></i>Arrastra para ordenar</span>
+      {% endif %}
     </div>
-  </div>
-  <div class="cms-gallery-grid">
-    {% for image in gallery %}
-      <article class="cms-gallery-card">
-        <div class="cms-gallery-media">
-          {% if image.image %}
-            <img src="{{ image.image.url }}" alt="{{ image.title }}">
-          {% elif image.external_image_url %}
-            <img src="{{ image.external_image_url }}" alt="{{ image.title }}">
-          {% endif %}
-        </div>
-        <div>
-          <h3>{{ image.title }}</h3>
-          <p>Orden {{ image.sort_order }}{% if image.product %} · {{ image.product.name }}{% endif %}</p>
-        </div>
-        <div class="row-actions">
-          {% if image.is_published %}
-            <span class="badge text-bg-success">Publicada</span>
+
+    <div
+      class="cms-outline-list"
+      {% if admin_permissions.cms.can_edit %}
+        data-cms-outline
+        data-reorder-url="{% url 'cms:block_reorder' %}"
+        data-csrf="{{ csrf_token }}"
+      {% endif %}
+    >
+      {% for block in blocks %}
+        <article
+          class="cms-outline-item{% if selected_block and selected_block.id == block.id %} is-active{% endif %}"
+          data-block-id="{{ block.id }}"
+          data-preview-url="{% url 'cms:landing_preview' %}?selected_block={{ block.id }}"
+          tabindex="0"
+        >
+          <div class="cms-outline-main">
+            {% if admin_permissions.cms.can_edit %}
+              <button class="cms-drag-handle" type="button" title="Arrastrar bloque" aria-label="Arrastrar bloque" data-cms-drag-handle><i class="bi bi-grip-vertical" aria-hidden="true"></i></button>
+            {% endif %}
+            <div>
+              <div class="cms-outline-kicker">
+                <span data-order-label>{{ block.sort_order }}</span>
+                <span>{{ block.get_type_display }}</span>
+              </div>
+              <h3>{{ block.title }}</h3>
+              <p>{{ block.subtitle|default:block.body|truncatechars:82 }}</p>
+            </div>
+          </div>
+          <div class="cms-outline-meta">
+            {% if block.status == "PUBLISHED" %}
+              <span class="badge text-bg-success">Publicado</span>
+            {% else %}
+              <span class="badge text-bg-secondary">Borrador</span>
+            {% endif %}
+            {% if not block.is_visible %}
+              <span class="badge text-bg-warning">Oculto</span>
+            {% endif %}
+          </div>
+        </article>
+      {% empty %}
+        <p class="empty-copy">No hay bloques configurados. Crea el primer bloque para construir la landing.</p>
+      {% endfor %}
+    </div>
+  </aside>
+
+  <section class="cms-preview-panel">
+    <div class="cms-panel-head">
+      <div>
+        <p class="eyebrow">Preview real</p>
+        <h2>Landing renderizada</h2>
+      </div>
+      <div class="cms-preview-actions">
+        <button class="btn btn-outline-secondary btn-sm" type="button" data-cms-refresh-preview><i class="bi bi-arrow-clockwise" aria-hidden="true"></i>Recargar</button>
+        <a class="btn btn-outline-secondary btn-sm" href="{% url 'cms:landing_preview' %}{% if selected_block %}?selected_block={{ selected_block.id }}{% endif %}" target="_blank" rel="noopener" data-cms-open-preview><i class="bi bi-box-arrow-up-right" aria-hidden="true"></i>Abrir</a>
+      </div>
+    </div>
+    <div class="cms-preview-browser">
+      <iframe
+        title="Vista previa de landing"
+        src="{% url 'cms:landing_preview' %}{% if selected_block %}?selected_block={{ selected_block.id }}{% endif %}"
+        data-cms-preview-frame
+      ></iframe>
+    </div>
+  </section>
+
+  <aside class="cms-inspector-panel">
+    <div class="cms-panel-head">
+      <div>
+        <p class="eyebrow">Inspector</p>
+        <h2>Bloque</h2>
+      </div>
+    </div>
+    {% for block in blocks %}
+      <article class="cms-inspector-card{% if not selected_block or selected_block.id != block.id %} is-hidden{% endif %}" data-inspector-for="{{ block.id }}">
+        <div class="cms-inspector-title">
+          <span class="badge text-bg-light">{{ block.get_type_display }}</span>
+          {% if block.status == "PUBLISHED" %}
+            <span class="badge text-bg-success">Publicado</span>
           {% else %}
-            <span class="badge text-bg-secondary">Oculta</span>
+            <span class="badge text-bg-secondary">Borrador</span>
           {% endif %}
-          {% if admin_permissions.cms.can_edit %}
-            <a class="btn btn-sm btn-outline-secondary" href="{% url 'cms:gallery_update' image.id %}"><i class="bi bi-pencil" aria-hidden="true"></i>Editar</a>
+          {% if not block.is_visible %}
+            <span class="badge text-bg-warning">Oculto</span>
           {% endif %}
-          {% if admin_permissions.cms.can_delete %}
-            <form method="post" action="{% url 'cms:gallery_toggle' image.id %}">
+        </div>
+        <h3>{{ block.title }}</h3>
+        <p>{{ block.subtitle|default:block.body|default:"Sin descripcion"|truncatechars:180 }}</p>
+        <dl class="cms-inspector-facts">
+          <div>
+            <dt>Orden</dt>
+            <dd data-order-label>{{ block.sort_order }}</dd>
+          </div>
+          <div>
+            <dt>Items</dt>
+            <dd>{{ block.items.count }}</dd>
+          </div>
+          <div>
+            <dt>Actualizado</dt>
+            <dd>{{ block.updated_at|date:"d/m/Y H:i" }}</dd>
+          </div>
+        </dl>
+        {% if admin_permissions.cms.can_edit %}
+          <div class="cms-inspector-actions">
+            <a class="btn btn-primary w-100" href="{% url 'cms:block_update' block.id %}"><i class="bi bi-pencil" aria-hidden="true"></i>Editar bloque</a>
+            <div class="cms-order-buttons">
+              <form method="post" action="{% url 'cms:block_move' block.id 'up' %}">
+                {% csrf_token %}
+                <button class="btn btn-outline-secondary btn-sm" type="submit"><i class="bi bi-arrow-up" aria-hidden="true"></i>Subir</button>
+              </form>
+              <form method="post" action="{% url 'cms:block_move' block.id 'down' %}">
+                {% csrf_token %}
+                <button class="btn btn-outline-secondary btn-sm" type="submit"><i class="bi bi-arrow-down" aria-hidden="true"></i>Bajar</button>
+              </form>
+            </div>
+            <form method="post" action="{% url 'cms:block_publish_toggle' block.id %}">
               {% csrf_token %}
-              <button class="btn btn-sm btn-outline-secondary" type="submit" data-confirm="Cambiar la publicacion de esta imagen?">
-                {% if image.is_published %}<i class="bi bi-eye-slash" aria-hidden="true"></i>Ocultar{% else %}<i class="bi bi-eye" aria-hidden="true"></i>Publicar{% endif %}
+              <button class="btn btn-outline-secondary w-100" type="submit">
+                {% if block.status == "PUBLISHED" %}<i class="bi bi-cloud-slash" aria-hidden="true"></i>Pasar a borrador{% else %}<i class="bi bi-cloud-check" aria-hidden="true"></i>Publicar{% endif %}
               </button>
             </form>
-          {% endif %}
-        </div>
+            <form method="post" action="{% url 'cms:block_visibility_toggle' block.id %}">
+              {% csrf_token %}
+              <button class="btn btn-outline-secondary w-100" type="submit">
+                {% if block.is_visible %}<i class="bi bi-eye-slash" aria-hidden="true"></i>Ocultar{% else %}<i class="bi bi-eye" aria-hidden="true"></i>Mostrar{% endif %}
+              </button>
+            </form>
+          </div>
+        {% endif %}
       </article>
     {% empty %}
-      <p class="empty-copy">No hay imagenes de galeria.</p>
+      <p class="empty-copy">Selecciona o crea un bloque para ver sus acciones.</p>
     {% endfor %}
-  </div>
+  </aside>
 </section>
 {% endblock %}
