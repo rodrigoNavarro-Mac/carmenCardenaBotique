@@ -15,7 +15,6 @@
     {% endif %}
     {% if admin_permissions.cms.can_edit %}
       <a class="btn btn-outline-secondary" href="{% url 'cms:landing_page_edit' %}"><i class="bi bi-sliders" aria-hidden="true"></i>Datos generales</a>
-      <a class="btn btn-primary" href="{% url 'cms:palette_list' %}"><i class="bi bi-palette" aria-hidden="true"></i>Paletas</a>
     {% endif %}
   </div>
 </div>
@@ -42,8 +41,8 @@
     <strong>{{ published_count }}</strong>
   </article>
   <article>
-    <span>Paleta activa</span>
-    <strong class="compact-value">{{ active_palette.name|default:"Base" }}</strong>
+    <span>Identidad visual</span>
+    <strong class="compact-value">Paleta fija</strong>
   </article>
 </section>
 

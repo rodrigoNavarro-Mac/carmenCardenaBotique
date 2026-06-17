@@ -1,0 +1,118 @@
+{% extends "base.html" %}
+
+{% block title %}Catalogo de renta{% endblock %}
+
+{% block body %}
+<main id="main-content" class="public-shell boutique-catalog-page" tabindex="-1">
+  {% include "public/includes/navbar.html" with public_nav_current="catalog" %}
+
+  <section class="catalog-showcase">
+    {% if messages %}
+      <div class="message-stack">
+        {% for message in messages %}
+          <div class="alert alert-{{ message.tags|default:'info' }}">{{ message }}</div>
+        {% endfor %}
+      </div>
+    {% endif %}
+    <div class="catalog-showcase-copy">
+      <p class="catalog-kicker">Renta por 24 horas sin pago web</p>
+      <h1>Prendas listas para apartar en tienda</h1>
+      <p>Explora disponibilidad real por sucursal, arma tu apartado y presenta el codigo en caja.</p>
+    </div>
+    <div class="catalog-showcase-panel">
+      <span>{{ page_obj.paginator.count }} piezas rentables</span>
+      <a href="{% url 'rentals:rental_cart' %}">Ver apartado</a>
+    </div>
+  </section>
+
+  <section class="catalog-filter-strip">
+    <form class="catalog-filter-form" method="get">
+      <label class="catalog-search">
+        <i class="bi bi-search" aria-hidden="true"></i>
+        <input type="search" name="q" value="{{ request.GET.q }}" placeholder="Buscar vestido, blazer, SKU">
+      </label>
+      <select name="category" aria-label="Categoria">
+        <option value="">Categorias</option>
+        {% for category in categories %}
+          <option value="{{ category.id }}" {% if request.GET.category == category.id|stringformat:"s" %}selected{% endif %}>{{ category.name }}</option>
+        {% endfor %}
+      </select>
+      <select name="brand" aria-label="Marca">
+        <option value="">Marcas</option>
+        {% for brand in brands %}
+          <option value="{{ brand.id }}" {% if request.GET.brand == brand.id|stringformat:"s" %}selected{% endif %}>{{ brand.name }}</option>
+        {% endfor %}
+      </select>
+      <select name="branch" aria-label="Sucursal">
+        <option value="">Sucursales</option>
+        {% for branch in branches %}
+          <option value="{{ branch.id }}" {% if request.GET.branch == branch.id|stringformat:"s" %}selected{% endif %}>{{ branch.name }}</option>
+        {% endfor %}
+      </select>
+      <button type="submit">Filtrar</button>
+    </form>
+  </section>
+
+  <section class="catalog-product-section">
+    <div class="boutique-product-grid">
+      {% for card in cards %}
+        {% with product=card.product %}
+          <article class="boutique-product-card">
+            <div class="boutique-product-media">
+              {% if product.image %}
+                <img src="{{ product.image.url }}" alt="{{ product.name }}">
+              {% elif product.external_image_url %}
+                <img src="{{ product.external_image_url }}" alt="{{ product.name }}">
+              {% else %}
+                <div class="product-image-placeholder">CC</div>
+              {% endif %}
+              {% if card.availability %}
+                <span class="product-rental-badge">Renta</span>
+              {% endif %}
+            </div>
+            <div class="boutique-product-info">
+              <div class="boutique-product-heading">
+                <div>
+                  <span>{{ product.category.name|default:"Boutique" }}</span>
+                  <h2>{{ product.name }}</h2>
+                </div>
+                <strong>${{ product.rental_price|default:"0.00" }}</strong>
+              </div>
+              <p>{{ product.brand.name|default:"Seleccion Carmen Cardena" }}</p>
+              <div class="product-availability-copy">
+                {% if card.availability %}
+                  {% for item in card.availability %}
+                    <span>{{ item.label }} en {{ item.branch.name }}</span>
+                  {% endfor %}
+                {% else %}
+                  <span>No disponible para renta</span>
+                {% endif %}
+              </div>
+              {% if product.rental_deposit %}
+                <small>Deposito en caja: ${{ product.rental_deposit }}</small>
+              {% endif %}
+              {% if card.availability %}
+                <form class="boutique-add-form" method="post" action="{% url 'rentals:rental_cart_add' product.id %}">
+                  {% csrf_token %}
+                  <select name="branch" aria-label="Sucursal para {{ product.name }}" required>
+                    {% for item in card.availability %}
+                      <option value="{{ item.branch.id }}">{{ item.branch.name }}</option>
+                    {% endfor %}
+                  </select>
+                  <input type="hidden" name="quantity" value="1">
+                  <button type="submit">Apartar</button>
+                </form>
+              {% endif %}
+            </div>
+          </article>
+        {% endwith %}
+      {% empty %}
+        <div class="catalog-empty-state">
+          <h2>No encontramos prendas con esos filtros</h2>
+          <a href="{% url 'rentals:public_catalog' %}">Ver todo el catalogo</a>
+        </div>
+      {% endfor %}
+    </div>
+  </section>
+</main>
+{% endblock %}

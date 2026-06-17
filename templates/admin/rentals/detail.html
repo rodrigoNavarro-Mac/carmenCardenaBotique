@@ -1,0 +1,67 @@
+{% extends "admin/base_admin.html" %}
+
+{% block title %}Renta {{ reservation.code }}{% endblock %}
+
+{% block admin_content %}
+<div class="page-title-row">
+  <div>
+    <p class="eyebrow">Verificacion en caja</p>
+    <h1>{{ reservation.code }}</h1>
+  </div>
+  <a class="btn btn-outline-secondary" href="{% url 'rentals:admin_reservation_list' %}"><i class="bi bi-arrow-left" aria-hidden="true"></i>Volver</a>
+</div>
+
+{% if messages %}
+  <div class="message-stack">
+    {% for message in messages %}
+      <div class="alert alert-{{ message.tags|default:'info' }}">{{ message }}</div>
+    {% endfor %}
+  </div>
+{% endif %}
+
+<div class="admin-grid">
+  <section class="work-panel">
+    <h2>Prendas</h2>
+    <div class="rental-cart-list">
+      {% for line in reservation.lines.all %}
+        <article class="rental-cart-row">
+          <div>
+            <strong>{{ line.product.name }}</strong>
+            <span>{{ line.branch.name }} · {{ line.quantity }} pieza{% if line.quantity != 1 %}s{% endif %} · Renta ${{ line.rental_price }} · Deposito ${{ line.rental_deposit }}</span>
+          </div>
+        </article>
+      {% endfor %}
+    </div>
+  </section>
+
+  <aside class="ops-card">
+    <h2>Cliente</h2>
+    <p><strong>{{ reservation.customer_name }}</strong></p>
+    {% if reservation.customer %}
+      <p><a href="{% url 'customers:customer_detail' reservation.customer.id %}">Ver ficha de cliente</a></p>
+    {% endif %}
+    <p>{{ reservation.customer_phone }}</p>
+    <p>Estado: <strong>{{ reservation.get_status_display }}</strong></p>
+    <p>Vence: {{ reservation.expires_at|date:"d/m/Y H:i" }}</p>
+    {% if reservation.pickup_date %}<p>Recogida: {{ reservation.pickup_date|date:"d/m/Y" }}</p>{% endif %}
+    <p>Renta estimada: <strong>${{ reservation.total_rental }}</strong></p>
+    <p>Deposito estimado: <strong>${{ reservation.total_deposit }}</strong></p>
+    {% if reservation.notes %}<p>{{ reservation.notes }}</p>{% endif %}
+    {% if reservation.status == "PENDING" %}
+      <form method="post" action="{% url 'rentals:admin_reservation_rent' reservation.code %}">
+        {% csrf_token %}
+        <button class="btn btn-primary w-100" type="submit"><i class="bi bi-box-arrow-up-right" aria-hidden="true"></i>Entregar renta</button>
+      </form>
+      <form method="post" action="{% url 'rentals:admin_reservation_cancel' reservation.code %}">
+        {% csrf_token %}
+        <button class="btn btn-outline-secondary w-100 mt-2" type="submit"><i class="bi bi-x-circle" aria-hidden="true"></i>Cancelar apartado</button>
+      </form>
+    {% elif reservation.status == "RENTED" %}
+      <form method="post" action="{% url 'rentals:admin_reservation_return' reservation.code %}">
+        {% csrf_token %}
+        <button class="btn btn-primary w-100" type="submit"><i class="bi bi-arrow-return-left" aria-hidden="true"></i>Marcar devolucion</button>
+      </form>
+    {% endif %}
+  </aside>
+</div>
+{% endblock %}

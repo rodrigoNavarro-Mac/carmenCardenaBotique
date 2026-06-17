@@ -30,6 +30,8 @@ class InventoryMovement(models.Model):
         TRANSFER_IN = "TRANSFER_IN", "Transferencia entrada"
         ADJUSTMENT = "ADJUSTMENT", "Ajuste"
         WASTE = "WASTE", "Merma"
+        RENTAL_OUT = "RENTAL_OUT", "Renta salida"
+        RENTAL_RETURN = "RENTAL_RETURN", "Renta devolucion"
 
     branch = models.ForeignKey("branches.Branch", on_delete=models.PROTECT)
     product = models.ForeignKey("catalog.Product", on_delete=models.PROTECT)

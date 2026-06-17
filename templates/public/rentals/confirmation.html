@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+
+{% block title %}Codigo de apartado {{ reservation.code }}{% endblock %}
+
+{% block body %}
+<main id="main-content" class="public-shell boutique-catalog-page rental-flow-page" tabindex="-1">
+  {% include "public/includes/navbar.html" with public_nav_current="catalog" %}
+  <section class="content-band reservation-confirmation rental-confirmation-panel">
+    <p class="catalog-kicker">Apartado creado</p>
+    <h1>{{ reservation.code }}</h1>
+    <p>Presenta este codigo en caja. Tu apartado vence el {{ reservation.expires_at|date:"d/m/Y H:i" }}.</p>
+    <div class="rental-cart-list">
+      {% for line in reservation.lines.all %}
+        <article class="rental-cart-row">
+          <div>
+            <strong>{{ line.product.name }}</strong>
+            <span>{{ line.branch.name }} - {{ line.quantity }} pieza{% if line.quantity != 1 %}s{% endif %}</span>
+          </div>
+        </article>
+      {% endfor %}
+    </div>
+    <div class="hero-actions">
+      <a class="btn btn-primary" href="{% url 'rentals:public_catalog' %}">Seguir viendo catalogo</a>
+      <a class="btn btn-outline-secondary" href="{% url 'landing' %}">Volver al inicio</a>
+    </div>
+  </section>
+</main>
+{% endblock %}

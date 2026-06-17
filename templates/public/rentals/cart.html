@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+
+{% block title %}Apartado de renta{% endblock %}
+
+{% block body %}
+<main id="main-content" class="public-shell boutique-catalog-page rental-flow-page" tabindex="-1">
+  {% include "public/includes/navbar.html" with public_nav_current="catalog" %}
+
+  <section class="content-band rental-checkout-grid rental-flow-section">
+    <div>
+      {% if messages %}
+        <div class="message-stack">
+          {% for message in messages %}
+            <div class="alert alert-{{ message.tags|default:'info' }}">{{ message }}</div>
+          {% endfor %}
+        </div>
+      {% endif %}
+      <p class="catalog-kicker">Apartado</p>
+      <h1>Confirma tus prendas</h1>
+      <p>Tu codigo se genera sin pago web y queda vigente durante 24 horas.</p>
+      <div class="rental-cart-list">
+        {% for item in cart_items %}
+          <article class="rental-cart-row">
+            <div>
+              <strong>{{ item.product.name }}</strong>
+              <span>{{ item.branch.name }} - ${{ item.product.rental_price|default:"0.00" }} renta{% if item.product.rental_deposit %} - ${{ item.product.rental_deposit }} deposito{% endif %}</span>
+            </div>
+            <form method="post" action="{% url 'rentals:rental_cart_remove' forloop.counter0 %}">
+              {% csrf_token %}
+              <button class="btn btn-sm btn-outline-secondary" type="submit"><i class="bi bi-trash" aria-hidden="true"></i>Quitar</button>
+            </form>
+          </article>
+        {% empty %}
+          <p class="empty-copy">Aun no tienes prendas en el apartado.</p>
+        {% endfor %}
+      </div>
+      {% if cart_items %}
+        <div class="rental-summary">
+          <span>Renta estimada: <strong>${{ cart_total }}</strong></span>
+          <span>Deposito estimado: <strong>${{ deposit_total }}</strong></span>
+        </div>
+      {% endif %}
+    </div>
+
+    <form class="work-panel public-reservation-form rental-flow-form" method="post" data-prevent-double-submit>
+      {% csrf_token %}
+      {{ form.non_field_errors }}
+      <label>{{ form.customer_name.label }}{{ form.customer_name }}{{ form.customer_name.errors }}</label>
+      <label>{{ form.customer_phone.label }}{{ form.customer_phone }}{{ form.customer_phone.errors }}</label>
+      <label>{{ form.pickup_date.label }}{{ form.pickup_date }}{{ form.pickup_date.errors }}</label>
+      <label>{{ form.notes.label }}{{ form.notes }}{{ form.notes.errors }}</label>
+      <button class="btn btn-primary w-100" type="submit" {% if not cart_items %}disabled{% endif %}><i class="bi bi-check2" aria-hidden="true"></i>Generar codigo</button>
+    </form>
+  </section>
+</main>
+{% endblock %}

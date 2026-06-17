@@ -1,0 +1,44 @@
+<nav class="boutique-catalog-nav boutique-public-nav">
+  <a class="catalog-wordmark" href="{% url 'landing' %}">
+    {% if config.logo_url %}
+      <span class="brand-logo-frame"><img class="brand-logo" src="{{ config.logo_url }}" alt="{{ config.logo_alt }}"></span>
+    {% elif active_branding.logo_url %}
+      <span class="brand-logo-frame"><img class="brand-logo" src="{{ active_branding.logo_url }}" alt="{{ active_branding.logo_alt }}"></span>
+    {% else %}
+      {% if page.boutique_name %}
+        <span>{{ page.boutique_name }}</span>
+      {% elif config.boutique_name %}
+        <span>{{ config.boutique_name }}</span>
+      {% elif active_branding.boutique_name %}
+        <span>{{ active_branding.boutique_name }}</span>
+      {% else %}
+        <span>Carmen Cardena</span>
+      {% endif %}
+      <small>Boutique</small>
+    {% endif %}
+  </a>
+  <div class="catalog-nav-links">
+    {% if public_nav_current == "landing" %}
+      <a href="#destacados">Destacados</a>
+      <a href="{% url 'rentals:public_catalog' %}">Catalogo</a>
+      <a href="#experiencia">Experiencia</a>
+      <a href="#galeria">Galeria</a>
+      <a href="#sucursales">Sucursales</a>
+    {% else %}
+      <a href="{% url 'landing' %}#destacados">Destacados</a>
+      <a href="{% url 'rentals:public_catalog' %}">Catalogo</a>
+      <a href="{% url 'landing' %}#experiencia">Experiencia</a>
+      <a href="{% url 'landing' %}#galeria">Galeria</a>
+      <a href="{% url 'landing' %}#sucursales">Sucursales</a>
+    {% endif %}
+    {% if config.instagram_url %}
+      <a href="{{ config.instagram_url }}">Instagram</a>
+    {% elif active_branding.instagram_url %}
+      <a href="{{ active_branding.instagram_url }}">Instagram</a>
+    {% endif %}
+    <a class="catalog-bag-link" href="{% url 'rentals:rental_cart' %}" aria-label="Ver apartado">
+      <i class="bi bi-bag" aria-hidden="true"></i>
+      {% if cart_count %}<span>{{ cart_count }}</span>{% endif %}
+    </a>
+  </div>
+</nav>

@@ -8,14 +8,13 @@ from django.views.decorators.clickjacking import xframe_options_sameorigin
 from django.views.decorators.http import require_POST
 
 from .forms import (
-    ColorPaletteForm,
     GalleryImageForm,
     LandingBlockForm,
     LandingBlockItemFormSet,
     LandingConfigForm,
     LandingPageForm,
 )
-from .models import ColorPalette, GalleryImage, LandingBlock, LandingConfig, LandingPage
+from .models import GalleryImage, LandingBlock, LandingConfig, LandingPage
 
 
 def get_landing_page():
@@ -41,7 +40,6 @@ def cms_dashboard(request):
     page = get_landing_page()
     blocks = page.blocks.prefetch_related("items")
     selected_block = blocks.first()
-    active_palette = ColorPalette.objects.filter(is_active=True).first()
     return render(
         request,
         "admin/cms/dashboard.html",
@@ -53,7 +51,6 @@ def cms_dashboard(request):
             "block_count": blocks.count(),
             "block_types": LandingBlock.BlockType.choices,
             "selected_block": selected_block,
-            "active_palette": active_palette,
         },
     )
 
@@ -196,55 +193,27 @@ def landing_config_edit(request):
 
 @login_required
 def palette_list(request):
-    palettes = ColorPalette.objects.all()
-    return render(
-        request,
-        "admin/cms/palette_list.html",
-        {
-            "palettes": palettes,
-            "active_palette": palettes.filter(is_active=True).first(),
-        },
-    )
+    messages.info(request, "La paleta esta fija en static/css/palette.css para mantener consistencia visual.")
+    return redirect("cms:dashboard")
 
 
 @login_required
 def palette_create(request):
-    form = ColorPaletteForm(request.POST or None)
-    if request.method == "POST" and form.is_valid():
-        palette = form.save()
-        if palette.is_active:
-            ColorPalette.objects.exclude(pk=palette.pk).update(is_active=False)
-        messages.success(request, "Paleta creada.")
-        return redirect("cms:palette_list")
-    return render(request, "admin/cms/palette_form.html", {"form": form, "title": "Nueva paleta"})
+    messages.info(request, "La edicion de paletas desde CMS esta desactivada.")
+    return redirect("cms:dashboard")
 
 
 @login_required
 def palette_update(request, pk):
-    palette = get_object_or_404(ColorPalette, pk=pk)
-    form = ColorPaletteForm(request.POST or None, instance=palette)
-    if request.method == "POST" and form.is_valid():
-        palette = form.save()
-        if palette.is_active:
-            ColorPalette.objects.exclude(pk=palette.pk).update(is_active=False)
-        messages.success(request, "Paleta actualizada.")
-        return redirect("cms:palette_list")
-    return render(
-        request,
-        "admin/cms/palette_form.html",
-        {"form": form, "title": "Editar paleta", "palette": palette},
-    )
+    messages.info(request, "La edicion de paletas desde CMS esta desactivada.")
+    return redirect("cms:dashboard")
 
 
 @login_required
 @require_POST
 def palette_activate(request, pk):
-    palette = get_object_or_404(ColorPalette, pk=pk)
-    ColorPalette.objects.update(is_active=False)
-    palette.is_active = True
-    palette.save(update_fields=["is_active", "updated_at"])
-    messages.success(request, f"Paleta {palette.name} activada.")
-    return redirect("cms:palette_list")
+    messages.info(request, "La activacion de paletas desde CMS esta desactivada.")
+    return redirect("cms:dashboard")
 
 
 @login_required

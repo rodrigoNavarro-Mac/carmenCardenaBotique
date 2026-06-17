@@ -41,6 +41,10 @@ class Product(TimeStampedModel):
     external_image_url = models.URLField(blank=True)
     is_active = models.BooleanField(default=True)
     is_featured = models.BooleanField(default=False)
+    is_rentable = models.BooleanField(default=False)
+    rental_price = models.DecimalField(max_digits=12, decimal_places=2, null=True, blank=True)
+    rental_deposit = models.DecimalField(max_digits=12, decimal_places=2, null=True, blank=True)
+    rental_terms = models.CharField(max_length=180, blank=True)
 
     class Meta:
         ordering = ["name"]

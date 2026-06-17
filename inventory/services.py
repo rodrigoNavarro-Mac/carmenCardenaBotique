@@ -15,6 +15,7 @@ def register_stock_movement(*, branch, product, movement_type, quantity, user=No
         InventoryMovement.MovementType.IN,
         InventoryMovement.MovementType.RETURN,
         InventoryMovement.MovementType.TRANSFER_IN,
+        InventoryMovement.MovementType.RENTAL_RETURN,
     ]:
         item.quantity += quantity
     elif movement_type == InventoryMovement.MovementType.ADJUSTMENT:

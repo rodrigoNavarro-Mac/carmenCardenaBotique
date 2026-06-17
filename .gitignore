@@ -7,3 +7,4 @@ staticfiles/
 .env
 .coverage
 htmlcov/
+codex-skill-set/

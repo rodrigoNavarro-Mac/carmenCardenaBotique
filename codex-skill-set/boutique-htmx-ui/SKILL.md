@@ -41,6 +41,16 @@ templates/
 
 Keep reusable widgets in includes or template tags only when they remove real duplication.
 
+## Mandatory Public UI Consistency
+
+- Reuse `templates/public/includes/navbar.html` for every public-facing page: landing, catalog, rental cart, rental confirmation, future public detail pages, and CMS preview surfaces where applicable.
+- Do not create another public navbar, brand mark, cart link, or public navigation variant in page templates. Add links or state to the shared include instead.
+- Keep public pages on the shared palette tokens from `static/css/palette.css`: `--public-bg`, `--public-surface`, `--public-ink`, `--public-muted`, `--public-accent`, `--public-accent-2`, `--public-gold`, `--public-line`, `--public-line-strong`, and `--public-inverse`.
+- Do not hardcode public page colors unless defining/updating the palette tokens themselves.
+- Treat `static/css/palette.css` as the source of truth for identity colors. Palette switching from CMS is intentionally disabled; do not reintroduce runtime palette injection in `base.html`.
+- Admin/dashboard screens must use the same boutique palette tokens as landing/catalog. Do not create a separate admin color identity.
+- After any public UI change, verify that `/`, `/catalogo/`, `/apartado/`, and a rental confirmation page when available use the same navbar and color language.
+
 ## Screen Standards
 
 - Lists include search/filter controls, empty state, permission-aware actions, and pagination.

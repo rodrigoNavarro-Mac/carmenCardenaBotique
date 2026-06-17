@@ -1,32 +1,46 @@
-<div id="featured-products" class="product-grid">
+<div id="featured-products" class="boutique-product-grid landing-product-grid">
   {% for product in featured_products %}
-    <article class="product-card">
-      <div class="media-tile">
+    <article class="boutique-product-card">
+      <div class="boutique-product-media">
         {% if product.image %}
           <img src="{{ product.image.url }}" alt="{{ product.name }}">
         {% elif product.external_image_url %}
           <img src="{{ product.external_image_url }}" alt="{{ product.name }}">
+        {% else %}
+          <div class="product-image-placeholder">CC</div>
+        {% endif %}
+        {% if product.is_rentable %}<span class="product-rental-badge">Renta</span>{% endif %}
+      </div>
+      <div class="boutique-product-info">
+        <div class="boutique-product-heading">
+          <div>
+            <span>{{ product.category.name|default:"Boutique" }}</span>
+            <h2>{{ product.name }}</h2>
+          </div>
+          <strong>${{ product.sale_price }}</strong>
+        </div>
+        <p>{{ product.brand.name|default:"Seleccion Carmen Cardena" }}</p>
+        {% if product.is_rentable %}
+          <a class="landing-product-link" href="{% url 'rentals:public_catalog' %}?q={{ product.name|urlencode }}">Apartar renta</a>
         {% endif %}
       </div>
-      <div class="product-meta">
-        <span>{{ product.category.name|default:"Boutique" }}</span>
-        <strong>${{ product.sale_price }}</strong>
-      </div>
-      <h3>{{ product.name }}</h3>
-      <p>{{ product.brand.name|default:"Seleccion Carmen Cardena" }}</p>
     </article>
   {% empty %}
     {% for product in fallback_products %}
-      <article class="product-card">
-        <div class="media-tile">
+      <article class="boutique-product-card">
+        <div class="boutique-product-media">
           <img src="{{ product.image_url }}" alt="{{ product.name }}">
         </div>
-        <div class="product-meta">
-          <span>{{ product.category }}</span>
-          <strong>${{ product.price }}</strong>
+        <div class="boutique-product-info">
+          <div class="boutique-product-heading">
+            <div>
+              <span>{{ product.category }}</span>
+              <h2>{{ product.name }}</h2>
+            </div>
+            <strong>${{ product.price }}</strong>
+          </div>
+          <p>Seleccion Carmen Cardena</p>
         </div>
-        <h3>{{ product.name }}</h3>
-        <p>Seleccion Carmen Cardena</p>
       </article>
     {% endfor %}
   {% endfor %}

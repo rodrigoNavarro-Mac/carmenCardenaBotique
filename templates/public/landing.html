@@ -3,28 +3,11 @@
 {% block title %}{{ page.boutique_name|default:config.boutique_name|default:"Carmen Cardena Boutique" }}{% endblock %}
 
 {% block body %}
-<main id="main-content" class="public-shell" x-data="{ look: 0 }" tabindex="-1">
+<main id="main-content" class="public-shell boutique-landing-page" x-data="{ look: 0 }" tabindex="-1">
   {% if preview_mode %}
     <div class="preview-ribbon">Vista previa CMS: incluye borradores y bloques ocultos</div>
   {% endif %}
-  <nav class="public-nav glass-nav">
-    <a class="brand-mark" href="/">
-      {% if config.logo_url %}
-        <span class="brand-logo-frame"><img class="brand-logo" src="{{ config.logo_url }}" alt="{{ config.logo_alt }}"></span>
-      {% else %}
-        <span class="brand-symbol">CC</span>
-      {% endif %}
-      <span>{{ page.boutique_name|default:config.boutique_name|default:"Carmen Cardena Boutique" }}</span>
-    </a>
-    <div class="nav-actions">
-      <a href="#destacados">Destacados</a>
-      <a href="#experiencia">Experiencia</a>
-      <a href="#galeria">Galeria</a>
-      <a href="#sucursales">Sucursales</a>
-      {% if config.instagram_url %}<a href="{{ config.instagram_url }}">Instagram</a>{% endif %}
-      {% if config.whatsapp_url %}<a class="btn btn-primary btn-sm" href="{{ config.whatsapp_url }}">WhatsApp</a>{% endif %}
-    </div>
-  </nav>
+  {% include "public/includes/navbar.html" with public_nav_current="landing" %}
 
   {% if has_block_landing %}
     {% for block in blocks %}
@@ -47,18 +30,19 @@
       </div>
     {% endfor %}
   {% else %}
-    <section class="landing-hero">
+    <section class="landing-hero boutique-home-hero">
       <div class="hero-copy">
-        <p class="eyebrow">Boutique multisucursal</p>
+        <p class="catalog-kicker">Boutique multisucursal</p>
         <h1>{{ config.headline|default:"Moda seleccionada para cada ocasion" }}</h1>
         <p>{{ config.subheadline|default:"Looks, marcas y piezas listas para descubrir en tienda." }}</p>
         <div class="hero-actions">
-          {% if config.whatsapp_url %}
-            <a class="btn btn-primary" href="{{ config.whatsapp_url }}">Contactar por WhatsApp</a>
-          {% else %}
-            <a class="btn btn-primary" href="#destacados">Ver destacados</a>
-          {% endif %}
+          <a class="btn btn-primary" href="{% url 'rentals:public_catalog' %}">Ver catalogo</a>
+          {% if config.whatsapp_url %}<a class="btn btn-outline-secondary" href="{{ config.whatsapp_url }}">WhatsApp</a>{% endif %}
         </div>
+      </div>
+      <div class="boutique-hero-note">
+        <span>Renta disponible</span>
+        <strong>Aparta sin pago web y recoge en sucursal</strong>
       </div>
     </section>
     <section id="destacados" class="content-band">

@@ -10,6 +10,7 @@ from core.views import admin_dashboard, admin_information, landing, landing_feat
 urlpatterns = [
     path("", landing, name="landing"),
     path("partials/featured/", landing_featured, name="landing_featured"),
+    path("", include("rentals.urls")),
     path("django-admin/", admin.site.urls),
     path("accounts/", include("accounts.urls")),
     path("admin-panel/login/", LoginView.as_view(template_name="accounts/login.html"), name="admin_login"),

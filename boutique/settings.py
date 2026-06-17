@@ -29,6 +29,7 @@ INSTALLED_APPS = [
     "branches",
     "catalog",
     "inventory",
+    "rentals",
     "sales",
     "customers",
     "finance",

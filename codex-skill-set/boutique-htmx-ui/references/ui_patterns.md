@@ -59,3 +59,16 @@ Public page should include:
 - Social links.
 
 Only render active/published CMS content.
+
+## Public design system
+
+- Use `templates/public/includes/navbar.html` on all public pages. Do not duplicate nav markup in `landing.html`, catalog, rental cart, or confirmation templates.
+- Public pages must share the boutique palette via `static/css/palette.css` and the `--public-*` tokens. Avoid page-local hex colors for public UI.
+- CMS palette switching is disabled by design. Do not add back active palette injection in `templates/base.html`; edit `static/css/palette.css` instead.
+- Dashboard/admin screens must remain visually consistent with the landing/catalog palette. Use shared CSS variables, not a separate dashboard palette.
+- Keep public page shells aligned:
+  - Landing: `public-shell boutique-landing-page`
+  - Catalog/rental flows: `public-shell boutique-catalog-page`
+  - Rental cart/confirmation: add `rental-flow-page` for flow-specific layout only.
+- If a new public workflow needs different links in the nav, extend the shared include with context flags instead of creating a second nav.
+- After editing public UI, render-test `/`, `/catalogo/`, and `/apartado/`.

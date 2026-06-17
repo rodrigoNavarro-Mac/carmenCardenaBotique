@@ -32,6 +32,12 @@
     <h2>Publicacion</h2>
     <label class="form-check">{{ form.is_active }} <span>{{ form.is_active.label }}</span></label>
     <label class="form-check">{{ form.is_featured }} <span>{{ form.is_featured.label }}</span></label>
+    <hr>
+    <h2>Renta</h2>
+    <label class="form-check">{{ form.is_rentable }} <span>{{ form.is_rentable.label }}</span></label>
+    <label>{{ form.rental_price.label }}{{ form.rental_price }}{{ form.rental_price.errors }}</label>
+    <label>{{ form.rental_deposit.label }}{{ form.rental_deposit }}{{ form.rental_deposit.errors }}</label>
+    <label>{{ form.rental_terms.label }}{{ form.rental_terms }}{{ form.rental_terms.errors }}</label>
     <button class="btn btn-primary w-100" type="submit"><i class="bi bi-check2" aria-hidden="true"></i>Guardar producto</button>
   </aside>
 </form>

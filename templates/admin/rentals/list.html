@@ -1,0 +1,75 @@
+{% extends "admin/base_admin.html" %}
+
+{% block title %}Rentas{% endblock %}
+
+{% block admin_content %}
+<div class="page-title-row">
+  <div>
+    <p class="eyebrow">Operacion</p>
+    <h1>Rentas y apartados</h1>
+  </div>
+</div>
+
+{% if messages %}
+  <div class="message-stack">
+    {% for message in messages %}
+      <div class="alert alert-{{ message.tags|default:'info' }}">{{ message }}</div>
+    {% endfor %}
+  </div>
+{% endif %}
+
+<form class="filter-bar" method="get">
+  <label>
+    Buscar codigo o cliente
+    <input class="form-control" type="search" name="q" value="{{ request.GET.q }}" placeholder="REN-20260617-X8K4">
+  </label>
+  <label>
+    Estado
+    <select class="form-select" name="status">
+      <option value="">Todos</option>
+      {% for value,label in status_choices %}
+        <option value="{{ value }}" {% if request.GET.status == value %}selected{% endif %}>{{ label }}</option>
+      {% endfor %}
+    </select>
+  </label>
+  <button class="btn btn-primary" type="submit"><i class="bi bi-search" aria-hidden="true"></i>Buscar</button>
+</form>
+
+<section class="work-panel">
+  <div class="table-responsive">
+    <table class="table align-middle">
+      <thead>
+        <tr>
+          <th>Codigo</th>
+          <th>Cliente</th>
+          <th>Estado</th>
+          <th>Vence</th>
+          <th>Prendas</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for reservation in reservations %}
+          <tr>
+            <td><strong>{{ reservation.code }}</strong></td>
+            <td>
+              {% if reservation.customer %}
+                <a href="{% url 'customers:customer_detail' reservation.customer.id %}">{{ reservation.customer_name }}</a>
+              {% else %}
+                {{ reservation.customer_name }}
+              {% endif %}
+              <span class="table-subcopy">{{ reservation.customer_phone }}</span>
+            </td>
+            <td><span class="badge text-bg-secondary">{{ reservation.get_status_display }}</span></td>
+            <td>{{ reservation.expires_at|date:"d/m/Y H:i" }}</td>
+            <td>{{ reservation.lines.count }}</td>
+            <td><a class="btn btn-sm btn-outline-secondary" href="{% url 'rentals:admin_reservation_detail' reservation.code %}">Verificar</a></td>
+          </tr>
+        {% empty %}
+          <tr><td colspan="6"><p class="empty-copy">No hay apartados con esos filtros.</p></td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</section>
+{% endblock %}

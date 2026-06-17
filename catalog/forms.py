@@ -32,6 +32,10 @@ class ProductForm(BootstrapFormMixin, forms.ModelForm):
             "external_image_url",
             "is_active",
             "is_featured",
+            "is_rentable",
+            "rental_price",
+            "rental_deposit",
+            "rental_terms",
         ]
         labels = {
             "name": "Nombre",
@@ -46,6 +50,10 @@ class ProductForm(BootstrapFormMixin, forms.ModelForm):
             "external_image_url": "URL de imagen",
             "is_active": "Activo",
             "is_featured": "Destacado en landing",
+            "is_rentable": "Disponible para renta",
+            "rental_price": "Precio de renta",
+            "rental_deposit": "Deposito",
+            "rental_terms": "Condiciones de renta",
         }
 
     def __init__(self, *args, **kwargs):

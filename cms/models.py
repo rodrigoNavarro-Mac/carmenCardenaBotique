@@ -12,20 +12,20 @@ hex_color_validator = RegexValidator(
 
 class ColorPalette(TimeStampedModel):
     name = models.CharField(max_length=80, unique=True)
-    primary = models.CharField(max_length=7, validators=[hex_color_validator], default="#c38380")
-    primary_hover = models.CharField(max_length=7, validators=[hex_color_validator], default="#4b342c")
-    primary_contrast = models.CharField(max_length=7, validators=[hex_color_validator], default="#fffaf2")
-    accent = models.CharField(max_length=7, validators=[hex_color_validator], default="#9c7164")
-    accent_soft = models.CharField(max_length=7, validators=[hex_color_validator], default="#ead5c8")
-    paper = models.CharField(max_length=7, validators=[hex_color_validator], default="#e8e1d1")
-    surface = models.CharField(max_length=7, validators=[hex_color_validator], default="#fbf6eb")
-    surface_muted = models.CharField(max_length=7, validators=[hex_color_validator], default="#eee3d2")
-    surface_strong = models.CharField(max_length=7, validators=[hex_color_validator], default="#4b342c")
-    ink = models.CharField(max_length=7, validators=[hex_color_validator], default="#2f211c")
-    ink_soft = models.CharField(max_length=7, validators=[hex_color_validator], default="#9c7164")
-    line = models.CharField(max_length=7, validators=[hex_color_validator], default="#cdb9a9")
-    gold = models.CharField(max_length=7, validators=[hex_color_validator], default="#d8b69f")
-    rose_soft = models.CharField(max_length=7, validators=[hex_color_validator], default="#ead9cf")
+    primary = models.CharField(max_length=7, validators=[hex_color_validator], default="#6f2d3b")
+    primary_hover = models.CharField(max_length=7, validators=[hex_color_validator], default="#2b1821")
+    primary_contrast = models.CharField(max_length=7, validators=[hex_color_validator], default="#fffdf8")
+    accent = models.CharField(max_length=7, validators=[hex_color_validator], default="#7c8a78")
+    accent_soft = models.CharField(max_length=7, validators=[hex_color_validator], default="#e0e7de")
+    paper = models.CharField(max_length=7, validators=[hex_color_validator], default="#f7f3ed")
+    surface = models.CharField(max_length=7, validators=[hex_color_validator], default="#fffdf8")
+    surface_muted = models.CharField(max_length=7, validators=[hex_color_validator], default="#ebe5dc")
+    surface_strong = models.CharField(max_length=7, validators=[hex_color_validator], default="#2b1821")
+    ink = models.CharField(max_length=7, validators=[hex_color_validator], default="#161411")
+    ink_soft = models.CharField(max_length=7, validators=[hex_color_validator], default="#625d55")
+    line = models.CharField(max_length=7, validators=[hex_color_validator], default="#d7cec1")
+    gold = models.CharField(max_length=7, validators=[hex_color_validator], default="#c7a66a")
+    rose_soft = models.CharField(max_length=7, validators=[hex_color_validator], default="#ead8dc")
     is_active = models.BooleanField(default=False)
     is_preset = models.BooleanField(default=False)
 
@@ -55,6 +55,14 @@ class ColorPalette(TimeStampedModel):
             ("--color-warning", self.accent),
             ("--color-success", self.surface_strong),
             ("--color-info", self.accent),
+            ("--public-bg", self.paper),
+            ("--public-surface", self.surface),
+            ("--public-ink", self.ink),
+            ("--public-muted", self.ink_soft),
+            ("--public-accent", self.primary),
+            ("--public-accent-2", self.accent),
+            ("--public-gold", self.gold),
+            ("--public-inverse", self.surface_strong),
         ]
 
 
