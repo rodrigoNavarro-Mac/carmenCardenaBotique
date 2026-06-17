@@ -9,7 +9,11 @@
   {% endif %}
   <nav class="public-nav glass-nav">
     <a class="brand-mark" href="/">
-      <span class="brand-symbol">CC</span>
+      {% if config.logo_url %}
+        <span class="brand-logo-frame"><img class="brand-logo" src="{{ config.logo_url }}" alt="{{ config.logo_alt }}"></span>
+      {% else %}
+        <span class="brand-symbol">CC</span>
+      {% endif %}
       <span>{{ page.boutique_name|default:config.boutique_name|default:"Carmen Cardena Boutique" }}</span>
     </a>
     <div class="nav-actions">

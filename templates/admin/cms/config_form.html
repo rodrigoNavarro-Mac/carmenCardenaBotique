@@ -11,12 +11,15 @@
   <a class="btn btn-outline-secondary" href="{% url 'cms:dashboard' %}"><i class="bi bi-arrow-left" aria-hidden="true"></i>Volver</a>
 </div>
 
-<form class="editor-grid compact-editor" method="post" data-prevent-double-submit>
+<form class="editor-grid compact-editor" method="post" enctype="multipart/form-data" data-prevent-double-submit>
   {% csrf_token %}
   <section class="work-panel form-panel">
     {{ form.non_field_errors }}
     <div class="form-grid">
       <label>{{ form.boutique_name.label }}{{ form.boutique_name }}{{ form.boutique_name.errors }}</label>
+      <label>{{ form.logo_image.label }}{{ form.logo_image }}{{ form.logo_image.help_text }}{{ form.logo_image.errors }}</label>
+      <label>{{ form.logo_external_url.label }}{{ form.logo_external_url }}{{ form.logo_external_url.help_text }}{{ form.logo_external_url.errors }}</label>
+      <label>{{ form.logo_alt_text.label }}{{ form.logo_alt_text }}{{ form.logo_alt_text.errors }}</label>
       <label>{{ form.headline.label }}{{ form.headline }}{{ form.headline.errors }}</label>
       <label class="wide-field">{{ form.subheadline.label }}{{ form.subheadline }}{{ form.subheadline.errors }}</label>
       <label>{{ form.whatsapp_url.label }}{{ form.whatsapp_url }}{{ form.whatsapp_url.errors }}</label>

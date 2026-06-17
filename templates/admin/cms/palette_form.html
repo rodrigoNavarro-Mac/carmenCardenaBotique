@@ -1,0 +1,49 @@
+{% extends "admin/base_admin.html" %}
+
+{% block title %}{{ title }}{% endblock %}
+
+{% block admin_content %}
+<div class="page-title-row">
+  <div>
+    <p class="eyebrow">CMS</p>
+    <h1>{{ title }}</h1>
+  </div>
+  <a class="btn btn-outline-secondary" href="{% url 'cms:palette_list' %}"><i class="bi bi-arrow-left" aria-hidden="true"></i>Volver</a>
+</div>
+
+<form class="editor-grid compact-editor" method="post" data-prevent-double-submit>
+  {% csrf_token %}
+  <section class="work-panel form-panel">
+    {{ form.non_field_errors }}
+    <div class="form-grid palette-form-grid">
+      <label class="wide-field">{{ form.name.label }}{{ form.name }}{{ form.name.errors }}</label>
+      <label>{{ form.primary.label }}{{ form.primary }}{{ form.primary.errors }}</label>
+      <label>{{ form.primary_hover.label }}{{ form.primary_hover }}{{ form.primary_hover.errors }}</label>
+      <label>{{ form.primary_contrast.label }}{{ form.primary_contrast }}{{ form.primary_contrast.errors }}</label>
+      <label>{{ form.accent.label }}{{ form.accent }}{{ form.accent.errors }}</label>
+      <label>{{ form.accent_soft.label }}{{ form.accent_soft }}{{ form.accent_soft.errors }}</label>
+      <label>{{ form.paper.label }}{{ form.paper }}{{ form.paper.errors }}</label>
+      <label>{{ form.surface.label }}{{ form.surface }}{{ form.surface.errors }}</label>
+      <label>{{ form.surface_muted.label }}{{ form.surface_muted }}{{ form.surface_muted.errors }}</label>
+      <label>{{ form.surface_strong.label }}{{ form.surface_strong }}{{ form.surface_strong.errors }}</label>
+      <label>{{ form.ink.label }}{{ form.ink }}{{ form.ink.errors }}</label>
+      <label>{{ form.ink_soft.label }}{{ form.ink_soft }}{{ form.ink_soft.errors }}</label>
+      <label>{{ form.line.label }}{{ form.line }}{{ form.line.errors }}</label>
+      <label>{{ form.gold.label }}{{ form.gold }}{{ form.gold.errors }}</label>
+      <label>{{ form.rose_soft.label }}{{ form.rose_soft }}{{ form.rose_soft.errors }}</label>
+    </div>
+  </section>
+  <aside class="ops-card form-side palette-preview-card">
+    <h2>Publicacion</h2>
+    <label class="form-check">{{ form.is_active }} <span>{{ form.is_active.label }}</span></label>
+    <div class="palette-preview-surface">
+      <span class="palette-preview-symbol">CC</span>
+      <div>
+        <strong>Carmen Cardena</strong>
+        <p>Vista rapida de contraste.</p>
+      </div>
+    </div>
+    <button class="btn btn-primary w-100" type="submit"><i class="bi bi-check2" aria-hidden="true"></i>Guardar paleta</button>
+  </aside>
+</form>
+{% endblock %}

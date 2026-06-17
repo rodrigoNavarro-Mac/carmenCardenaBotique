@@ -6,8 +6,12 @@
 <main id="main-content" class="auth-shell" tabindex="-1">
   <section class="auth-panel">
     <a class="brand-mark" href="/">
-      <span class="brand-symbol">CC</span>
-      <span>Carmen Cardena Boutique</span>
+      {% if active_branding.logo_url %}
+        <span class="brand-logo-frame"><img class="brand-logo" src="{{ active_branding.logo_url }}" alt="{{ active_branding.logo_alt }}"></span>
+      {% else %}
+        <span class="brand-symbol">CC</span>
+      {% endif %}
+      <span>{{ active_branding.boutique_name|default:"Carmen Cardena Boutique" }}</span>
     </a>
     <h1>Iniciar sesion</h1>
     <form method="post" class="stack-form" data-prevent-double-submit>

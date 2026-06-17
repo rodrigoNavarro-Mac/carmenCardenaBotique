@@ -8,7 +8,7 @@ from accounts.models import User
 from accounts.permissions import permissions_for_role
 from branches.models import Branch
 from catalog.models import Product
-from cms.models import GalleryImage, LandingBlock, LandingBlockItem, LandingConfig, LandingPage
+from cms.models import ColorPalette, GalleryImage, LandingBlock, LandingBlockItem, LandingConfig, LandingPage
 from finance.models import CashRegisterSession, Expense, IncomeEntry
 from finance.services import summarize_cash_session
 from inventory.models import InventoryItem, InventoryMovement
@@ -301,9 +301,11 @@ def _landing_context(include_drafts=False):
     )[:6]
     gallery = GalleryImage.objects.filter(is_active=True, is_published=True)[:8]
     branches = Branch.objects.filter(is_active=True)
+    active_palette = ColorPalette.objects.filter(is_active=True).first()
     return {
         "page": page,
         "config": config,
+        "active_palette": active_palette,
         "blocks": blocks,
         "has_block_landing": bool(blocks),
         "preview_mode": include_drafts,

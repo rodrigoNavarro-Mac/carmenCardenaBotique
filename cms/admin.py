@@ -1,6 +1,13 @@
 from django.contrib import admin
 
-from .models import GalleryImage, LandingBlock, LandingBlockItem, LandingConfig, LandingPage
+from .models import ColorPalette, GalleryImage, LandingBlock, LandingBlockItem, LandingConfig, LandingPage
+
+
+@admin.register(ColorPalette)
+class ColorPaletteAdmin(admin.ModelAdmin):
+    list_display = ("name", "is_active", "is_preset", "updated_at")
+    list_filter = ("is_active", "is_preset")
+    search_fields = ("name",)
 
 
 @admin.register(LandingConfig)

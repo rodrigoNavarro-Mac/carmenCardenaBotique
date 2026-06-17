@@ -15,54 +15,98 @@
   {% csrf_token %}
   <section class="work-panel form-panel">
     {{ form.non_field_errors }}
-    <div class="form-grid">
-      <label>{{ form.type.label }}{{ form.type }}{{ form.type.errors }}</label>
-      <label>{{ form.sort_order.label }}{{ form.sort_order }}{{ form.sort_order.errors }}</label>
-      <label>{{ form.title.label }}{{ form.title }}{{ form.title.errors }}</label>
-      <label>{{ form.subtitle.label }}{{ form.subtitle }}{{ form.subtitle.errors }}</label>
-      <label class="wide-field">{{ form.body.label }}{{ form.body }}{{ form.body.errors }}</label>
-      <label>{{ form.cta_label.label }}{{ form.cta_label }}{{ form.cta_label.errors }}</label>
-      <label>{{ form.cta_url.label }}{{ form.cta_url }}{{ form.cta_url.errors }}</label>
-      <label>{{ form.secondary_cta_label.label }}{{ form.secondary_cta_label }}{{ form.secondary_cta_label.errors }}</label>
-      <label>{{ form.secondary_cta_url.label }}{{ form.secondary_cta_url }}{{ form.secondary_cta_url.errors }}</label>
-      <label class="wide-field">{{ form.external_image_url.label }}{{ form.external_image_url }}{{ form.external_image_url.errors }}</label>
-      <label class="wide-field">{{ form.image.label }}{{ form.image }}{{ form.image.errors }}</label>
+    <div class="cms-guided-note">
+      <i class="bi bi-magic" aria-hidden="true"></i>
+      <div>
+        <strong>Edita el contenido de esta seccion.</strong>
+        <p>Los campos vacios simplemente no aparecen. Para imagenes en Render, usa una URL de imagen.</p>
+      </div>
+    </div>
+
+    <div class="cms-form-section">
+      <div class="section-heading">
+        <div>
+          <p class="eyebrow">Paso 1</p>
+          <h2>Contenido principal</h2>
+        </div>
+      </div>
+      <div class="form-grid">
+        <label>{{ form.type.label }}{{ form.type }}<small>{{ form.type.help_text }}</small>{{ form.type.errors }}</label>
+        <label>{{ form.sort_order.label }}{{ form.sort_order }}<small>{{ form.sort_order.help_text }}</small>{{ form.sort_order.errors }}</label>
+        <label>{{ form.title.label }}{{ form.title }}{{ form.title.errors }}</label>
+        <label>{{ form.subtitle.label }}{{ form.subtitle }}<small>{{ form.subtitle.help_text }}</small>{{ form.subtitle.errors }}</label>
+        <label class="wide-field">{{ form.body.label }}{{ form.body }}<small>{{ form.body.help_text }}</small>{{ form.body.errors }}</label>
+      </div>
+    </div>
+
+    <div class="cms-form-section">
+      <div class="section-heading">
+        <div>
+          <p class="eyebrow">Paso 2</p>
+          <h2>Enlaces de la seccion</h2>
+        </div>
+      </div>
+      <div class="form-grid">
+        <label>{{ form.cta_label.label }}{{ form.cta_label }}<small>{{ form.cta_label.help_text }}</small>{{ form.cta_label.errors }}</label>
+        <label>{{ form.cta_url.label }}{{ form.cta_url }}<small>{{ form.cta_url.help_text }}</small>{{ form.cta_url.errors }}</label>
+        <label>{{ form.secondary_cta_label.label }}{{ form.secondary_cta_label }}<small>{{ form.secondary_cta_label.help_text }}</small>{{ form.secondary_cta_label.errors }}</label>
+        <label>{{ form.secondary_cta_url.label }}{{ form.secondary_cta_url }}<small>{{ form.secondary_cta_url.help_text }}</small>{{ form.secondary_cta_url.errors }}</label>
+      </div>
+    </div>
+
+    <div class="cms-form-section">
+      <div class="section-heading">
+        <div>
+          <p class="eyebrow">Paso 3</p>
+          <h2>Imagen del bloque</h2>
+        </div>
+      </div>
+      <div class="form-grid">
+        <label class="wide-field">{{ form.external_image_url.label }}{{ form.external_image_url }}<small>{{ form.external_image_url.help_text }}</small>{{ form.external_image_url.errors }}</label>
+        <label class="wide-field">{{ form.image.label }}{{ form.image }}<small>{{ form.image.help_text }}</small>{{ form.image.errors }}</label>
+      </div>
     </div>
 
     <div class="cms-item-editor">
       <div class="section-heading">
         <div>
-          <p class="eyebrow">Items</p>
-          <h2>Contenido repetible</h2>
+          <p class="eyebrow">Opcional</p>
+          <h2>Tarjetas dentro de esta seccion</h2>
         </div>
       </div>
+      <p class="cms-section-help">Usa estas tarjetas cuando la seccion necesita varios elementos, como looks, beneficios, fotos o categorias. Si esta seccion no los necesita, deja esta parte vacia.</p>
       {{ formset.management_form }}
       {{ formset.non_form_errors }}
       {% for item_form in formset %}
         <article class="cms-item-form">
+          <div class="cms-item-title-row">
+            <strong>Tarjeta {{ forloop.counter }}</strong>
+            <span>Opcional</span>
+          </div>
           {{ item_form.id }}
           <div class="form-grid">
-            <label>{{ item_form.title.label }}{{ item_form.title }}{{ item_form.title.errors }}</label>
-            <label>{{ item_form.sort_order.label }}{{ item_form.sort_order }}{{ item_form.sort_order.errors }}</label>
-            <label>{{ item_form.subtitle.label }}{{ item_form.subtitle }}{{ item_form.subtitle.errors }}</label>
-            <label>{{ item_form.cta_label.label }}{{ item_form.cta_label }}{{ item_form.cta_label.errors }}</label>
-            <label class="wide-field">{{ item_form.body.label }}{{ item_form.body }}{{ item_form.body.errors }}</label>
-            <label>{{ item_form.cta_url.label }}{{ item_form.cta_url }}{{ item_form.cta_url.errors }}</label>
-            <label class="wide-field">{{ item_form.external_image_url.label }}{{ item_form.external_image_url }}{{ item_form.external_image_url.errors }}</label>
+            <label>{{ item_form.title.label }}{{ item_form.title }}<small>{{ item_form.title.help_text }}</small>{{ item_form.title.errors }}</label>
+            <label>{{ item_form.sort_order.label }}{{ item_form.sort_order }}<small>{{ item_form.sort_order.help_text }}</small>{{ item_form.sort_order.errors }}</label>
+            <label>{{ item_form.subtitle.label }}{{ item_form.subtitle }}<small>{{ item_form.subtitle.help_text }}</small>{{ item_form.subtitle.errors }}</label>
+            <label>{{ item_form.cta_label.label }}{{ item_form.cta_label }}<small>{{ item_form.cta_label.help_text }}</small>{{ item_form.cta_label.errors }}</label>
+            <label class="wide-field">{{ item_form.body.label }}{{ item_form.body }}<small>{{ item_form.body.help_text }}</small>{{ item_form.body.errors }}</label>
+            <label>{{ item_form.cta_url.label }}{{ item_form.cta_url }}<small>{{ item_form.cta_url.help_text }}</small>{{ item_form.cta_url.errors }}</label>
+            <label class="wide-field">{{ item_form.external_image_url.label }}{{ item_form.external_image_url }}<small>{{ item_form.external_image_url.help_text }}</small>{{ item_form.external_image_url.errors }}</label>
             <label class="wide-field">{{ item_form.image.label }}{{ item_form.image }}{{ item_form.image.errors }}</label>
           </div>
           <div class="cms-item-state">
             <label class="form-check">{{ item_form.is_visible }} <span>{{ item_form.is_visible.label }}</span></label>
             {% if item_form.DELETE %}
-              <label class="form-check">{{ item_form.DELETE }} <span>Eliminar item</span></label>
+              <label class="form-check">{{ item_form.DELETE }} <span>Eliminar tarjeta</span></label>
             {% endif %}
           </div>
         </article>
       {% endfor %}
     </div>
   </section>
-  <aside class="ops-card form-side">
-    <h2>Estado</h2>
+  <aside class="ops-card form-side cms-publish-panel">
+    <h2>Publicacion</h2>
+    <p class="cms-section-help">Guarda como borrador mientras editas. Publica cuando quieras que aparezca en el sitio.</p>
     <label>{{ form.status.label }}{{ form.status }}{{ form.status.errors }}</label>
     <label class="form-check">{{ form.is_visible }} <span>{{ form.is_visible.label }}</span></label>
     <button class="btn btn-primary w-100" type="submit"><i class="bi bi-check2" aria-hidden="true"></i>Guardar bloque</button>

@@ -1,0 +1,84 @@
+{% extends "admin/base_admin.html" %}
+
+{% block title %}Paletas{% endblock %}
+
+{% block admin_content %}
+<div class="page-title-row">
+  <div>
+    <p class="eyebrow">CMS</p>
+    <h1>Paletas de color</h1>
+  </div>
+  <div class="page-actions">
+    <a class="btn btn-outline-secondary" href="{% url 'cms:dashboard' %}"><i class="bi bi-arrow-left" aria-hidden="true"></i>Volver</a>
+    {% if admin_permissions.cms.can_create %}
+      <a class="btn btn-primary" href="{% url 'cms:palette_create' %}"><i class="bi bi-plus-lg" aria-hidden="true"></i>Nueva paleta</a>
+    {% endif %}
+  </div>
+</div>
+
+{% if messages %}
+  <div class="message-stack">
+    {% for message in messages %}
+      <div class="alert alert-{{ message.tags|default:'info' }}">{{ message }}</div>
+    {% endfor %}
+  </div>
+{% endif %}
+
+<section class="work-panel">
+  <div class="section-heading">
+    <div>
+      <p class="eyebrow">Seleccion visual</p>
+      <h2>Paletas guardadas</h2>
+    </div>
+  </div>
+  <div class="palette-grid">
+    {% for palette in palettes %}
+      <article class="palette-card{% if palette.is_active %} is-active{% endif %}">
+        <div class="palette-card-head">
+          <div>
+            <h3>{{ palette.name }}</h3>
+            <div class="palette-badges">
+              {% if palette.is_active %}<span class="badge text-bg-success">Activa</span>{% endif %}
+              {% if palette.is_preset %}<span class="badge text-bg-light">Preset</span>{% endif %}
+            </div>
+          </div>
+          <div class="palette-swatches" aria-label="Muestra de colores">
+            <span style="background: {{ palette.primary }}"></span>
+            <span style="background: {{ palette.accent }}"></span>
+            <span style="background: {{ palette.paper }}"></span>
+            <span style="background: {{ palette.surface }}"></span>
+            <span style="background: {{ palette.ink }}"></span>
+          </div>
+        </div>
+        <dl class="palette-facts">
+          <div>
+            <dt>Principal</dt>
+            <dd>{{ palette.primary }}</dd>
+          </div>
+          <div>
+            <dt>Fondo</dt>
+            <dd>{{ palette.paper }}</dd>
+          </div>
+          <div>
+            <dt>Texto</dt>
+            <dd>{{ palette.ink }}</dd>
+          </div>
+        </dl>
+        <div class="palette-actions">
+          {% if admin_permissions.cms.can_edit %}
+            <a class="btn btn-outline-secondary btn-sm" href="{% url 'cms:palette_update' palette.id %}"><i class="bi bi-pencil" aria-hidden="true"></i>Editar</a>
+            {% if not palette.is_active %}
+              <form method="post" action="{% url 'cms:palette_activate' palette.id %}">
+                {% csrf_token %}
+                <button class="btn btn-primary btn-sm" type="submit"><i class="bi bi-check2-circle" aria-hidden="true"></i>Activar</button>
+              </form>
+            {% endif %}
+          {% endif %}
+        </div>
+      </article>
+    {% empty %}
+      <p class="empty-copy">Todavia no hay paletas guardadas.</p>
+    {% endfor %}
+  </div>
+</section>
+{% endblock %}

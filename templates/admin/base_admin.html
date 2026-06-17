@@ -4,9 +4,13 @@
 <div class="admin-shell" x-data="{ sidebarOpen: false }">
   <aside class="admin-sidebar" :class="{ 'is-open': sidebarOpen }" aria-label="Navegacion principal">
     <a class="brand-mark admin-brand" href="{% url 'admin_dashboard' %}">
-      <span class="brand-symbol">CC</span>
+      {% if active_branding.logo_url %}
+        <span class="brand-logo-frame"><img class="brand-logo" src="{{ active_branding.logo_url }}" alt="{{ active_branding.logo_alt }}"></span>
+      {% else %}
+        <span class="brand-symbol">CC</span>
+      {% endif %}
       <span>
-        Carmen Cardena
+        {{ active_branding.boutique_name|default:"Carmen Cardena" }}
         <small>Back office</small>
       </span>
     </a>

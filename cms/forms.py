@@ -1,7 +1,7 @@
 from django import forms
 from django.forms import inlineformset_factory
 
-from .models import GalleryImage, LandingBlock, LandingBlockItem, LandingConfig, LandingPage
+from .models import ColorPalette, GalleryImage, LandingBlock, LandingBlockItem, LandingConfig, LandingPage
 
 
 def style_form_fields(form):
@@ -23,6 +23,9 @@ class LandingConfigForm(forms.ModelForm):
         model = LandingConfig
         fields = [
             "boutique_name",
+            "logo_image",
+            "logo_external_url",
+            "logo_alt_text",
             "headline",
             "subheadline",
             "whatsapp_url",
@@ -32,6 +35,9 @@ class LandingConfigForm(forms.ModelForm):
         ]
         labels = {
             "boutique_name": "Nombre de boutique",
+            "logo_image": "Logo",
+            "logo_external_url": "URL de logo",
+            "logo_alt_text": "Texto alternativo del logo",
             "headline": "Titulo principal",
             "subheadline": "Texto de apoyo",
             "whatsapp_url": "WhatsApp",
@@ -39,10 +45,80 @@ class LandingConfigForm(forms.ModelForm):
             "facebook_url": "Facebook",
             "is_active": "Configuracion activa",
         }
+        help_texts = {
+            "logo_image": "Para produccion en Render, prefiere URL de logo hasta configurar almacenamiento persistente.",
+            "logo_external_url": "Usa una imagen cuadrada, horizontal o transparente alojada externamente.",
+        }
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         style_form_fields(self)
+
+
+class ColorPaletteForm(forms.ModelForm):
+    class Meta:
+        model = ColorPalette
+        fields = [
+            "name",
+            "primary",
+            "primary_hover",
+            "primary_contrast",
+            "accent",
+            "accent_soft",
+            "paper",
+            "surface",
+            "surface_muted",
+            "surface_strong",
+            "ink",
+            "ink_soft",
+            "line",
+            "gold",
+            "rose_soft",
+            "is_active",
+        ]
+        labels = {
+            "name": "Nombre de paleta",
+            "primary": "Principal",
+            "primary_hover": "Principal hover",
+            "primary_contrast": "Texto sobre principal",
+            "accent": "Acento",
+            "accent_soft": "Acento suave",
+            "paper": "Fondo general",
+            "surface": "Superficie",
+            "surface_muted": "Superficie suave",
+            "surface_strong": "Superficie fuerte",
+            "ink": "Texto principal",
+            "ink_soft": "Texto secundario",
+            "line": "Lineas",
+            "gold": "Dorado / detalle",
+            "rose_soft": "Rosa suave",
+            "is_active": "Activar esta paleta",
+        }
+        widgets = {
+            "primary": forms.TextInput(attrs={"type": "color"}),
+            "primary_hover": forms.TextInput(attrs={"type": "color"}),
+            "primary_contrast": forms.TextInput(attrs={"type": "color"}),
+            "accent": forms.TextInput(attrs={"type": "color"}),
+            "accent_soft": forms.TextInput(attrs={"type": "color"}),
+            "paper": forms.TextInput(attrs={"type": "color"}),
+            "surface": forms.TextInput(attrs={"type": "color"}),
+            "surface_muted": forms.TextInput(attrs={"type": "color"}),
+            "surface_strong": forms.TextInput(attrs={"type": "color"}),
+            "ink": forms.TextInput(attrs={"type": "color"}),
+            "ink_soft": forms.TextInput(attrs={"type": "color"}),
+            "line": forms.TextInput(attrs={"type": "color"}),
+            "gold": forms.TextInput(attrs={"type": "color"}),
+            "rose_soft": forms.TextInput(attrs={"type": "color"}),
+        }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        style_form_fields(self)
+        self.fields["cta_url"].widget.attrs["data-link-fill-target"] = "primary"
+        self.fields["secondary_cta_url"].widget.attrs["data-link-fill-target"] = "secondary"
+        for name, field in self.fields.items():
+            if name not in {"name", "is_active"}:
+                field.widget.attrs["class"] = "form-control form-control-color"
 
 
 class GalleryImageForm(forms.ModelForm):
@@ -108,24 +184,31 @@ class LandingBlockForm(forms.ModelForm):
             "status",
         ]
         labels = {
-            "type": "Tipo de bloque",
-            "title": "Titulo",
-            "subtitle": "Etiqueta o subtitulo",
-            "body": "Texto",
+            "type": "Que seccion quieres editar",
+            "title": "Titulo que vera el cliente",
+            "subtitle": "Frase corta arriba o debajo del titulo",
+            "body": "Descripcion",
             "image": "Imagen",
-            "external_image_url": "URL de imagen",
+            "external_image_url": "Imagen desde internet",
             "cta_label": "Texto del boton principal",
-            "cta_url": "Enlace del boton principal",
-            "secondary_cta_label": "Texto del boton secundario",
-            "secondary_cta_url": "Enlace del boton secundario",
-            "sort_order": "Orden",
-            "is_visible": "Visible",
-            "status": "Estado",
+            "cta_url": "A donde manda el boton principal",
+            "secondary_cta_label": "Texto del segundo boton",
+            "secondary_cta_url": "A donde manda el segundo boton",
+            "sort_order": "Posicion en la pagina",
+            "is_visible": "Mostrar en la pagina",
+            "status": "Publicacion",
         }
         help_texts = {
-            "type": "Selecciona uno de los bloques controlados de la landing.",
-            "cta_url": "Puede ser una URL completa o un ancla como #destacados.",
-            "secondary_cta_url": "Opcional. Puede ser una URL completa o un ancla.",
+            "type": "Hero es la primera pantalla. Lookbook, galeria y beneficios suelen usar tarjetas internas.",
+            "subtitle": "Opcional. Sirve como bajada, etiqueta o frase de apoyo.",
+            "body": "Opcional. Escribe un parrafo corto para explicar la seccion.",
+            "external_image_url": "Recomendado en Render: pega una URL de imagen para no depender de archivos subidos.",
+            "image": "En local funciona bien. En Render usa URL de imagen hasta configurar almacenamiento permanente.",
+            "cta_label": "Ejemplo: Ver destacados, Comprar por WhatsApp, Agendar visita.",
+            "cta_url": "Puedes pegar una URL completa como https://wa.me/... o dejarlo vacio.",
+            "secondary_cta_label": "Opcional. Dejalo vacio si solo necesitas un boton.",
+            "secondary_cta_url": "Opcional. Puedes pegar una URL completa o dejarlo vacio.",
+            "sort_order": "Numero menor aparece antes. Puedes usar 10, 20, 30.",
         }
 
     def __init__(self, *args, **kwargs):
@@ -148,15 +231,24 @@ class LandingBlockItemForm(forms.ModelForm):
             "is_visible",
         ]
         labels = {
-            "title": "Titulo",
-            "subtitle": "Subtitulo",
-            "body": "Texto",
+            "title": "Nombre de esta tarjeta",
+            "subtitle": "Texto corto",
+            "body": "Descripcion",
             "image": "Imagen",
-            "external_image_url": "URL de imagen",
-            "cta_label": "Texto del enlace",
-            "cta_url": "Enlace",
-            "sort_order": "Orden",
-            "is_visible": "Visible",
+            "external_image_url": "Imagen desde internet",
+            "cta_label": "Texto del boton o enlace",
+            "cta_url": "A donde manda",
+            "sort_order": "Posicion",
+            "is_visible": "Mostrar esta tarjeta",
+        }
+        help_texts = {
+            "title": "Ejemplo: Vestidos de noche, Look dorado, Atencion personalizada.",
+            "subtitle": "Opcional. Una linea corta para acompanar el titulo.",
+            "body": "Opcional. Describe esta tarjeta en pocas palabras.",
+            "external_image_url": "Recomendado en Render si esta tarjeta necesita imagen.",
+            "cta_label": "Opcional. Dejalo vacio si la tarjeta no necesita boton.",
+            "cta_url": "Opcional. Puede ser una seccion de la pagina o una URL completa.",
+            "sort_order": "Usa 10, 20, 30 para ordenar sin complicarte.",
         }
 
     def __init__(self, *args, **kwargs):
