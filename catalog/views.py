@@ -5,6 +5,7 @@ from django.db.models import Count, Q
 from django.http import Http404
 from django.shortcuts import get_object_or_404, redirect, render
 
+from .barcodes import code128b_svg
 from .forms import BrandForm, CategoryForm, ProductForm, ProductTypeForm
 from .models import Brand, Category, Product, ProductType
 
@@ -45,7 +46,12 @@ def _product_queryset(request):
     brand_id = request.GET.get("brand", "").strip()
 
     if query:
-        queryset = queryset.filter(Q(name__icontains=query) | Q(sku__icontains=query))
+        queryset = queryset.filter(
+            Q(name__icontains=query)
+            | Q(sku__icontains=query)
+            | Q(size__icontains=query)
+            | Q(color__icontains=query)
+        )
     if status == "active":
         queryset = queryset.filter(is_active=True)
     elif status == "inactive":
@@ -94,6 +100,24 @@ def product_update(request, pk):
         messages.success(request, f"Producto {product.sku} actualizado.")
         return redirect("catalog:product_list")
     return render(request, "admin/catalog/form.html", {"form": form, "title": "Editar producto", "product": product})
+
+
+@login_required
+def product_label(request, pk):
+    product = get_object_or_404(Product.objects.select_related("brand", "category"), pk=pk)
+    try:
+        barcode_svg = code128b_svg(product.sku)
+    except ValueError as exc:
+        messages.error(request, str(exc))
+        return redirect("catalog:product_list")
+    return render(
+        request,
+        "admin/catalog/product_label.html",
+        {
+            "product": product,
+            "barcode_svg": barcode_svg,
+        },
+    )
 
 
 @login_required

@@ -45,6 +45,8 @@
   function initSaleEditor(form) {
     const priceScript = document.getElementById(form.dataset.productPricesId);
     const prices = priceScript ? JSON.parse(priceScript.textContent) : {};
+    const lookupScript = document.getElementById(form.dataset.productLookupId);
+    const productsBySku = lookupScript ? JSON.parse(lookupScript.textContent) : {};
     const rows = form.querySelector("[data-sale-rows]");
     const emptyTemplate = form.querySelector("[data-empty-sale-line]");
     const totalInput = form.querySelector('input[name="lines-TOTAL_FORMS"]');
@@ -58,6 +60,19 @@
 
     function saleRows() {
       return Array.from(rows.querySelectorAll(".sale-line-row"));
+    }
+
+    function normalizeBarcode(value) {
+      return String(value || "").trim().toUpperCase();
+    }
+
+    function setBarcodeFeedback(message, state) {
+      const target = form.querySelector("[data-barcode-feedback]");
+      if (!target) {
+        return;
+      }
+      target.textContent = message;
+      target.dataset.state = state || "idle";
     }
 
     function rowTotal(row) {
@@ -156,6 +171,58 @@
       paymentTotalInput.value = paymentLineRows().length;
     }
 
+    function addSaleRow() {
+      const index = Number(totalInput.value);
+      rows.insertAdjacentHTML("beforeend", emptyTemplate.innerHTML.replaceAll("__prefix__", index));
+      reindexRows();
+      updateTotals();
+      return saleRows().at(-1);
+    }
+
+    function firstEmptyProductRow() {
+      return saleRows().find(function (row) {
+        const product = row.querySelector('[name$="-product"]');
+        const quantity = row.querySelector('[name$="-quantity"]');
+        return product && !product.value && quantity && !quantity.value;
+      });
+    }
+
+    function addProductBySku(rawSku) {
+      const sku = normalizeBarcode(rawSku);
+      const barcodeInput = form.querySelector("[data-barcode-input]");
+      if (!sku) {
+        setBarcodeFeedback("Escanea o escribe un código.", "warning");
+        return;
+      }
+      const product = productsBySku[sku];
+      if (!product) {
+        setBarcodeFeedback("No se encontró producto con SKU " + sku + ".", "error");
+        if (barcodeInput) {
+          barcodeInput.select();
+        }
+        return;
+      }
+
+      const existingRow = saleRows().find(function (row) {
+        return row.querySelector('[name$="-product"]')?.value === product.id;
+      });
+      const targetRow = existingRow || firstEmptyProductRow() || addSaleRow();
+      const productSelect = targetRow.querySelector('[name$="-product"]');
+      const quantityInput = targetRow.querySelector('[name$="-quantity"]');
+      if (!productSelect || !quantityInput) {
+        return;
+      }
+
+      productSelect.value = product.id;
+      quantityInput.value = existingRow ? Number(quantityInput.value || 0) + 1 : Number(quantityInput.value || 0) || 1;
+      updateTotals();
+      setBarcodeFeedback(product.sku + " - " + product.name + " agregado.", "success");
+      if (barcodeInput) {
+        barcodeInput.value = "";
+        barcodeInput.focus();
+      }
+    }
+
     function updateTotals() {
       let subtotal = 0;
       saleRows().forEach(function (row) {
@@ -187,10 +254,19 @@
     form.addEventListener("change", updateTotals);
 
     form.querySelector("[data-add-sale-line]")?.addEventListener("click", function () {
-      const index = Number(totalInput.value);
-      rows.insertAdjacentHTML("beforeend", emptyTemplate.innerHTML.replaceAll("__prefix__", index));
-      reindexRows();
-      updateTotals();
+      addSaleRow();
+    });
+
+    form.querySelector("[data-barcode-add]")?.addEventListener("click", function () {
+      addProductBySku(form.querySelector("[data-barcode-input]")?.value || "");
+    });
+
+    form.querySelector("[data-barcode-input]")?.addEventListener("keydown", function (event) {
+      if (event.key !== "Enter") {
+        return;
+      }
+      event.preventDefault();
+      addProductBySku(event.currentTarget.value);
     });
 
     rows.addEventListener("click", function (event) {

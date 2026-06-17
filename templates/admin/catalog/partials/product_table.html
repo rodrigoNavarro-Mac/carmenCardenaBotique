@@ -25,7 +25,11 @@
                 </div>
                 <div>
                   <strong>{{ product.name }}</strong>
-                  <span>{{ product.brand.name|default:"Sin marca" }}</span>
+                  <span>
+                    {{ product.brand.name|default:"Sin marca" }}
+                    {% if product.size %} · Talla {{ product.size }}{% endif %}
+                    {% if product.color %} · {{ product.color }}{% endif %}
+                  </span>
                 </div>
               </div>
             </td>
@@ -44,6 +48,7 @@
             </td>
             <td class="text-end">
               <div class="row-actions">
+                <a class="btn btn-sm btn-outline-secondary" href="{% url 'catalog:product_label' product.id %}" target="_blank" rel="noopener"><i class="bi bi-upc-scan" aria-hidden="true"></i>Etiqueta</a>
                 {% if admin_permissions.catalog.can_edit %}
                   <a class="btn btn-sm btn-outline-secondary" href="{% url 'catalog:product_update' product.id %}"><i class="bi bi-pencil" aria-hidden="true"></i>Editar</a>
                 {% endif %}

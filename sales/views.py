@@ -130,9 +130,20 @@ def sale_create(request):
 
 
 def _sale_create_context(header_form, formset, customer_form, payment_formset, show_customer_modal=False):
+    products = Product.objects.filter(is_active=True).only("id", "sku", "name", "sale_price")
     product_prices = {
         str(product.pk): str(product.sale_price)
-        for product in Product.objects.filter(is_active=True).only("id", "sale_price")
+        for product in products
+    }
+    product_lookup = {
+        product.sku.strip().upper(): {
+            "id": str(product.pk),
+            "sku": product.sku,
+            "name": product.name,
+            "price": str(product.sale_price),
+        }
+        for product in products
+        if product.sku
     }
     return {
         "header_form": header_form,
@@ -140,6 +151,7 @@ def _sale_create_context(header_form, formset, customer_form, payment_formset, s
         "payment_formset": payment_formset,
         "customer_form": customer_form,
         "product_prices": product_prices,
+        "product_lookup": product_lookup,
         "show_customer_modal": show_customer_modal,
     }
 

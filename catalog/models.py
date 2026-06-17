@@ -34,6 +34,8 @@ class Product(TimeStampedModel):
     category = models.ForeignKey(Category, null=True, blank=True, on_delete=models.SET_NULL)
     product_type = models.ForeignKey(ProductType, null=True, blank=True, on_delete=models.SET_NULL)
     brand = models.ForeignKey(Brand, null=True, blank=True, on_delete=models.SET_NULL)
+    size = models.CharField(max_length=40, blank=True)
+    color = models.CharField(max_length=60, blank=True)
     description = models.TextField(blank=True)
     cost_price = models.DecimalField(max_digits=12, decimal_places=2)
     sale_price = models.DecimalField(max_digits=12, decimal_places=2)

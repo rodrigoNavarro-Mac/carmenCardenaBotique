@@ -36,7 +36,7 @@
     {% elif active_branding.instagram_url %}
       <a href="{{ active_branding.instagram_url }}">Instagram</a>
     {% endif %}
-    <a class="catalog-bag-link" href="{% url 'rentals:rental_cart' %}" aria-label="Ver apartado">
+    <a class="catalog-bag-link" href="{% url 'rentals:public_catalog' %}" aria-label="Ver catalogo">
       <i class="bi bi-bag" aria-hidden="true"></i>
       {% if cart_count %}<span>{{ cart_count }}</span>{% endif %}
     </a>

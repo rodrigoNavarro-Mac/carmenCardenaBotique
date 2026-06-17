@@ -6,10 +6,85 @@ Esta guia resume como se conectan los modulos principales en el uso diario.
 
 1. Crear categorias, marcas y tipos.
 2. Crear productos con SKU unico.
-3. Marcar productos como activos.
-4. Opcional: marcar productos como destacados para landing.
+3. Capturar atributos propios del producto:
+   - marca
+   - categoria
+   - tipo
+   - talla
+   - color
+   - costo
+   - precio de venta
+4. Marcar productos como activos.
+5. Opcional: marcar productos como destacados para landing.
 
 El producto no tiene stock global.
+
+### Producto, talla, color y SKU
+
+Cada combinacion vendible debe existir como un producto independiente cuando tenga stock propio. Por ejemplo:
+
+```text
+Vestido Gala / Talla M / Negro
+Vestido Gala / Talla L / Negro
+Vestido Gala / Talla M / Rojo
+```
+
+Aunque compartan nombre comercial, cada combinacion debe tener su propio `SKU`, su propia etiqueta y su propio inventario por sucursal. Esto evita vender una talla o color diferente al que realmente esta en tienda.
+
+Reglas recomendadas:
+
+- `SKU` debe ser unico y estable. Una vez impresa la etiqueta, no cambiarlo salvo correccion controlada.
+- `Talla` y `Color` describen la variante fisica que se vende.
+- Si un producto no maneja talla o color, dejar el campo vacio.
+- El inventario se controla por producto y sucursal; por eso talla/color viven en `Product`, no como texto suelto en la venta.
+- Si se cambia talla o color despues de imprimir etiquetas, revisar si tambien se deben reimprimir etiquetas.
+
+Ejemplo de SKU manual:
+
+```text
+VGA-M-NEG-0001
+VGA-L-NEG-0002
+VGA-M-ROJ-0003
+```
+
+El sistema usa `Product.sku` como codigo maestro para etiquetas, lector USB y busqueda en POS. La etiqueta DYMO imprime ese SKU como codigo de barras Code 128.
+
+### Etiquetas DYMO de producto
+
+La DYMO LabelWriter Wireless se usa para imprimir etiquetas de producto, inventario y codigos de barras. No se usa como ticketera de recibos largos.
+
+Flujo para imprimir etiqueta:
+
+1. Entrar a `Catalogo`.
+2. Buscar el producto por nombre, SKU, talla o color.
+3. Usar el boton `Etiqueta` en la fila del producto.
+4. Revisar que la etiqueta muestre:
+   - nombre del producto
+   - talla y color, si existen
+   - codigo de barras
+   - SKU en texto
+   - precio
+5. Presionar `Imprimir en DYMO`.
+6. En el dialogo de impresion del navegador, seleccionar la DYMO LabelWriter Wireless.
+7. Confirmar el tamano de etiqueta configurado en DYMO Connect / Windows.
+8. Imprimir y pegar la etiqueta al producto, tag, bolsa o empaque.
+
+La etiqueta esta pensada para la DYMO LabelWriter Wireless:
+
+- tecnologia: termica directa
+- ancho maximo de impresion: 56 mm
+- ancho maximo de etiqueta: 62 mm
+- conectividad: Wi-Fi o USB
+- software recomendado: DYMO Connect for Desktop en Windows
+
+Si el codigo de barras impreso no escanea bien:
+
+- revisar que la etiqueta no este reducida o escalada por el navegador
+- imprimir al 100% de escala
+- limpiar o alinear la etiqueta si salio borrosa
+- confirmar que el SKU no tenga caracteres raros
+- probar con un SKU corto y claro
+- verificar que el lector USB agregue Enter al final del escaneo
 
 ## Flujo de Inventario
 
@@ -28,7 +103,7 @@ El producto no tiene stock global.
 2. Seleccionar sucursal.
 3. Seleccionar cliente opcional.
 4. Opcional: crear cliente desde el modal de la venta.
-5. Agregar productos y cantidades.
+5. Agregar productos y cantidades. Para POS con lector USB, enfocar el campo `Codigo de barras` y escanear el SKU; el lector funciona como teclado y agrega una unidad. Si el producto ya esta en la venta, incrementa la cantidad.
 6. Opcional: marcar una linea con compostura, fecha prometida y notas.
 7. Capturar uno o varios pagos: efectivo, tarjeta, transferencia u otro.
 8. El sistema calcula en vivo:
@@ -49,6 +124,72 @@ Si no hay stock suficiente o no hay caja abierta, la venta se bloquea.
 Al terminar, se abre un modal con el ticket. El ticket se puede reabrir desde el recibo.
 
 Si el pago no cubre el total, la venta queda como `Pago parcial`.
+
+### Venta con lector USB
+
+El lector USB no requiere integracion especial de hardware en el servidor. Debe configurarse como lector tipo teclado:
+
+```text
+escaneo -> escribe SKU -> envia Enter
+```
+
+Uso en caja:
+
+1. Entrar a `Ventas > Nueva venta`.
+2. Seleccionar la sucursal donde se esta vendiendo.
+3. Colocar el cursor en `Codigo de barras`.
+4. Escanear la etiqueta DYMO pegada al producto.
+5. El sistema busca el producto por `Product.sku`.
+6. Si el producto existe:
+   - se agrega una linea de venta
+   - si ya estaba en la venta, aumenta la cantidad en 1
+   - se recalcula el subtotal
+7. Si el producto no existe:
+   - se muestra un mensaje de SKU no encontrado
+   - se debe revisar si la etiqueta corresponde a un producto activo
+   - se puede buscar el producto manualmente por el selector
+8. Repetir el escaneo por cada prenda o unidad.
+9. Capturar pagos.
+10. Registrar la venta.
+
+El lector USB debe probarse antes de operacion real. Una prueba simple es abrir Bloc de notas, escanear una etiqueta y confirmar que aparece el SKU seguido de un salto de linea. Si no hace Enter, configurar el lector con sufijo `Enter` desde su manual.
+
+### Cobro y ticket
+
+La pantalla de venta permite pagos mixtos:
+
+- efectivo
+- tarjeta
+- transferencia
+- otro
+
+El sistema calcula:
+
+- subtotal
+- total pagado
+- cambio para efectivo
+- saldo pendiente
+
+Al guardar la venta:
+
+- valida que exista caja abierta para la sucursal
+- valida stock disponible
+- crea `Sale`
+- crea `SaleLine`
+- crea `SalePayment`
+- descuenta inventario
+- registra ingreso financiero
+- abre el ticket de venta
+
+El ticket se imprime con el navegador mediante `window.print()`. La DYMO LabelWriter Wireless no es ideal para este ticket porque esta disenada para etiquetas cortas. Si la tienda necesita recibos fisicos, agregar una impresora termica POS de recibos.
+
+### Hardware POS
+
+- Lector de codigo de barras USB: configurarlo en modo teclado con Enter al final del escaneo. El codigo debe coincidir con `Product.sku`.
+- DYMO LabelWriter Wireless: usarla como impresora de etiquetas de producto/SKU, no como ticketera de recibos. Su ancho maximo de impresion es 56 mm, pensado para etiquetas.
+- En Catalogo, usar `Etiqueta` en cada producto para abrir una etiqueta imprimible con codigo de barras Code 128 basado en `Product.sku`.
+- Instalar DYMO Connect for Desktop en Windows, agregar la impresora por Wi-Fi o USB y configurar el tamano de etiqueta antes de imprimir desde el navegador.
+- El ticket de venta sigue usando `window.print()`. Para recibos largos conviene una impresora termica POS de tickets; la DYMO queda para etiquetas de inventario, activos y codigos de barras.
 
 ## Liquidacion de Saldo
 
@@ -223,3 +364,35 @@ python manage.py check
 python manage.py makemigrations --check --dry-run
 python manage.py collectstatic --no-input
 ```
+
+## Checklist POS con Etiquetas
+
+Antes de operar en tienda:
+
+1. Confirmar que cada producto vendible tiene:
+   - nombre
+   - SKU unico
+   - talla, si aplica
+   - color, si aplica
+   - precio de venta
+   - estado activo
+2. Imprimir etiqueta DYMO desde `Catalogo > Etiqueta`.
+3. Pegar la etiqueta en el producto correcto.
+4. Probar que el lector USB lee el codigo en Bloc de notas.
+5. Probar que el mismo codigo agrega el producto en `Ventas > Nueva venta`.
+6. Cargar inventario por sucursal antes de vender.
+7. Abrir caja para la sucursal.
+8. Hacer una venta de prueba con un producto etiquetado.
+9. Confirmar que:
+   - se descuenta stock
+   - se registra pago
+   - se abre ticket
+   - el producto vendido coincide con talla/color fisicos
+
+Errores comunes:
+
+- `SKU no encontrado`: la etiqueta no corresponde a un producto activo o el SKU fue cambiado.
+- `Stock insuficiente`: el producto existe, pero no tiene inventario suficiente en esa sucursal.
+- `Abre una caja`: falta abrir caja para la sucursal antes de vender.
+- El lector escribe el SKU pero no agrega producto: revisar que el lector envie Enter al final.
+- La etiqueta imprime muy pequena o cortada: revisar escala de impresion, tamano de etiqueta y configuracion de DYMO Connect.

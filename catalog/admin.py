@@ -12,6 +12,6 @@ class NamedActiveAdmin(admin.ModelAdmin):
 
 @admin.register(Product)
 class ProductAdmin(admin.ModelAdmin):
-    list_display = ("sku", "name", "brand", "sale_price", "is_active", "is_featured")
-    list_filter = ("is_active", "is_featured", "brand", "category", "product_type")
-    search_fields = ("sku", "name", "description")
+    list_display = ("sku", "name", "brand", "size", "color", "sale_price", "is_active", "is_featured")
+    list_filter = ("is_active", "is_featured", "brand", "category", "product_type", "size", "color")
+    search_fields = ("sku", "name", "size", "color", "description")

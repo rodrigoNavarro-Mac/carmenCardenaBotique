@@ -2264,6 +2264,44 @@ select:focus {
   padding-top: 1rem;
 }
 
+.barcode-panel {
+  background: color-mix(in srgb, var(--color-info-soft) 55%, #ffffff);
+  border: 1px solid var(--color-info-line);
+  border-radius: 8px;
+  display: grid;
+  gap: 0.5rem;
+  margin-top: 1rem;
+  padding: 0.9rem;
+}
+
+.barcode-panel > label {
+  color: var(--color-ink);
+  font-weight: 900;
+}
+
+.barcode-entry {
+  display: grid;
+  gap: 0.6rem;
+  grid-template-columns: minmax(180px, 1fr) auto;
+}
+
+.barcode-feedback {
+  color: var(--color-ink-soft);
+  font-size: 0.88rem;
+  margin: 0;
+}
+
+.barcode-feedback[data-state="success"] {
+  color: var(--color-success);
+  font-weight: 800;
+}
+
+.barcode-feedback[data-state="warning"],
+.barcode-feedback[data-state="error"] {
+  color: var(--color-danger);
+  font-weight: 800;
+}
+
 .sale-lines-head {
   align-items: center;
   display: flex;
@@ -2739,6 +2777,7 @@ select:focus {
   .compact-filter,
   .finance-filter,
   .alteration-filter,
+  .barcode-entry,
   .user-filter,
   .editor-grid,
   .form-grid,
@@ -3133,159 +3172,252 @@ select:focus {
   margin: 0.15rem 0 0;
 }
 
-.help-dashboard {
+.usage-guide-shell {
   gap: 1.25rem;
 }
 
-.role-guide {
-  display: grid;
-  gap: 1rem;
+.usage-guide-tabs,
+.usage-guide-jump-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.65rem;
 }
 
-.role-guide-head {
+.usage-guide-tabs {
+  background: color-mix(in srgb, var(--color-surface) 92%, var(--color-accent-soft));
+  border: 1px solid var(--color-line);
+  border-radius: 8px;
+  padding: 0.65rem;
+  position: sticky;
+  top: 76px;
+  z-index: 3;
+}
+
+.usage-guide-tabs a,
+.usage-guide-jump-list a {
   align-items: center;
+  border-radius: 999px;
+  color: var(--color-primary-hover);
+  display: inline-flex;
+  font-weight: 900;
+  gap: 0.4rem;
+  text-decoration: none;
+}
+
+.usage-guide-tabs a {
   background: var(--color-surface);
   border: 1px solid var(--color-line);
-  border-left: 6px solid var(--color-primary);
-  border-radius: 8px;
-  box-shadow: 0 10px 28px rgba(75, 52, 44, 0.06);
+  padding: 0.55rem 0.85rem;
+}
+
+.usage-guide-jump-list a {
+  background: var(--color-rose-soft);
+  font-size: 0.84rem;
+  padding: 0.35rem 0.6rem;
+}
+
+.usage-guide-tabs a:hover,
+.usage-guide-jump-list a:hover {
+  background: var(--color-accent-soft);
+}
+
+.usage-guide-section {
+  display: grid;
+  gap: 1rem;
+  scroll-margin-top: 140px;
+}
+
+.usage-guide-section-head {
+  align-items: end;
   display: flex;
   gap: 1rem;
   justify-content: space-between;
-  padding: 1rem;
 }
 
-.role-guide-head h2,
-.help-note h3,
-.module-guide-card h3,
-.module-guide-section h4 {
+.usage-guide-section-head h2,
+.usage-guide-flow h3,
+.usage-guide-flow h4,
+.usage-guide-manual-card h4 {
   margin: 0;
 }
 
-.role-guide-head > span {
-  background: var(--color-rose-soft);
-  border-radius: 999px;
-  color: var(--color-primary-hover);
-  font-size: 0.85rem;
-  font-weight: 800;
-  padding: 0.4rem 0.65rem;
-  white-space: nowrap;
+.usage-guide-section-head > p {
+  color: var(--color-ink-soft);
+  margin: 0;
+  max-width: 560px;
 }
 
-.help-grid {
+.usage-guide-flow-list {
   display: grid;
   gap: 1rem;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
 }
 
-.help-note,
-.module-guide-card,
-.permission-table {
+.usage-guide-flow,
+.usage-guide-manual-card {
   background: var(--color-surface);
   border: 1px solid var(--color-line);
   border-radius: 8px;
   box-shadow: 0 10px 28px rgba(75, 52, 44, 0.06);
-}
-
-.help-note {
   padding: 1rem;
+  scroll-margin-top: 150px;
 }
 
-.help-note h3 {
-  font-size: 1rem;
+.usage-guide-flow > header,
+.usage-guide-manual-card summary {
+  align-items: center;
+  display: flex;
+  gap: 0.8rem;
 }
 
-.help-note ul,
-.help-note ol,
-.module-guide-section ul {
+.usage-guide-flow > header p:last-child,
+.usage-guide-manual-card > p {
   color: var(--color-ink-soft);
-  margin: 0.7rem 0 0;
-  padding-left: 1.2rem;
+  margin: 0.15rem 0 0;
 }
 
-.help-note li,
-.module-guide-section li {
-  margin-bottom: 0.35rem;
-}
-
-.permission-table {
-  overflow: hidden;
-}
-
-.permission-table .admin-table {
-  margin: 0;
-}
-
-.permission-table td:first-child {
-  align-items: center;
-  display: flex;
-  gap: 0.5rem;
-  font-weight: 800;
-}
-
-.permission-pill {
-  border-radius: 999px;
-  display: inline-flex;
-  font-size: 0.78rem;
-  font-weight: 900;
-  justify-content: center;
-  min-width: 42px;
-  padding: 0.25rem 0.5rem;
-}
-
-.permission-pill.yes {
-  background: var(--color-success-soft);
-  color: var(--color-success);
-}
-
-.permission-pill.no {
-  background: var(--color-warning-soft);
-  color: var(--color-danger);
-}
-
-.module-guide-grid {
-  display: grid;
-  gap: 1rem;
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-}
-
-.module-guide-card {
-  display: grid;
-  gap: 1rem;
-  padding: 1rem;
-}
-
-.module-guide-card header {
-  align-items: center;
-  display: flex;
-  gap: 0.75rem;
-}
-
-.module-guide-icon {
+.usage-guide-icon {
   align-items: center;
   background: var(--color-accent-soft);
   border-radius: 50%;
   color: var(--color-primary-hover);
   display: inline-flex;
   flex: 0 0 auto;
-  height: 2.5rem;
+  height: 2.6rem;
   justify-content: center;
-  width: 2.5rem;
+  width: 2.6rem;
 }
 
-.module-guide-card > p {
-  color: var(--color-ink-soft);
-  margin: 0;
+.usage-guide-quick-grid,
+.usage-guide-detail-grid {
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  margin-top: 1rem;
 }
 
-.module-guide-section {
+.usage-guide-quick-grid section,
+.usage-guide-detail-grid section {
   border-top: 1px solid var(--color-line);
   padding-top: 0.85rem;
 }
 
-.module-guide-section h4 {
-  color: var(--color-ink);
-  font-size: 0.92rem;
+.usage-guide-quick-grid ul,
+.usage-guide-quick-grid ol,
+.usage-guide-detail-grid ul {
+  color: var(--color-ink-soft);
+  margin: 0.55rem 0 0;
+  padding-left: 1.2rem;
+}
+
+.usage-guide-quick-grid li,
+.usage-guide-detail-grid li {
+  margin-bottom: 0.35rem;
+}
+
+.usage-guide-detail,
+.usage-guide-manual-card {
+  margin-top: 1rem;
+}
+
+.usage-guide-detail summary,
+.usage-guide-manual-card summary {
+  cursor: pointer;
+  list-style: none;
+}
+
+.usage-guide-detail summary::-webkit-details-marker,
+.usage-guide-manual-card summary::-webkit-details-marker {
+  display: none;
+}
+
+.usage-guide-detail summary {
+  align-items: center;
+  background: var(--color-rose-soft);
+  border-radius: 8px;
+  color: var(--color-primary-hover);
+  display: flex;
+  font-weight: 900;
+  justify-content: space-between;
+  padding: 0.7rem 0.85rem;
+}
+
+.usage-guide-detail[open] summary i,
+.usage-guide-manual-card[open] summary > i {
+  transform: rotate(180deg);
+}
+
+.usage-guide-warning {
+  background: var(--color-warning-soft);
+  border: 1px solid var(--color-warning-line) !important;
+  border-radius: 8px;
+  padding: 0.85rem;
+}
+
+.usage-guide-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 1rem;
+}
+
+.usage-guide-manual-list {
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.usage-guide-manual-card {
+  margin: 0;
+}
+
+.usage-guide-manual-card[open] {
+  border-color: color-mix(in srgb, var(--color-primary) 32%, var(--color-line));
+}
+
+.usage-guide-manual-card summary {
+  border-radius: 8px;
+  justify-content: space-between;
+  min-height: 58px;
+}
+
+.usage-guide-manual-card summary > span:nth-child(2) {
+  flex: 1;
+}
+
+.usage-guide-manual-card summary small {
+  color: var(--color-accent);
+  display: block;
+  font-size: 0.72rem;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.usage-guide-permissions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  margin-top: 1rem;
+}
+
+.usage-guide-permissions span {
+  border-radius: 999px;
+  font-size: 0.78rem;
+  font-weight: 900;
+  padding: 0.25rem 0.5rem;
+}
+
+.usage-guide-permissions .is-allowed {
+  background: var(--color-success-soft);
+  color: var(--color-success);
+}
+
+.usage-guide-permissions .is-denied {
+  background: var(--color-warning-soft);
+  color: var(--color-danger);
+}
+
+.usage-guide-manual-card > .usage-guide-detail-grid {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
 }
 
 @media (max-width: 1200px) {
@@ -3299,6 +3431,15 @@ select:focus {
   }
 
   .pos-dashboard .cash-session-row {
+    grid-template-columns: 1fr;
+  }
+
+  .usage-guide-quick-grid,
+  .usage-guide-detail-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .usage-guide-manual-card > .usage-guide-detail-grid {
     grid-template-columns: 1fr;
   }
 }
@@ -3318,14 +3459,22 @@ select:focus {
   .pos-dashboard .cash-session-row dl,
   .pos-dashboard .payment-method-grid,
   .reports-dashboard .payment-method-grid,
-  .pos-dashboard .empty-state,
-  .help-grid {
+  .pos-dashboard .empty-state {
     grid-template-columns: 1fr;
   }
 
-  .role-guide-head {
+  .usage-guide-tabs {
+    position: static;
+  }
+
+  .usage-guide-section-head,
+  .usage-guide-flow > header {
     align-items: stretch;
     flex-direction: column;
+  }
+
+  .usage-guide-manual-list {
+    grid-template-columns: 1fr;
   }
 }
 

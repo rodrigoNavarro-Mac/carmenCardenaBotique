@@ -3,109 +3,175 @@
 {% block title %}Guia de uso{% endblock %}
 
 {% block admin_content %}
-<div class="control-dashboard help-dashboard">
+<div class="control-dashboard usage-guide-shell">
   <section class="dashboard-hero">
     <div>
       <p class="eyebrow">Informacion interna</p>
-      <h1>Guia de uso por rol</h1>
-      <p>{% if is_admin_guide %}Vista administrativa completa: cada rol aparece separado con sus modulos, permisos, funciones y errores comunes.{% else %}Esta vista muestra solo la informacion correspondiente a tu rol y a los modulos que puedes consultar.{% endif %}</p>
+      <h1>Guia de uso</h1>
+      <p>Consulta la operacion diaria de tienda y el manual de referencia por modulo segun los permisos de tu rol.</p>
     </div>
     <div class="dashboard-actions">
       <a class="btn btn-outline-secondary" href="{% url 'admin_dashboard' %}"><i class="bi bi-speedometer2" aria-hidden="true"></i>Dashboard</a>
     </div>
   </section>
 
-  {% for guide in role_guides %}
-    <section class="role-guide" id="rol-{{ guide.role|lower }}">
-      <header class="role-guide-head">
-        <div>
-          <p class="eyebrow">Rol</p>
-          <h2>{{ guide.role_label }}</h2>
-        </div>
-        <span>{{ guide.modules|length }} modulos visibles</span>
-      </header>
+  <nav class="usage-guide-tabs" aria-label="Secciones de la guia">
+    <a href="#operacion-diaria"><i class="bi bi-calendar-check" aria-hidden="true"></i><span>Operacion diaria</span></a>
+    <a href="#manual-uso"><i class="bi bi-journal-text" aria-hidden="true"></i><span>Manual de uso</span></a>
+  </nav>
 
-      <div class="help-grid">
-        <article class="help-note">
-          <h3>Responsabilidad</h3>
-          <ul>
-            {% for note in guide.notes %}
-              <li>{{ note }}</li>
-            {% endfor %}
-          </ul>
-        </article>
-        <article class="help-note">
-          <h3>Flujo sugerido</h3>
-          <ol>
-            {% for step in guide.workflow %}
-              <li>{{ step }}</li>
-            {% endfor %}
-          </ol>
-        </article>
+  <section class="usage-guide-section" id="operacion-diaria">
+    <header class="usage-guide-section-head">
+      <div>
+        <p class="eyebrow">Flujo de tienda</p>
+        <h2>Operacion diaria</h2>
       </div>
+      <p>Checklist secuencial para preparar productos, vender, manejar caja y revisar el cierre.</p>
+    </header>
 
-      <div class="permission-table">
-        <table class="admin-table table">
-          <thead>
-            <tr>
-              <th>Modulo</th>
-              <th>Ver</th>
-              <th>Crear</th>
-              <th>Editar</th>
-              <th>Eliminar</th>
-            </tr>
-          </thead>
-          <tbody>
-            {% for module in guide.modules %}
-              <tr>
-                <td><i class="bi {{ module.icon }}" aria-hidden="true"></i>{{ module.label }}</td>
-                <td>{% if module.permissions.can_view %}<span class="permission-pill yes">Si</span>{% else %}<span class="permission-pill no">No</span>{% endif %}</td>
-                <td>{% if module.permissions.can_create %}<span class="permission-pill yes">Si</span>{% else %}<span class="permission-pill no">No</span>{% endif %}</td>
-                <td>{% if module.permissions.can_edit %}<span class="permission-pill yes">Si</span>{% else %}<span class="permission-pill no">No</span>{% endif %}</td>
-                <td>{% if module.permissions.can_delete %}<span class="permission-pill yes">Si</span>{% else %}<span class="permission-pill no">No</span>{% endif %}</td>
-              </tr>
-            {% empty %}
-              <tr>
-                <td colspan="5">Este rol no tiene modulos visibles configurados.</td>
-              </tr>
-            {% endfor %}
-          </tbody>
-        </table>
-      </div>
+    <nav class="usage-guide-jump-list" aria-label="Flujos operativos">
+      {% for item in daily_operation_guide %}
+        <a href="#operacion-{{ item.key }}"><i class="bi {{ item.icon }}" aria-hidden="true"></i>{{ item.title }}</a>
+      {% endfor %}
+    </nav>
 
-      <div class="module-guide-grid">
-        {% for module in guide.modules %}
-          <article class="module-guide-card">
-            <header>
-              <span class="module-guide-icon"><i class="bi {{ module.icon }}" aria-hidden="true"></i></span>
-              <div>
-                <p class="eyebrow">Modulo</p>
-                <h3>{{ module.label }}</h3>
-              </div>
-            </header>
-            <p>{{ module.purpose }}</p>
+    <div class="usage-guide-flow-list">
+      {% for item in daily_operation_guide %}
+        <article class="usage-guide-flow" id="operacion-{{ item.key }}">
+          <header>
+            <span class="usage-guide-icon"><i class="bi {{ item.icon }}" aria-hidden="true"></i></span>
+            <div>
+              <p class="eyebrow">Operacion</p>
+              <h3>{{ item.title }}</h3>
+              <p>{{ item.summary }}</p>
+            </div>
+          </header>
 
-            <div class="module-guide-section">
-              <h4>Como se usa</h4>
+          <div class="usage-guide-quick-grid">
+            <section>
+              <h4>Requisitos</h4>
               <ul>
-                {% for function in module.functions %}
-                  <li>{{ function }}</li>
+                {% for prerequisite in item.prerequisites %}
+                  <li>{{ prerequisite }}</li>
                 {% endfor %}
               </ul>
-            </div>
+            </section>
+            <section>
+              <h4>Pasos rapidos</h4>
+              <ol>
+                {% for step in item.quick_steps %}
+                  <li>{{ step }}</li>
+                {% endfor %}
+              </ol>
+            </section>
+          </div>
 
-            <div class="module-guide-section">
-              <h4>Posibles errores</h4>
+          <details class="usage-guide-detail">
+            <summary><span>Ver detalle operativo</span><i class="bi bi-chevron-down" aria-hidden="true"></i></summary>
+            <div class="usage-guide-detail-grid">
+              <section>
+                <h4>Notas de uso</h4>
+                <ul>
+                  {% for detail in item.details %}
+                    <li>{{ detail }}</li>
+                  {% endfor %}
+                </ul>
+              </section>
+              <section class="usage-guide-warning">
+                <h4>Errores comunes</h4>
+                <ul>
+                  {% for error in item.common_errors %}
+                    <li>{{ error }}</li>
+                  {% endfor %}
+                </ul>
+              </section>
+            </div>
+          </details>
+
+          {% if item.actions %}
+            <div class="usage-guide-actions">
+              {% for action in item.actions %}
+                <a class="btn btn-sm btn-outline-secondary" href="{% url action.url_name %}"><i class="bi {{ action.icon }}" aria-hidden="true"></i>{{ action.label }}</a>
+              {% endfor %}
+            </div>
+          {% endif %}
+        </article>
+      {% empty %}
+        <section class="work-panel">
+          <p class="empty-copy">Tu rol no tiene flujos operativos visibles configurados.</p>
+        </section>
+      {% endfor %}
+    </div>
+  </section>
+
+  <section class="usage-guide-section" id="manual-uso">
+    <header class="usage-guide-section-head">
+      <div>
+        <p class="eyebrow">Referencia</p>
+        <h2>Manual de uso</h2>
+      </div>
+      <p>Consulta por modulo: proposito, acciones principales, permisos, buenas practicas y errores comunes.</p>
+    </header>
+
+    <nav class="usage-guide-jump-list" aria-label="Modulos del manual">
+      {% for module in module_usage_manual %}
+        <a href="#manual-{{ module.key }}"><i class="bi {{ module.icon }}" aria-hidden="true"></i>{{ module.label }}</a>
+      {% endfor %}
+    </nav>
+
+    <div class="usage-guide-manual-list">
+      {% for module in module_usage_manual %}
+        <details class="usage-guide-manual-card" id="manual-{{ module.key }}" {% if forloop.first %}open{% endif %}>
+          <summary>
+            <span class="usage-guide-icon"><i class="bi {{ module.icon }}" aria-hidden="true"></i></span>
+            <span>
+              <small>Modulo</small>
+              <strong>{{ module.label }}</strong>
+            </span>
+            <i class="bi bi-chevron-down" aria-hidden="true"></i>
+          </summary>
+
+          <p>{{ module.purpose }}</p>
+
+          <div class="usage-guide-permissions" aria-label="Permisos del modulo">
+            {% for permission in module.permission_state %}
+              <span class="{% if permission.allowed %}is-allowed{% else %}is-denied{% endif %}">{{ permission.label }}</span>
+            {% endfor %}
+          </div>
+
+          <div class="usage-guide-detail-grid">
+            <section>
+              <h4>Acciones principales</h4>
               <ul>
-                {% for error in module.errors %}
+                {% for action in module.actions %}
+                  <li>{{ action }}</li>
+                {% endfor %}
+              </ul>
+            </section>
+            <section>
+              <h4>Buenas practicas</h4>
+              <ul>
+                {% for practice in module.best_practices %}
+                  <li>{{ practice }}</li>
+                {% endfor %}
+              </ul>
+            </section>
+            <section class="usage-guide-warning">
+              <h4>Errores comunes</h4>
+              <ul>
+                {% for error in module.common_errors %}
                   <li>{{ error }}</li>
                 {% endfor %}
               </ul>
-            </div>
-          </article>
-        {% endfor %}
-      </div>
-    </section>
-  {% endfor %}
+            </section>
+          </div>
+        </details>
+      {% empty %}
+        <section class="work-panel">
+          <p class="empty-copy">Tu rol no tiene modulos visibles configurados.</p>
+        </section>
+      {% endfor %}
+    </div>
+  </section>
 </div>
 {% endblock %}

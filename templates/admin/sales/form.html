@@ -25,8 +25,9 @@
 </div>
 
 {{ product_prices|json_script:"product-prices" }}
+{{ product_lookup|json_script:"product-lookup" }}
 
-<form class="editor-grid sale-editor" method="post" data-prevent-double-submit data-sale-editor data-product-prices-id="product-prices">
+<form class="editor-grid sale-editor" method="post" data-prevent-double-submit data-sale-editor data-product-prices-id="product-prices" data-product-lookup-id="product-lookup">
   {% csrf_token %}
   <section class="work-panel form-panel">
     {{ header_form.non_field_errors }}
@@ -42,6 +43,18 @@
         </div>
         {{ header_form.customer.errors }}
       </div>
+    </div>
+
+    <div class="barcode-panel" data-barcode-panel>
+      <label for="barcode-scan-input">Código de barras</label>
+      <div class="barcode-entry">
+        <input class="form-control" id="barcode-scan-input" type="text" inputmode="search" autocomplete="off" placeholder="Escanea o escribe el SKU" data-barcode-input>
+        <button class="btn btn-outline-secondary" type="button" data-barcode-add>
+          <i class="bi bi-upc-scan" aria-hidden="true"></i>
+          Agregar
+        </button>
+      </div>
+      <p class="barcode-feedback" data-barcode-feedback aria-live="polite">Listo para escanear con lector USB.</p>
     </div>
 
     <div class="sale-lines">

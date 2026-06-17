@@ -108,6 +108,11 @@ def rental_cart_add(request, product_id):
 
 def rental_cart(request):
     cart_items = _cart_items(request)
+    if not cart_items:
+        if request.method == "POST":
+            messages.error(request, "Primero selecciona una prenda para apartar.")
+        return redirect("rentals:public_catalog")
+
     form = RentalReservationForm(request.POST or None)
     if request.method == "POST" and form.is_valid():
         try:
