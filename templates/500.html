@@ -1,0 +1,85 @@
+{% load static %}
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Woops | Carmen Cardena Boutique</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="{% static 'css/palette.css' %}">
+  <style>
+    body {
+      align-items: center;
+      background: var(--public-bg, #f7f3ed);
+      color: var(--public-ink, #161411);
+      display: flex;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      justify-content: center;
+      margin: 0;
+      min-height: 100vh;
+      padding: 1.25rem;
+    }
+
+    .error-shell {
+      max-width: 680px;
+      text-align: center;
+    }
+
+    .error-badge {
+      align-items: center;
+      background: var(--public-inverse, #2b1821);
+      border-radius: 50%;
+      color: var(--color-primary-contrast, #fffdf8);
+      display: inline-flex;
+      font-size: 2.4rem;
+      height: 5.25rem;
+      justify-content: center;
+      margin-bottom: 1.35rem;
+      width: 5.25rem;
+    }
+
+    h1 {
+      font-family: Georgia, "Times New Roman", serif;
+      font-size: clamp(3rem, 11vw, 6.5rem);
+      line-height: 0.9;
+      margin: 0 0 1rem;
+    }
+
+    p {
+      color: var(--public-muted, #625d55);
+      font-size: 1.08rem;
+      line-height: 1.55;
+      margin: 0 auto 1.5rem;
+      max-width: 34rem;
+    }
+
+    a {
+      align-items: center;
+      background: var(--public-inverse, #2b1821);
+      color: var(--color-primary-contrast, #fffdf8);
+      display: inline-flex;
+      font-size: 0.78rem;
+      font-weight: 900;
+      gap: 0.55rem;
+      letter-spacing: 0.08em;
+      min-height: 2.9rem;
+      padding: 0.8rem 1.15rem;
+      text-decoration: none;
+      text-transform: uppercase;
+    }
+
+    a:hover {
+      background: var(--public-accent, #6f2d3b);
+      color: var(--color-primary-contrast, #fffdf8);
+    }
+  </style>
+</head>
+<body>
+  <main class="error-shell">
+    <div class="error-badge" aria-hidden="true"><i class="bi bi-tools"></i></div>
+    <h1>Woops.</h1>
+    <p>La boutique tropezo con una etiqueta mal puesta. Entra al panel para revisar la configuracion y dejar el aparador presentable otra vez.</p>
+    <a href="{% url 'admin_login' %}"><i class="bi bi-box-arrow-in-right" aria-hidden="true"></i>Ir al login</a>
+  </main>
+</body>
+</html>

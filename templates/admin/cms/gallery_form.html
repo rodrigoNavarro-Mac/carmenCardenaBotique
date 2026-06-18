@@ -19,7 +19,11 @@
       <label>{{ form.title.label }}{{ form.title }}{{ form.title.errors }}</label>
       <label>{{ form.sort_order.label }}{{ form.sort_order }}{{ form.sort_order.errors }}</label>
       <label class="wide-field">{{ form.external_image_url.label }}{{ form.external_image_url }}{{ form.external_image_url.errors }}</label>
-      <label class="wide-field">{{ form.image.label }}{{ form.image }}{{ form.image.errors }}</label>
+      <div class="wide-field blob-upload-panel" data-blob-upload data-blob-upload-url="{% url 'vercel_blob_upload_token' %}">
+        <label for="gallery-blob-image">Imagen</label>
+        <input class="form-control" id="gallery-blob-image" type="file" accept="image/jpeg,image/png,image/webp" data-blob-file>
+        <p class="field-help" data-blob-status>La imagen se sube directo a Vercel Blob y aqui solo se guarda la URL.</p>
+      </div>
       <label>{{ form.product.label }}{{ form.product }}{{ form.product.errors }}</label>
       <label>{{ form.branch.label }}{{ form.branch }}{{ form.branch.errors }}</label>
     </div>

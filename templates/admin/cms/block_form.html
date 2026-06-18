@@ -31,8 +31,6 @@
         </div>
       </div>
       <div class="form-grid">
-        <label>{{ form.type.label }}{{ form.type }}<small>{{ form.type.help_text }}</small>{{ form.type.errors }}</label>
-        <label>{{ form.sort_order.label }}{{ form.sort_order }}<small>{{ form.sort_order.help_text }}</small>{{ form.sort_order.errors }}</label>
         <label>{{ form.title.label }}{{ form.title }}{{ form.title.errors }}</label>
         <label>{{ form.subtitle.label }}{{ form.subtitle }}<small>{{ form.subtitle.help_text }}</small>{{ form.subtitle.errors }}</label>
         <label class="wide-field">{{ form.body.label }}{{ form.body }}<small>{{ form.body.help_text }}</small>{{ form.body.errors }}</label>
@@ -63,7 +61,11 @@
       </div>
       <div class="form-grid">
         <label class="wide-field">{{ form.external_image_url.label }}{{ form.external_image_url }}<small>{{ form.external_image_url.help_text }}</small>{{ form.external_image_url.errors }}</label>
-        <label class="wide-field">{{ form.image.label }}{{ form.image }}<small>{{ form.image.help_text }}</small>{{ form.image.errors }}</label>
+        <div class="wide-field blob-upload-panel" data-blob-upload data-blob-upload-url="{% url 'vercel_blob_upload_token' %}">
+          <label for="block-blob-image">Imagen del bloque</label>
+          <input class="form-control" id="block-blob-image" type="file" accept="image/jpeg,image/png,image/webp" data-blob-file>
+          <p class="field-help" data-blob-status>La imagen se sube directo a Vercel Blob y aqui solo se guarda la URL.</p>
+        </div>
       </div>
     </div>
 
@@ -86,30 +88,27 @@
           {{ item_form.id }}
           <div class="form-grid">
             <label>{{ item_form.title.label }}{{ item_form.title }}<small>{{ item_form.title.help_text }}</small>{{ item_form.title.errors }}</label>
-            <label>{{ item_form.sort_order.label }}{{ item_form.sort_order }}<small>{{ item_form.sort_order.help_text }}</small>{{ item_form.sort_order.errors }}</label>
             <label>{{ item_form.subtitle.label }}{{ item_form.subtitle }}<small>{{ item_form.subtitle.help_text }}</small>{{ item_form.subtitle.errors }}</label>
             <label>{{ item_form.cta_label.label }}{{ item_form.cta_label }}<small>{{ item_form.cta_label.help_text }}</small>{{ item_form.cta_label.errors }}</label>
             <label class="wide-field">{{ item_form.body.label }}{{ item_form.body }}<small>{{ item_form.body.help_text }}</small>{{ item_form.body.errors }}</label>
             <label>{{ item_form.cta_url.label }}{{ item_form.cta_url }}<small>{{ item_form.cta_url.help_text }}</small>{{ item_form.cta_url.errors }}</label>
             <label class="wide-field">{{ item_form.external_image_url.label }}{{ item_form.external_image_url }}<small>{{ item_form.external_image_url.help_text }}</small>{{ item_form.external_image_url.errors }}</label>
-            <label class="wide-field">{{ item_form.image.label }}{{ item_form.image }}{{ item_form.image.errors }}</label>
-          </div>
-          <div class="cms-item-state">
-            <label class="form-check">{{ item_form.is_visible }} <span>{{ item_form.is_visible.label }}</span></label>
-            {% if item_form.DELETE %}
-              <label class="form-check">{{ item_form.DELETE }} <span>Eliminar tarjeta</span></label>
-            {% endif %}
+            <div class="wide-field blob-upload-panel" data-blob-upload data-blob-upload-url="{% url 'vercel_blob_upload_token' %}">
+              <label for="item-blob-image-{{ forloop.counter }}">Imagen de tarjeta</label>
+              <input class="form-control" id="item-blob-image-{{ forloop.counter }}" type="file" accept="image/jpeg,image/png,image/webp" data-blob-file>
+              <p class="field-help" data-blob-status>La imagen se sube directo a Vercel Blob y aqui solo se guarda la URL.</p>
+            </div>
           </div>
         </article>
+      {% empty %}
+        <p class="empty-copy">Esta seccion no usa tarjetas editables.</p>
       {% endfor %}
     </div>
   </section>
   <aside class="ops-card form-side cms-publish-panel">
-    <h2>Publicacion</h2>
-    <p class="cms-section-help">Guarda como borrador mientras editas. Publica cuando quieras que aparezca en el sitio.</p>
-    <label>{{ form.status.label }}{{ form.status }}{{ form.status.errors }}</label>
-    <label class="form-check">{{ form.is_visible }} <span>{{ form.is_visible.label }}</span></label>
-    <button class="btn btn-primary w-100" type="submit"><i class="bi bi-check2" aria-hidden="true"></i>Guardar bloque</button>
+    <h2>Contenido</h2>
+    <p class="cms-section-help">La seccion, su orden y su publicacion pertenecen al diseno fijo. Aqui solo se actualiza el contenido.</p>
+    <button class="btn btn-primary w-100" type="submit"><i class="bi bi-check2" aria-hidden="true"></i>Guardar contenido</button>
     {% if block.pk %}
       <a class="btn btn-outline-secondary w-100" href="{% url 'cms:landing_preview' %}" target="_blank" rel="noopener"><i class="bi bi-eye" aria-hidden="true"></i>Vista previa</a>
     {% endif %}

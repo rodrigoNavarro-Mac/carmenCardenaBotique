@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 
-{% block title %}{{ page.boutique_name|default:config.boutique_name|default:"Carmen Cardena Boutique" }}{% endblock %}
+{% block title %}{% if page.boutique_name %}{{ page.boutique_name }}{% elif config.boutique_name %}{{ config.boutique_name }}{% else %}Carmen Cardena Boutique{% endif %}{% endblock %}
 
 {% block body %}
 <main id="main-content" class="public-shell boutique-landing-page" x-data="{ look: 0 }" tabindex="-1">

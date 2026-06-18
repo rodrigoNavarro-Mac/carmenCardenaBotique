@@ -13,6 +13,12 @@
       return;
     }
 
+    if (form.dataset.blobUploading === "true") {
+      event.preventDefault();
+      markBlobUploadPending(form);
+      return;
+    }
+
     if (form.matches("[data-prevent-double-submit]")) {
       form.querySelectorAll('button[type="submit"]').forEach(function (button) {
         button.disabled = true;
@@ -302,6 +308,150 @@
   }
 
   document.querySelectorAll("[data-sale-editor]").forEach(initSaleEditor);
+
+  function initSkuScanner(input) {
+    const form = input.closest("form");
+    const feedback = form?.querySelector("[data-sku-scan-feedback]");
+    const focusButton = form?.querySelector("[data-sku-scan-focus]");
+
+    function updateFeedback(message, state) {
+      if (!feedback) {
+        return;
+      }
+      feedback.textContent = message;
+      feedback.dataset.state = state || "idle";
+    }
+
+    focusButton?.addEventListener("click", function () {
+      input.focus();
+      input.select();
+      updateFeedback("Listo para escanear el codigo de barras.", "idle");
+    });
+
+    input.addEventListener("input", function () {
+      updateFeedback(input.value.trim() ? "Codigo capturado. Puedes guardar el producto." : "Si queda vacio, se genera automaticamente.", input.value.trim() ? "success" : "idle");
+    });
+
+    input.addEventListener("keydown", function (event) {
+      if (event.key !== "Enter") {
+        return;
+      }
+      event.preventDefault();
+      input.value = input.value.trim().toUpperCase();
+      updateFeedback(input.value ? "Codigo capturado. Puedes guardar el producto." : "Si queda vacio, se genera automaticamente.", input.value ? "success" : "idle");
+    });
+  }
+
+  document.querySelectorAll("[data-sku-scan-input]").forEach(initSkuScanner);
+
+  function csrfToken() {
+    const input = document.querySelector('input[name="csrfmiddlewaretoken"]');
+    if (input?.value) {
+      return input.value;
+    }
+    return document.cookie
+      .split(";")
+      .map(function (part) {
+        return part.trim();
+      })
+      .find(function (part) {
+        return part.startsWith("csrftoken=");
+      })
+      ?.split("=")[1] || "";
+  }
+
+  let blobClientModule = null;
+
+  function loadBlobClient() {
+    if (!blobClientModule) {
+      blobClientModule = import("https://esm.sh/@vercel/blob@2.4.0/client?bundle");
+    }
+    return blobClientModule;
+  }
+
+  function initBlobUpload(panel) {
+    const fileInput = panel.querySelector("[data-blob-file]");
+    const status = panel.querySelector("[data-blob-status]");
+    const form = panel.closest("form");
+    const scope = panel.closest(".cms-item-form") || panel.closest(".form-grid") || form;
+    const urlInput = scope?.querySelector("[data-blob-url-input]");
+    const uploadUrl = panel.dataset.blobUploadUrl;
+
+    if (!fileInput || !urlInput || !uploadUrl || !form) {
+      return;
+    }
+
+    function setStatus(message, state) {
+      if (!status) {
+        return;
+      }
+      status.textContent = message;
+      status.dataset.state = state || "idle";
+    }
+
+    function setUploading(uploading) {
+      fileInput.disabled = uploading;
+      const currentCount = Number(form.dataset.blobUploadCount || 0);
+      const nextCount = Math.max(currentCount + (uploading ? 1 : -1), 0);
+      form.dataset.blobUploadCount = String(nextCount);
+      form.dataset.blobUploading = nextCount > 0 ? "true" : "false";
+      form.querySelectorAll('button[type="submit"]').forEach(function (button) {
+        if (uploading) {
+          button.disabled = true;
+          button.dataset.blobDisabled = "true";
+        } else if (button.dataset.blobDisabled === "true" && nextCount === 0) {
+          button.disabled = false;
+          delete button.dataset.blobDisabled;
+        }
+      });
+    }
+
+    fileInput.addEventListener("change", async function () {
+      const file = fileInput.files?.[0];
+      if (!file) {
+        return;
+      }
+      if (!["image/jpeg", "image/png", "image/webp"].includes(file.type)) {
+        setStatus("Usa JPG, PNG o WebP.", "error");
+        fileInput.value = "";
+        return;
+      }
+
+      setUploading(true);
+      setStatus("Subiendo imagen a Vercel Blob...", "idle");
+      try {
+        const blobClient = await loadBlobClient();
+        const safeName = file.name.replace(/[^A-Za-z0-9._-]+/g, "-") || "imagen.jpg";
+        const result = await blobClient.upload("boutique/" + Date.now() + "-" + safeName, file, {
+          access: "public",
+          contentType: file.type,
+          handleUploadUrl: uploadUrl,
+          headers: {
+            "X-CSRFToken": csrfToken(),
+          },
+        });
+        urlInput.value = result.url;
+        urlInput.dispatchEvent(new Event("input", { bubbles: true }));
+        setStatus("Imagen subida. Guarda el formulario para conservar esta URL.", "success");
+      } catch (error) {
+        setStatus("No se pudo subir la imagen. Revisa el token de Vercel Blob.", "error");
+      } finally {
+        setUploading(false);
+      }
+    });
+  }
+
+  document.querySelectorAll("[data-blob-upload]").forEach(initBlobUpload);
+
+  function markBlobUploadPending(form) {
+    const activePanel = form.querySelector("[data-blob-upload] [data-blob-file]:disabled")?.closest("[data-blob-upload]");
+    const status = activePanel?.querySelector("[data-blob-status]");
+    if (status) {
+      status.textContent = "La imagen sigue subiendo. El boton Guardar se activa al terminar.";
+      status.dataset.state = "warning";
+      activePanel.scrollIntoView({ behavior: "smooth", block: "center" });
+    }
+  }
 
   function initSettleForm(form) {
     const balance = Number(form.dataset.settleBalance || 0);

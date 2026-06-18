@@ -4,6 +4,7 @@ from django.contrib import admin
 from django.contrib.auth.views import LoginView, LogoutView
 from django.urls import include, path
 
+from core.blob_uploads import vercel_blob_upload_token
 from core.views import admin_dashboard, admin_information, landing, landing_featured
 
 
@@ -17,6 +18,7 @@ urlpatterns = [
     path("admin-panel/logout/", LogoutView.as_view(), name="admin_logout"),
     path("admin-panel/", admin_dashboard, name="admin_dashboard"),
     path("admin-panel/informacion/", admin_information, name="admin_information"),
+    path("admin-panel/blob/upload-token/", vercel_blob_upload_token, name="vercel_blob_upload_token"),
     path("admin-panel/catalogo/", include("catalog.urls")),
     path("admin-panel/inventario/", include("inventory.urls")),
     path("admin-panel/ventas/", include("sales.urls")),

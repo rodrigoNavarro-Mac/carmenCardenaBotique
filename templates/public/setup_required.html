@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+
+{% block title %}Woops | Carmen Cardena Boutique{% endblock %}
+
+{% block body %}
+<main id="main-content" class="setup-required-shell" tabindex="-1">
+  <section class="setup-required-panel">
+    <div class="setup-required-icon" aria-hidden="true"><i class="bi bi-tools"></i></div>
+    <p class="catalog-kicker">Configuracion pendiente</p>
+    <h1>Woops.</h1>
+    <p>La boutique tropezo con una etiqueta mal puesta. Entra al panel para configurar el aparador y dejarlo presentable otra vez.</p>
+    <a class="btn btn-primary" href="{% url 'admin_login' %}">
+      <i class="bi bi-box-arrow-in-right" aria-hidden="true"></i>
+      Ir al login
+    </a>
+  </section>
+</main>
+{% endblock %}

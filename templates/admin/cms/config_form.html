@@ -17,8 +17,12 @@
     {{ form.non_field_errors }}
     <div class="form-grid">
       <label>{{ form.boutique_name.label }}{{ form.boutique_name }}{{ form.boutique_name.errors }}</label>
-      <label>{{ form.logo_image.label }}{{ form.logo_image }}{{ form.logo_image.help_text }}{{ form.logo_image.errors }}</label>
       <label>{{ form.logo_external_url.label }}{{ form.logo_external_url }}{{ form.logo_external_url.help_text }}{{ form.logo_external_url.errors }}</label>
+      <div class="wide-field blob-upload-panel" data-blob-upload data-blob-upload-url="{% url 'vercel_blob_upload_token' %}">
+        <label for="logo-blob-image">Logo</label>
+        <input class="form-control" id="logo-blob-image" type="file" accept="image/jpeg,image/png,image/webp" data-blob-file>
+        <p class="field-help" data-blob-status>El logo se sube directo a Vercel Blob y aqui solo se guarda la URL.</p>
+      </div>
       <label>{{ form.logo_alt_text.label }}{{ form.logo_alt_text }}{{ form.logo_alt_text.errors }}</label>
       <label>{{ form.headline.label }}{{ form.headline }}{{ form.headline.errors }}</label>
       <label class="wide-field">{{ form.subheadline.label }}{{ form.subheadline }}{{ form.subheadline.errors }}</label>

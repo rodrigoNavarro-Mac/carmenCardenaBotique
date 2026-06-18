@@ -53,6 +53,12 @@ class LandingConfigForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         style_form_fields(self)
+        self.fields["logo_external_url"].widget.attrs.update(
+            {
+                "data-blob-url-input": "",
+                "placeholder": "Se llena automaticamente al subir a Vercel Blob",
+            }
+        )
 
 
 class ColorPaletteForm(forms.ModelForm):
@@ -148,6 +154,12 @@ class GalleryImageForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         style_form_fields(self)
+        self.fields["external_image_url"].widget.attrs.update(
+            {
+                "data-blob-url-input": "",
+                "placeholder": "Se llena automaticamente al subir a Vercel Blob",
+            }
+        )
 
 
 class LandingPageForm(forms.ModelForm):
@@ -169,7 +181,6 @@ class LandingBlockForm(forms.ModelForm):
     class Meta:
         model = LandingBlock
         fields = [
-            "type",
             "title",
             "subtitle",
             "body",
@@ -179,12 +190,8 @@ class LandingBlockForm(forms.ModelForm):
             "cta_url",
             "secondary_cta_label",
             "secondary_cta_url",
-            "sort_order",
-            "is_visible",
-            "status",
         ]
         labels = {
-            "type": "Que seccion quieres editar",
             "title": "Titulo que vera el cliente",
             "subtitle": "Frase corta arriba o debajo del titulo",
             "body": "Descripcion",
@@ -194,12 +201,8 @@ class LandingBlockForm(forms.ModelForm):
             "cta_url": "A donde manda el boton principal",
             "secondary_cta_label": "Texto del segundo boton",
             "secondary_cta_url": "A donde manda el segundo boton",
-            "sort_order": "Posicion en la pagina",
-            "is_visible": "Mostrar en la pagina",
-            "status": "Publicacion",
         }
         help_texts = {
-            "type": "Hero es la primera pantalla. Lookbook, galeria y beneficios suelen usar tarjetas internas.",
             "subtitle": "Opcional. Sirve como bajada, etiqueta o frase de apoyo.",
             "body": "Opcional. Escribe un parrafo corto para explicar la seccion.",
             "external_image_url": "Recomendado en Render: pega una URL de imagen para no depender de archivos subidos.",
@@ -208,12 +211,17 @@ class LandingBlockForm(forms.ModelForm):
             "cta_url": "Puedes pegar una URL completa como https://wa.me/... o dejarlo vacio.",
             "secondary_cta_label": "Opcional. Dejalo vacio si solo necesitas un boton.",
             "secondary_cta_url": "Opcional. Puedes pegar una URL completa o dejarlo vacio.",
-            "sort_order": "Numero menor aparece antes. Puedes usar 10, 20, 30.",
         }
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         style_form_fields(self)
+        self.fields["external_image_url"].widget.attrs.update(
+            {
+                "data-blob-url-input": "",
+                "placeholder": "Se llena automaticamente al subir a Vercel Blob",
+            }
+        )
 
 
 class LandingBlockItemForm(forms.ModelForm):
@@ -227,8 +235,6 @@ class LandingBlockItemForm(forms.ModelForm):
             "external_image_url",
             "cta_label",
             "cta_url",
-            "sort_order",
-            "is_visible",
         ]
         labels = {
             "title": "Nombre de esta tarjeta",
@@ -238,8 +244,6 @@ class LandingBlockItemForm(forms.ModelForm):
             "external_image_url": "Imagen desde internet",
             "cta_label": "Texto del boton o enlace",
             "cta_url": "A donde manda",
-            "sort_order": "Posicion",
-            "is_visible": "Mostrar esta tarjeta",
         }
         help_texts = {
             "title": "Ejemplo: Vestidos de noche, Look dorado, Atencion personalizada.",
@@ -248,18 +252,23 @@ class LandingBlockItemForm(forms.ModelForm):
             "external_image_url": "Recomendado en Render si esta tarjeta necesita imagen.",
             "cta_label": "Opcional. Dejalo vacio si la tarjeta no necesita boton.",
             "cta_url": "Opcional. Puede ser una seccion de la pagina o una URL completa.",
-            "sort_order": "Usa 10, 20, 30 para ordenar sin complicarte.",
         }
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         style_form_fields(self)
+        self.fields["external_image_url"].widget.attrs.update(
+            {
+                "data-blob-url-input": "",
+                "placeholder": "Se llena automaticamente al subir a Vercel Blob",
+            }
+        )
 
 
 LandingBlockItemFormSet = inlineformset_factory(
     LandingBlock,
     LandingBlockItem,
     form=LandingBlockItemForm,
-    extra=1,
-    can_delete=True,
+    extra=0,
+    can_delete=False,
 )

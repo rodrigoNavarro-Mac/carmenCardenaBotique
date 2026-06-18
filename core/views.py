@@ -8,7 +8,8 @@ from accounts.models import User
 from accounts.permissions import permissions_for_role
 from branches.models import Branch
 from catalog.models import Product
-from cms.models import ColorPalette, GalleryImage, LandingBlock, LandingBlockItem, LandingConfig, LandingPage
+from cms.defaults import ensure_static_landing, static_landing_blocks
+from cms.models import ColorPalette, GalleryImage, LandingConfig
 from core.help_guide import build_daily_operation_guide, build_module_usage_manual
 from finance.models import CashRegisterSession, Expense, IncomeEntry
 from finance.services import summarize_cash_session
@@ -62,16 +63,9 @@ LOOKBOOK_ITEMS = [
 ]
 
 def _landing_context(include_drafts=False):
+    page = ensure_static_landing()
     config = LandingConfig.objects.filter(is_active=True).first()
-    page = LandingPage.objects.filter(is_active=True).first() or LandingPage.objects.first()
-    blocks = []
-    if page:
-        block_queryset = page.blocks.prefetch_related(
-            models.Prefetch("items", queryset=LandingBlockItem.objects.filter(is_visible=True))
-        )
-        if not include_drafts:
-            block_queryset = block_queryset.filter(status=LandingBlock.Status.PUBLISHED, is_visible=True)
-        blocks = list(block_queryset)
+    blocks = static_landing_blocks(page, include_drafts=include_drafts)
     featured_products = Product.objects.filter(is_active=True, is_featured=True).select_related(
         "brand", "category", "product_type"
     )[:6]
@@ -94,7 +88,10 @@ def _landing_context(include_drafts=False):
 
 
 def landing(request):
-    return render(request, "public/landing.html", _landing_context())
+    context = _landing_context()
+    if context["config"] is None:
+        return render(request, "public/setup_required.html", context, status=503)
+    return render(request, "public/landing.html", context)
 
 
 def landing_featured(request):

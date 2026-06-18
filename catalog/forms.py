@@ -1,4 +1,5 @@
 from django import forms
+from django.utils.crypto import get_random_string
 
 from .models import Brand, Category, Product, ProductType
 
@@ -17,6 +18,8 @@ class BootstrapFormMixin:
 
 
 class ProductForm(BootstrapFormMixin, forms.ModelForm):
+    sku = forms.CharField(required=False, max_length=60)
+
     class Meta:
         model = Product
         fields = [
@@ -63,9 +66,33 @@ class ProductForm(BootstrapFormMixin, forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self._style_fields()
+        self.fields["sku"].widget.attrs.update(
+            {
+                "autocomplete": "off",
+                "data-sku-scan-input": "",
+                "placeholder": "Escanea el codigo o dejalo vacio",
+            }
+        )
+        self.fields["sku"].help_text = "Escanea el codigo de barras aqui. Si queda vacio, se genera automaticamente."
+        self.fields["external_image_url"].widget.attrs.update(
+            {
+                "data-blob-url-input": "",
+                "placeholder": "Se llena automaticamente al subir a Vercel Blob",
+            }
+        )
         for name in ["category", "product_type", "brand"]:
             self.fields[name].widget.attrs["class"] = "form-select"
         self.fields["image"].widget.attrs["class"] = "form-control"
+
+    def clean_sku(self):
+        sku = (self.cleaned_data.get("sku") or "").strip().upper()
+        if sku:
+            return sku
+
+        while True:
+            generated_sku = f"CCB-{get_random_string(8, allowed_chars='0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ')}"
+            if not Product.objects.filter(sku=generated_sku).exists():
+                return generated_sku
 
 
 class TaxonomyForm(BootstrapFormMixin, forms.ModelForm):

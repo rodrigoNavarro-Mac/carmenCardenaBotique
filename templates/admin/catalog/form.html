@@ -17,7 +17,17 @@
     {{ form.non_field_errors }}
     <div class="form-grid">
       <label>{{ form.name.label }}{{ form.name }}{{ form.name.errors }}</label>
-      <label>{{ form.sku.label }}{{ form.sku }}{{ form.sku.errors }}</label>
+      <label>
+        {{ form.sku.label }}
+        <span class="input-action-row">
+          {{ form.sku }}
+          <button class="btn btn-outline-secondary" type="button" data-sku-scan-focus title="Escanear SKU">
+            <i class="bi bi-upc-scan" aria-hidden="true"></i>
+          </button>
+        </span>
+        <span class="field-help" data-sku-scan-feedback>{{ form.sku.help_text }}</span>
+        {{ form.sku.errors }}
+      </label>
       <label>{{ form.category.label }}{{ form.category }}{{ form.category.errors }}</label>
       <label>{{ form.product_type.label }}{{ form.product_type }}{{ form.product_type.errors }}</label>
       <label>{{ form.brand.label }}{{ form.brand }}{{ form.brand.errors }}</label>
@@ -26,7 +36,11 @@
       <label>{{ form.sale_price.label }}{{ form.sale_price }}{{ form.sale_price.errors }}</label>
       <label>{{ form.cost_price.label }}{{ form.cost_price }}{{ form.cost_price.errors }}</label>
       <label class="wide-field">{{ form.external_image_url.label }}{{ form.external_image_url }}{{ form.external_image_url.errors }}</label>
-      <label class="wide-field">{{ form.image.label }}{{ form.image }}{{ form.image.errors }}</label>
+      <div class="wide-field blob-upload-panel" data-blob-upload data-blob-upload-url="{% url 'vercel_blob_upload_token' %}">
+        <label for="product-blob-image">Imagen</label>
+        <input class="form-control" id="product-blob-image" type="file" accept="image/jpeg,image/png,image/webp" data-blob-file>
+        <p class="field-help" data-blob-status>La imagen se sube directo a Vercel Blob y aqui solo se guarda la URL.</p>
+      </div>
       <label class="wide-field">{{ form.description.label }}{{ form.description }}{{ form.description.errors }}</label>
     </div>
   </section>
